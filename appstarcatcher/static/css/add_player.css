@@ -1,0 +1,638 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #1a1a1a;
+    min-height: 100vh;
+    /* تحديث grid layout */
+    display: grid;
+    grid-template-areas: 
+        "header header header"
+        "sidebar main main";
+    grid-template-columns: 300px 1fr;
+    grid-template-rows: 80px 1fr;
+}
+
+/* تحديث تصميم الهيدر */
+.header {
+    grid-area: header;
+    background: rgba(0,0,0,0.95);
+    padding: 0 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,0,0,0.1);
+    position: fixed;
+    width: 100%; /* تعديل العرض ليأخذ كامل الصفحة */
+    height: 80px;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+}
+
+.header-title {
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-title::before {
+    content: '';
+    width: 30px;
+    height: 3px;
+    background: linear-gradient(90deg, #ff0000, transparent);
+    border-radius: 2px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    order: 1;
+}
+
+.search-box {
+    position: relative;
+    width: 300px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 20px;
+    padding-right: 45px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+    background: rgba(255,255,255,0.15);
+    outline: none;
+}
+
+.search-box i {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255,255,255,0.5);
+}
+
+.header-links {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.header-icon:hover {
+    background: rgba(255,0,0,0.2);
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff0000;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    border: 2px solid #000;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 20px;
+    border-radius: 15px;
+    background: rgba(255,255,255,0.05);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.user-info:hover {
+    background: rgba(255,0,0,0.1);
+}
+
+.user-details {
+    text-align: right;
+}
+
+.user-name {
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.user-role {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.8rem;
+}
+
+.user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    background: linear-gradient(45deg, #ff0000, #ff4444);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    border: 2px solid rgba(255,255,255,0.1);
+}
+
+
+/* تحديث تصميم السايدبار */
+.sidebar {
+    grid-area: sidebar;
+    background: linear-gradient(180deg, #000000 0%, #1a1a1a 100%);
+    border-left: 1px solid rgba(255,0,0,0.1);
+    padding: 0;
+    color: #fff;
+    height: 100vh;
+    position: fixed;
+    width: 300px;
+    overflow-y: auto;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 25px;
+    background: rgba(255,0,0,0.1);
+    border-bottom: 1px solid rgba(255,0,0,0.1);
+}
+
+.logo img {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,0,0,0.3);
+    padding: 5px;
+}
+
+.logo span {
+    font-size: 1.2rem;
+    font-weight: 600;
+    background: linear-gradient(45deg, #fff, #ff4444);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 1px;
+}
+
+.nav-section {
+    padding: 20px 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.nav-section-title {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0 10px 15px;
+}
+
+.nav-item {
+    padding: 15px 20px;
+    margin: 5px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+    text-decoration: none;
+    position: relative;
+}
+
+.nav-item:hover {
+    background: rgba(255,0,0,0.1);
+}
+
+.nav-item.active {
+    background: linear-gradient(45deg, rgba(255,0,0,0.2), rgba(255,0,0,0.1));
+    box-shadow: 0 5px 15px rgba(255,0,0,0.1);
+}
+
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    right: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 20px;
+    background: #ff0000;
+    border-radius: 2px;
+}
+
+.nav-item i {
+    font-size: 1.2rem;
+    min-width: 25px;
+    text-align: center;
+}
+
+
+/* Main Content Styles */
+.main-content {
+    grid-area: main;
+    padding: 90px 30px 30px;
+    color: #fff;
+}
+
+.form-container {
+    background: rgba(25, 25, 25, 0.9);
+    border-radius: 20px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    padding: 30px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-title {
+    color: #fff;
+    margin-bottom: 30px;
+    font-size: 24px;
+    position: relative;
+}
+
+.form-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    right: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #ff0000, #ff4444);
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+/* تنسيقات label */
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #fff;
+    font-weight: 500;
+}
+
+/* تنسيقات الحقل input و select */
+input, select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: #1a1919; /* خلفية سوداء للحقل */
+    color: #fff; /* نص أبيض */
+    transition: all 0.3s ease;
+}
+
+/* تنسيقات الحقل عند التركيز (Focus) */
+input:focus, select:focus {
+    border-color: #ff0000;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2);
+}
+
+/* تخصيص العناصر داخل القائمة المنسدلة */
+select option {
+    background: #1a1919; /* خلفية سوداء للعناصر */
+    color: #fff; /* نص أبيض للعناصر */
+}
+
+/* تغيير لون الخلفية عند التمرير فوق العناصر */
+select option:hover {
+    background: #333; /* لون خلفية أغمق عند التمرير */
+}
+
+/* Image Upload Styles */
+.image-upload {
+    border: 2px dashed rgba(255,0,0,0.3);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    transition: all 0.3s ease;
+    background: rgba(255,255,255,0.05);
+}
+
+.image-upload:hover {
+    border-color: #ff0000;
+    background: rgba(255,0,0,0.1);
+}
+
+.image-upload-label {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.image-upload-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(255,0,0,0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.image-preview {
+    max-width: 200px;
+    max-height: 200px;
+    margin-top: 15px;
+    border-radius: 8px;
+    display: none;
+}
+
+/* Rarity Options Styles */
+.rarity-options {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.rarity-option {
+    padding: 12px;
+    text-align: center;
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255,255,255,0.05);
+}
+
+.rarity-option.selected {
+    background: #ff0000;
+    color: white;
+    border-color: #ff0000;
+}
+
+.submit-btn {
+    background: linear-gradient(45deg, #ff0000, #ff4444);
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    width: 100%;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255,0,0,0.3);
+}
+
+
+
+
+
+
+
+.market-section {
+    background: rgba(0,0,0,0.5);
+    border-radius: 15px;
+    padding: 20px;
+    overflow-y: auto;
+    max-height: 85vh;
+    border: 1px solid rgba(255,0,0,0.1);
+}
+
+.players-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    padding: 10px 0;
+}
+
+.player-card {
+    position: relative;
+    height: 300px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    border-radius: 12px;
+    padding: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.player-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.delete-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 0, 0, 0.2);
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    z-index: 3;
+    transition: all 0.3s ease;
+    color: rgba(255, 255, 255, 0.651);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-btn:hover {
+    background: rgba(255, 0, 0, 0.8);
+    transform: rotate(90deg);
+}
+
+.rarity-indicator {
+    position: absolute;
+    top: 8px;
+    right: 40px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75em;
+    font-weight: bold;
+    z-index: 3;
+}
+
+.rating-circle {
+    position: absolute;
+    top: 40px;
+    left: 12px;
+    width: 45px;
+    height: 45px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.rating-number {
+    font-size: 1.2em;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.position {
+    font-size: 0.7em;
+    opacity: 0.8;
+}
+
+.player-image-container {
+    width: 100%;
+    height: 140px;
+    margin: 20px 0 10px 0;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.player-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.player-card:hover .player-image {
+    transform: scale(1.05);
+}
+
+.player-details {
+    padding: 10px 0;
+    text-align: center;
+}
+
+.player-name {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.player-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.flag-icon {
+    width: 20px;
+    height: auto;
+    border-radius: 2px;
+}
+
+.club {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+.created-date {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    font-size: 0.7em;
+    opacity: 0.6;
+}
+
+/* Rarity Colors and Effects */
+.common {
+    background: linear-gradient(135deg, #4a4a4a 0%, #2d2d2d 100%);
+}
+
+.rare {
+    background: linear-gradient(135deg, #0051ff 0%, #00a2ff 100%);
+}
+
+.epic {
+    background: linear-gradient(135deg, #8400ff 0%, #cc00ff 100%);
+}
+
+.legendary {
+    background: linear-gradient(135deg, #ffd700 0%, #ff9900 100%);
+}
+
+.common .rarity-indicator {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+}
+
+.rare .rarity-indicator {
+    background: rgba(0,162,255,0.2);
+    color: #0a68d3;
+}
+
+.epic .rarity-indicator {
+    background: rgba(204,0,255,0.2);
+    color: #cc00ff;
+}
+
+.legendary .rarity-indicator {
+    background: rgba(255,215,0,0.2);
+    color: #ffd700;
+}
+
+/* Card Sheen Effect */
+.card-sheen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0) 0%,
+        rgba(255,255,255,0.1) 50%,
+        rgba(255,255,255,0) 100%
+    );
+    transform: translateX(-100%);
+    animation: sheen 3s infinite;
+}
+
+@keyframes sheen {
+    100% {
+        transform: translateX(100%);
+    }
+}

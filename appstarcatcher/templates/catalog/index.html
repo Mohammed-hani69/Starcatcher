@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>كتالوج الأندية</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary-color: #e60000;
+            --secondary-color: #000000;
+            --accent-color: #ff3333;
+        }
+        
+        body {
+            background-color: var(--secondary-color);
+            color: #ffffff;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            background: linear-gradient(to right, #000000, #440000);
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.2);
+            padding: 15px 0;
+        }
+        
+        .navbar-brand {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-red) !important;
+            text-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
+            transition: all 0.3s ease;
+            padding-left: 20px;
+        }
+        
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+        
+        .nav-link {
+            color: var(--text-light) !important;
+            font-weight: 600;
+            margin: 0 10px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary-red);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .coins-display {
+            background-color: rgba(255, 193, 7, 0.2);
+            border-radius: 20px;
+            padding: 5px 15px ;
+            margin-left: 15px;
+            color: var(--accent-gold);
+            font-weight: 700;
+        }
+
+        /* World Cup Badge */
+        .world-cup-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--primary-red);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 2rem 0;
+            margin-bottom: 3rem;
+            border-bottom: 5px solid var(--accent-color);
+            box-shadow: 0 4px 15px rgba(230, 0, 0, 0.3);
+        }
+        
+        .page-title {
+            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+            font-weight: 700;
+            letter-spacing: 1px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .page-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background-color: var(--accent-color);
+        }
+
+        .club-books {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2.5rem;
+            padding: 2rem;
+            justify-content: center;
+        }
+
+        .club-book {
+            position: relative;
+            width: 220px;
+            height: 320px;
+            perspective: 1500px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .club-book:hover {
+            transform: translateY(-10px);
+        }
+
+        .book-cover {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: all 0.5s;
+            background: linear-gradient(45deg, var(--club-color, var(--primary-color)) 0%, var(--secondary-color) 100%);
+            border-radius: 8px;
+            box-shadow: 8px 8px 20px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+        }
+        
+        .book-cover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,0,0,0.1) 0%, rgba(0,0,0,0) 50%);
+            z-index: 1;
+        }
+
+        .club-book:hover .book-cover {
+            transform: rotateY(-15deg);
+            box-shadow: 15px 15px 25px rgba(0,0,0,0.7);
+        }
+
+        .club-logo {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.7));
+            transition: transform 0.3s ease;
+            z-index: 2;
+        }
+        
+        .club-book:hover .club-logo {
+            transform: scale(1.1);
+        }
+
+        .club-name {
+            color: white;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+        
+        .club-book:hover .club-name {
+            color: var(--accent-color);
+        }
+
+        .book-spine {
+            position: absolute;
+            left: -20px;
+            width: 40px;
+            height: 100%;
+            background: var(--club-color, var(--primary-color));
+            transform: rotateY(-90deg);
+            transform-origin: right;
+            box-shadow: -5px 0 10px rgba(0,0,0,0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .club-books {
+                gap: 2rem;
+            }
+            
+            .club-book {
+                width: 180px;
+                height: 280px;
+            }
+            
+            .club-logo {
+                width: 90px;
+                height: 90px;
+            }
+        }
+
+        /* Responsive Navbar Styling */
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                background: linear-gradient(to bottom, var(--secondary-color), var(--primary-color));
+                padding: 1rem;
+                border-radius: 10px;
+                margin-top: 1rem;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            .navbar-nav {
+                text-align: center;
+            }
+
+            .nav-link {
+                padding: 0.8rem 1rem;
+                margin: 5px 0;
+                border-radius: 5px;
+            }
+
+            .nav-link:hover {
+                background-color: rgba(229, 9, 20, 0.1);
+            }
+
+            .coins-display {
+                margin: 10px auto;
+                display: inline-block;
+            }
+
+            .navbar-toggler {
+                border: none;
+                background: transparent;
+                padding: 0.5rem;
+            }
+
+            .navbar-toggler:focus {
+                box-shadow: none;
+            }
+
+            .navbar-toggler-icon {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(229, 9, 20, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+            }
+        }
+
+        /* World Cup Badge Responsive */
+        @media (max-width: 768px) {
+            .world-cup-badge {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('home') }}">Star Catcher</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto">
+                    
+                        <a class="nav-link" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user me-2"></i>
+                            الملف الشخصي
+                        </a>
+                        <a class="nav-link" href="{{ url_for('myplayers') }}">
+                            <i class="fas fa-users me-2"></i>
+                            لاعبيني
+                        </a>
+                        <a class="nav-link" href="{{ url_for('catalog') }}">
+                            <i class="fas fa-book me-2"></i>
+                            الكتالوج
+                        </a>
+                        <a class="nav-link" href="{{ url_for('market') }}">
+                            <i class="fas fa-store me-2"></i>
+                            السوق
+                        </a>
+                        <a class="nav-link text-danger" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            تسجيل خروج
+                        </a>
+
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- World Cup Badge -->
+    <div class="world-cup-badge">
+        <i class="fas fa-trophy me-1"></i> كأس العالم 2026
+    </div>
+
+
+    <div class="page-header">
+        <div class="container">
+            <h1 class="text-center page-title animate__animated animate__fadeInDown">كتالوج الأندية</h1>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="club-books animate__animated animate__fadeIn">
+            {% for club in clubs %}
+            <a href="{{ url_for('club_catalog', club_id=club.club_id) }}" class="club-book">
+                <div class="book-spine"></div>
+                <div class="book-cover" style="--club-color: {% if club.club_color %}{{ club.club_color }}{% else %}#e60000{% endif %}">
+                    <img src="{{ club.club_image_url }}" alt="{{ club.club_name }}" class="club-logo">
+                    <div class="club-name">{{ club.club_name }}</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

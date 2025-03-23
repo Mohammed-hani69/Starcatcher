@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Catcher</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap">
+    <style>
+        :root {
+            --primary-red: #e50914;
+            --dark-red: #b30710;
+            --accent-gold: #ffc107;
+            --black: #121212;
+            --dark-gray: #1a1a1a;
+            --light-gray: #2d2d2d;
+            --text-light: #f8f9fa;
+        }
+        
+        body {
+            background-color: var(--black);
+            color: var(--text-light);
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        /* Navbar Styling */
+        .navbar {
+            background: linear-gradient(to right, #000000, #440000);
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.2);
+            padding: 15px 0;
+        }
+        
+        .navbar-brand {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-red) !important;
+            text-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
+            transition: all 0.3s ease;
+            padding-left: 20px;
+        }
+        
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+        
+        .nav-link {
+            color: var(--text-light) !important;
+            font-weight: 600;
+            margin: 0 10px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary-red);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .coins-display {
+            background-color: rgba(255, 193, 7, 0.2);
+            border-radius: 20px;
+            padding: 5px 15px ;
+            margin-left: 15px;
+            color: var(--accent-gold);
+            font-weight: 700;
+        }
+
+        /* World Cup Badge */
+        .world-cup-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--primary-red);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(130,0,0,0.8) 100%), url('/static/images/stadium-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            padding: 80px 0;
+            margin-bottom: 50px;
+            border-bottom: 4px solid var(--primary-red);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent 20%, var(--black) 150%);
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            background: linear-gradient(to right, var(--primary-red), var(--accent-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Subscription Cards */
+        .subscription-card {
+            background: linear-gradient(145deg, var(--dark-gray), var(--black));
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            transform: translateY(0);
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .subscription-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            z-index: -1;
+            border-radius: 16px;
+        }
+        
+        .standard-card::before {
+            background: linear-gradient(45deg, var(--primary-red), transparent, var(--primary-red));
+            animation: glowing-red 3s linear infinite;
+        }
+        
+        .premium-card::before {
+            background: linear-gradient(45deg, var(--accent-gold), transparent, var(--accent-gold));
+            animation: glowing-gold 3s linear infinite;
+        }
+        
+        @keyframes glowing-red {
+            0% { opacity: 0.8; }
+            50% { opacity: 0.5; }
+            100% { opacity: 0.8; }
+        }
+        
+        @keyframes glowing-gold {
+            0% { opacity: 0.8; }
+            50% { opacity: 0.5; }
+            100% { opacity: 0.8; }
+        }
+        
+        .subscription-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(229, 9, 20, 0.3);
+        }
+        
+        .subscription-card .card-header {
+            background: linear-gradient(to right, var(--black), var(--dark-gray));
+            padding: 20px;
+            border-bottom: 2px solid var(--primary-red);
+        }
+        
+        .premium-card .card-header {
+            border-bottom: 2px solid var(--accent-gold);
+        }
+        
+        .subscription-card .card-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .subscription-card .card-body {
+            padding: 30px;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 30px;
+        }
+        
+        .feature-list li {
+            margin-bottom: 15px;
+            padding-right: 30px;
+            position: relative;
+            font-size: 1.1rem;
+            color: #e1e1e1;
+            line-height: 1.6;
+        }
+        
+        .feature-list li::before {
+            content: '\f00c';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 0;
+            color: var(--primary-red);
+        }
+        
+        .premium-card .feature-list li::before {
+            color: var(--accent-gold);
+        }
+        
+        .subscription-btn {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            border: none;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .standard-btn {
+            background-color: var(--primary-red);
+            color: white;
+        }
+        
+        .standard-btn:hover {
+            background-color: var(--dark-red);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(229, 9, 20, 0.5);
+        }
+        
+        .premium-btn {
+            background-color: var(--accent-gold);
+            color: var(--black);
+        }
+        
+        .premium-btn:hover {
+            background-color: #e8af00;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.5);
+        }
+        
+        /* Packs Section */
+        .section-title {
+            position: relative;
+            display: inline-block;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            color: var(--primary-red);
+            text-transform: uppercase;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100px;
+            height: 3px;
+            background-color: var(--primary-red);
+        }
+        
+        .pack-card {
+            background: linear-gradient(145deg, var(--dark-gray), var(--black));
+            border: 1px solid var(--light-gray);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            height: 100%;
+            position: relative;
+        }
+        
+        .pack-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, transparent 50%);
+            z-index: 1;
+        }
+        
+        .pack-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 25px rgba(229, 9, 20, 0.25);
+            border-color: var(--primary-red);
+        }
+        
+        .pack-card .card-header {
+            padding: 15px;
+            text-align: center;
+            background-color: var(--black);
+            border-bottom: 2px solid var(--primary-red);
+        }
+        
+        .pack-card .card-body {
+            position: relative;
+            z-index: 2;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 60px);
+        }
+        
+        .pack-info {
+            flex-grow: 1;
+            margin-bottom: 20px;
+        }
+        
+        .pack-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--text-light);
+        }
+        
+        .pack-detail {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            color: #adb5bd;
+        }
+        
+        .pack-detail i {
+            margin-left: 10px;
+            color: var(--primary-red);
+        }
+        
+        .pack-price {
+            display: inline-block;
+            background: transparent;
+            color: var(--accent-gold);
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .pack-price small {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-right: 5px;
+            color: var(--accent-gold);
+        }
+
+        .pack-price:hover {
+            transform: translateY(-2px);
+        }
+
+        .pack-price i {
+            color: var(--accent-gold);
+            margin-left: 5px;
+        }
+
+        .premium-price {
+            color: var(--accent-gold);
+        }
+        
+        .pack-btn {
+            padding: 10px 20px;
+            font-weight: 600;
+            border-radius: 50px;
+            border: none;
+            background-color: var(--primary-red);
+            color: white;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .pack-btn:hover {
+            background-color: var(--dark-red);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
+        }
+        
+        /* Daily Pack */
+        .daily-pack-card {
+            background: linear-gradient(to bottom right, var(--black), var(--dark-gray));
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            padding: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+        
+        .daily-pack-card::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 20px;
+            background: linear-gradient(45deg, var(--primary-red), var(--accent-gold), var(--primary-red));
+            z-index: -1;
+            animation: rotate 5s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .daily-pack-card::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            background: linear-gradient(to bottom right, var(--black), var(--dark-gray));
+            border-radius: 15px;
+            z-index: -1;
+        }
+        
+        .daily-pack-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+            color: white;
+            text-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
+        }
+        
+        .daily-pack-btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 50px;
+            border: none;
+            background: linear-gradient(to right, var(--primary-red), var(--dark-red));
+            color: white;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .daily-pack-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.6s ease;
+        }
+        
+        .daily-pack-btn:hover::before {
+            left: 100%;
+        }
+        
+        .daily-pack-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(229, 9, 20, 0.6);
+        }
+        
+        .countdown-text {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: #adb5bd;
+            text-align: center;
+        }
+
+        /* إضافة CSS جديد للعداد بعد التصميم السابق */
+        .countdown-timer {
+            background: linear-gradient(145deg, var (--dark-gray), var(--black));
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--primary-red);
+        }
+
+        .countdown-timer::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary-red), var(--accent-gold));
+            z-index: -1;
+            animation: borderGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes borderGlow {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .countdown-digit {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 60px;
+            height: 60px;
+            background: linear-gradient(145deg, var(--black), var(--dark-gray));
+            margin: 0 5px;
+            border-radius: 10px;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var (--accent-gold);
+            text-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+            position: relative;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .countdown-separator {
+            display: inline-block;
+            margin: 0 5px;
+            font-size: 2rem;
+            color: var(--primary-red);
+            animation: pulse 1s infinite;
+            vertical-align: middle;
+        }
+
+        .countdown-label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+
+        .countdown-wrapper {
+            padding: 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .countdown-unit {
+            display: inline-block;
+            text-align: center;
+            margin: 0 5px;
+        }
+        
+        .price-tag {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .pack-price {
+            display: inline-block;
+            background: transparent;
+            color: var(--accent-gold);
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .pack-price small {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-right: 5px;
+            color: var(--accent-gold);
+        }
+
+        .pack-price:hover {
+            transform: translateY(-2px);
+        }
+
+        .pack-price i {
+            color: var(--accent-gold);
+            margin-left: 5px;
+        }
+
+        .premium-price {
+            color: var(--accent-gold);
+        }
+        
+        /* Pack Modal */
+        .modal-content {
+            background: linear-gradient(to bottom, var(--dark-gray), var(--black));
+            border: 2px solid var(--primary-red);
+            border-radius: 15px;
+        }
+        
+        .player-card {
+            background: linear-gradient(to bottom, var(--dark-gray), var(--black));
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .player-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            z-index: -1;
+            border-radius: 17px;
+            background: linear-gradient(45deg, var(--primary-red), var(--accent-gold), var(--primary-red));
+        }
+        
+        .player-card img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid var(--primary-red);
+        }
+        
+        .player-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: white;
+        }
+        
+        .player-rating {
+            display: inline-block;
+            background-color: var(--dark-gray);
+            color: var(--accent-gold);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+        
+        .add-to-collection-btn {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            border: none;
+            background: linear-gradient(to right, var(--primary-red), var(--dark-red));
+            color: white;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .add-to-collection-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(229, 9, 20, 0.5);
+        }
+
+        .feature-item {
+            font-size: 1.1rem;
+            color: #e1e1e1;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            position: relative;
+            padding-right: 30px;
+            text-align: right;
+        }
+
+        .price-wrapper {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+        }
+
+        .pack-price {
+            display: inline-block;
+            background: transparent;
+            color: var(--accent-gold);
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .pack-price small {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-right: 5px;
+            color: var(--accent-gold);
+        }
+
+        .pack-price:hover {
+            transform: translateY(-2px);
+        }
+
+        .pack-price i {
+            color: var(--accent-gold);
+            margin-left: 5px;
+        }
+
+        .premium-price {
+            color: var(--accent-gold);
+        }
+
+        .premium-card .feature-list li::before {
+            color: var(--accent-gold);
+        }
+
+        .premium-card .card-header {
+            border-bottom: 2px solid var(--accent-gold);
+        }
+
+        .premium-price {
+            color: var(--accent-gold);
+        }
+
+        .premium-price:hover {
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+        }
+
+        .premium-btn {
+            background-color: var(--accent-gold);
+            color: var(--black);
+        }
+
+        .premium-btn:hover {
+            background-color: #e8af00;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.5);
+        }
+
+        /* Responsive Navbar Styling */
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                background: linear-gradient(to bottom, var(--black), var(--dark-gray));
+                padding: 1rem;
+                border-radius: 10px;
+                margin-top: 1rem;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            .navbar-nav {
+                text-align: center;
+            }
+
+            .nav-link {
+                padding: 0.8rem 1rem;
+                margin: 5px 0;
+                border-radius: 5px;
+            }
+
+            .nav-link:hover {
+                background-color: rgba(229, 9, 20, 0.1);
+            }
+
+            .coins-display {
+                margin: 10px auto;
+                display: inline-block;
+            }
+
+            .navbar-toggler {
+                border: none;
+                background: transparent;
+                padding: 0.5rem;
+            }
+
+            .navbar-toggler:focus {
+                box-shadow: none;
+            }
+
+            .navbar-toggler-icon {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(229, 9, 20, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+            }
+        }
+
+        /* World Cup Badge Responsive */
+        @media (max-width: 768px) {
+            .world-cup-badge {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('home') }}">Star Catcher</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <span class="coins-display">
+                            <i class="fas fa-coins me-2"></i>
+                            {{ user.coins }} عملة
+                        </span>
+                        <a class="nav-link" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user me-2"></i>
+                            الملف الشخصي
+                        </a>
+                        <a class="nav-link" href="{{ url_for('myplayers') }}">
+                            <i class="fas fa-users me-2"></i>
+                            لاعبيني
+                        </a>
+                        <a class="nav-link" href="{{ url_for('catalog') }}">
+                            <i class="fas fa-book me-2"></i>
+                            الكتالوج
+                        </a>
+                        <a class="nav-link" href="{{ url_for('market') }}">
+                            <i class="fas fa-store me-2"></i>
+                            السوق
+                        </a>
+                        <a class="nav-link text-danger" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            تسجيل خروج
+                        </a>
+                    {% else %}
+                        <a class="nav-link" href="{{ url_for('login') }}">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            تسجيل الدخول
+                        </a>
+                        <a class="nav-link" href="{{ url_for('register') }}">
+                            <i class="fas fa-user-plus me-2"></i>
+                            التسجيل
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- World Cup Badge -->
+    <div class="world-cup-badge">
+        <i class="fas fa-trophy me-1"></i> كأس العالم 2026
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <h1 class="hero-title animate__animated animate__fadeInDown">اكتشف عالم النجوم</h1>
+            {% if not user.is_subscribed %}
+            <div class="row mt-5 animate__animated animate__fadeInUp">
+                    {% for subscription in subscription %}
+                    <div class="col-md-6">
+                        <div class="card subscription-card {% if loop.first %}standard-card{% else %}premium-card{% endif %}">
+                            <div class="card-header">
+                                <h3 class="card-title {% if loop.first %}text-danger{% else %}text-warning{% endif %}">
+                                    {{subscription.package_type}}
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <ul class="feature-list">
+                                    {% for detail in subscription.package_details.split('.') %}
+                                        {% if detail|trim %}
+                                            <li class="feature-item">{{ detail|trim }}</li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                                <div class="price-wrapper">
+                                    <span class="pack-price {% if not loop.first %}premium-price{% endif %}">
+                                        <i class="fas fa-tag me-2"></i>
+                                        {{ subscription.price }} <small>جنيه مصري</small>
+                                    </span>
+                                </div>
+                                <button class="subscription-btn {% if loop.first %}standard-btn{% else %}premium-btn{% endif %} mt-4">
+                                    <i class="fas fa-crown me-2"></i>
+                                    اشترك الآن
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Packs Section -->
+    <section class="container py-5">
+        <div class="row">
+            <div class="col-md-8">
+                <h2 class="section-title">الباكجات المتوفرة</h2>
+                <div class="row" id="packs-container">
+                    <!-- سيتم إضافة الباكجات هنا ديناميكيًا -->
+                </div>
+            </div>
+            
+            <script>
+                // جلب الباكجات عند تحميل الصفحة
+                document.addEventListener("DOMContentLoaded", function() {
+                    fetch('/api_packs', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const container = document.getElementById('packs-container');
+                            data.packs.forEach(pack => {
+                                const packHtml = `
+                                    <div class="col-md-4 mb-4">
+                                        <div class="pack-card">
+                                            <div class="card-body">
+                                                <div class="pack-info">
+                                                    <h4 class="pack-name">${pack.name}</h4>
+                                                    <div class="pack-detail">
+                                                        <i class="fas fa-users"></i>
+                                                        ${pack.player_count} لاعبين
+                                                    </div>
+                                                    <span class="pack-price">
+                                                        <i class="fas fa-coins me-2"></i>
+                                                        ${pack.price} عملة
+                                                    </span>
+                                                </div>
+                                                <button class="pack-btn open-pack" data-pack-id="${pack.id}">
+                                                    <i class="fas fa-box-open me-2"></i>
+                                                    افتح الباكج
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                                container.innerHTML += packHtml;
+                            });
+                        } else {
+                            console.error('خطأ في جلب الباكجات:', data.message);
+                        }
+                    })
+                    .catch(error => console.error('خطأ:', error));
+                });
+            </script>
+            <div class="col-md-4">
+                <div class="daily-pack-card">
+                    <h3 class="daily-pack-title">الباكج اليومي المجاني</h3>
+                    {% if can_open_daily %}
+                        <button class="daily-pack-btn" id="openDailyPack">
+                            <i class="fas fa-gift me-2"></i>
+                            افتح الباكج اليومي
+                        </button>
+                    {% else %}
+                        <p class="countdown-text">
+                            <div class="countdown-timer">
+                                <div class="countdown-wrapper">
+                                    <div class="countdown-unit">
+                                        <div class="countdown-digit" id="hours">00</div>
+                                        <span class="countdown-label">ساعة</span>
+                                    </div>
+                                    <span class="countdown-separator">:</span>
+                                    <div class="countdown-unit">
+                                        <div class="countdown-digit" id="minutes">00</div>
+                                        <span class="countdown-label">دقيقة</span>
+                                    </div>
+                                    <span class="countdown-separator">:</span>
+                                    <div class="countdown-unit">
+                                        <div class="countdown-digit" id="seconds">00</div>
+                                        <span class="countdown-label">ثانية</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- Update the confirm purchase modal -->
+    <div class="modal fade" id="confirmPurchaseModal" tabindex="-1" role="dialog" aria-labelledby="confirmPurchaseModalLabel" aria-modal="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmPurchaseModalLabel">تأكيد شراء الباكج</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>هل أنت متأكد من شراء هذا الباكج؟</p>
+                    <div class="pack-details">
+                        <p class="pack-name mb-2"></p>
+                        <p class="pack-price mb-2"></p>
+                        <p class="pack-players mb-0"></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-danger" id="confirmPurchaseBtn">تأكيد الشراء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update the pack opening modal -->
+    <div class="modal fade" id="packModal" tabindex="-1" role="dialog" aria-labelledby="packModalLabel" aria-modal="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center py-5">
+                    <div id="players-reveal" class="position-relative">
+                        <!-- Players will be displayed here -->
+                    </div>
+                    <button class="add-to-collection-btn" id="addToCollection">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        إضافة إلى القائمة
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Daily Pack Modal -->
+    <div class="modal fade" id="dailyPackModal" tabindex="-1" role="dialog" aria-labelledby="dailyPackModalLabel" aria-modal="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center py-5">
+                    <div id="daily-players-reveal" class="position-relative">
+                        <!-- Daily Pack Players will be displayed here -->
+                    </div>
+                    <button class="add-to-collection-btn" id="addDailyToCollection">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        إضافة إلى القائمة
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti/dist/confetti.browser.min.js"></script>
+
+    <script>
+        // دوال مساعدة موحدة
+        function getConfettiColors(rarity) {
+            const colors = {
+                'legendary': ['#FFD700', '#FFA500', '#FF8C00', '#FFD700'],
+                'epic': ['#e50914', '#ff5722', '#ff4444', '#ff1744'],
+                'rare': ['#1976d2', '#64b5f6', '#2196f3', '#0d47a1'],
+                'common': ['#757575', '#bdbdbd', '#9e9e9e', '#616161']
+            };
+            return colors[rarity] || colors.common;
+        }
+
+        // دالة موحدة للاحتفالات
+        function celebrateWithConfetti(rarity, intensity = 'normal') {
+            const colors = getConfettiColors(rarity);
+            const particleCount = intensity === 'high' ? 200 : 100;
+            
+            // من اليمين
+            confetti({
+                particleCount: particleCount,
+                spread: 90,
+                origin: { x: 0.9, y: 0.9 },
+                angle: 135,
+                startVelocity: 45,
+                gravity: 0.5,
+                drift: -0.4,
+                ticks: 400,
+                colors: colors
+            });
+            
+            // من اليسار
+            confetti({
+                particleCount: particleCount,
+                spread: 90,
+                origin: { x: 0.1, y: 0.9 },
+                angle: 45,
+                startVelocity: 45,
+                gravity: 0.5,
+                drift: 0.4,
+                ticks: 400,
+                colors: colors
+            });
+            
+            // من الوسط
+            confetti({
+                particleCount: particleCount * 1.5,
+                spread: 180,
+                origin: { x: 0.5, y: 1 },
+                startVelocity: 45,
+                gravity: 1,
+                ticks: 400,
+                colors: colors
+            });
+        }
+
+        // دالة موحدة لعرض اللاعبين
+        function displayPlayers(players, container, onComplete) {
+            container.innerHTML = '';
+            
+            players.forEach((player, index) => {
+                setTimeout(() => {
+                    const playerCard = document.createElement('div');
+                    playerCard.className = 'player-card animate__animated animate__flipInY';
+                    playerCard.innerHTML = `
+                        <img src="/static/uploads/image_player/${player.image_url}" alt="${player.name}">
+                        <h4 class="player-name">${player.name}</h4>
+                        <span class="player-rating">${player.rating}</span>
+                        <div class="player-details mt-2">
+                            <small class="d-block">${player.position}</small>
+                            <small class="d-block">${player.club_name}</small>
+                            <small class="d-block text-warning">${player.rarity}</small>
+                        </div>
+                    `;
+                    container.appendChild(playerCard);
+                    celebrateWithConfetti(player.rarity);
+
+                    if (index === players.length - 1 && onComplete) {
+                        onComplete();
+                    }
+                }, index * 1000);
+            });
+        }
+
+        // معالج الباكج اليومي
+        document.getElementById('openDailyPack')?.addEventListener('click', async function() {
+            try {
+                const dailyPackModal = new bootstrap.Modal(document.getElementById('dailyPackModal'));
+                const response = await fetch('/generate_daily_pack', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.status === 401) {
+                    alert('يرجى تسجيل الدخول أولاً');
+                    window.location.href = '/login';
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    dailyPackModal.show();
+                    celebrateWithConfetti('rare', 'high');
+
+                    const playersReveal = document.getElementById('daily-players-reveal');
+                    displayPlayers(data.players, playersReveal, () => {
+                        // تحديث واجهة المستخدم بعد اكتمال العرض
+                        document.getElementById('openDailyPack').style.display = 'none';
+                        updateCountdownDisplay();
+                    });
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error('❌ خطأ في فتح الباكج اليومي:', error);
+                alert('حدث خطأ أثناء فتح الباكج اليومي، يرجى المحاولة مرة أخرى.');
+            }
+        });
+
+        // معالج فتح الباكجات العادية
+        document.addEventListener('click', async function(e) {
+            if (e.target.classList.contains('open-pack') || e.target.closest('.open-pack')) {
+                const packId = e.target.dataset.packId;
+                try {
+                    const response = await fetch(`/open_package/${packId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (response.status === 401) {
+                        alert('يرجى تسجيل الدخول أولاً');
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        const packModal = new bootstrap.Modal(document.getElementById('packModal'));
+                        packModal.show();
+                        
+                        document.querySelector('.coins-display').textContent = 
+                            `${data.coins_remaining} عملة`;
+
+                        const playersReveal = document.getElementById('players-reveal');
+                        displayPlayers(data.players_received, playersReveal);
+                    } else {
+                        alert(data.message);
+                    }
+                } catch (error) {
+                    console.error('Error opening pack:', error);
+                    alert('حدث خطأ أثناء فتح الباكج');
+                }
+            }
+        });
+
+        // دالة تحديث عرض العداد
+        function updateCountdownDisplay() {
+            const countdownText = document.querySelector('.countdown-text');
+            if (countdownText) {
+                countdownText.innerHTML = `
+                    <div class="countdown-timer">
+                        <div class="countdown-wrapper">
+                            <div class="countdown-unit">
+                                <div class="countdown-digit" id="hours">24</div>
+                                <span class="countdown-label">ساعة</span>
+                            </div>
+                            <span class="countdown-separator">:</span>
+                            <div class="countdown-unit">
+                                <div class="countdown-digit" id="minutes">00</div>
+                                <span class="countdown-label">دقيقة</span>
+                            </div>
+                            <span class="countdown-separator">:</span>
+                            <div class="countdown-unit">
+                                <div class="countdown-digit" id="seconds">00</div>
+                                <span class="countdown-label">ثانية</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // إضافة معالج لإغلاق النوافذ المنبثقة
+        document.getElementById('addToCollection')?.addEventListener('click', function() {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('packModal'));
+            if (modal) modal.hide();
+        });
+
+        document.getElementById('addDailyToCollection')?.addEventListener('click', function() {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('dailyPackModal'));
+            if (modal) modal.hide();
+        });
+
+        // تحسين وظيفة العد التنازلي
+        document.addEventListener("DOMContentLoaded", function() {
+            const countdownElement = document.getElementById("hours");
+            if (!countdownElement) return;  // التحقق من وجود العنصر
+
+            let dailyPackEndTimestamp = {{ daily_pack_end_timestamp | default(0) }};
+            
+            function updateCountdown() {
+                const now = Math.floor(Date.now() / 1000);
+                const timeRemaining = dailyPackEndTimestamp - now;
+
+                if (timeRemaining > 0) {
+                    const hours = Math.floor(timeRemaining / 3600);
+                    const minutes = Math.floor((timeRemaining % 3600) / 60);
+                    const seconds = timeRemaining % 60;
+
+                    document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+                    document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+                    document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+                } else {
+                    // عند انتهاء الوقت
+                    const countdownText = document.querySelector('.countdown-text');
+                    if (countdownText) {
+                        countdownText.innerHTML = `
+                            <button class="daily-pack-btn" id="openDailyPack">
+                                <i class="fas fa-gift me-2"></i>
+                                افتح الباكج اليومي
+                            </button>
+                        `;
+
+                        // إضافة المعالج للزر الجديد
+                        const newButton = document.getElementById('openDailyPack');
+                        if (newButton) {
+                            newButton.addEventListener('click', handleDailyPackOpen);
+                        }
+                    }
+                    clearInterval(countdownInterval);
+                }
+            }
+
+            if (dailyPackEndTimestamp) {
+                updateCountdown();
+                const countdownInterval = setInterval(updateCountdown, 1000);
+            }
+        });
+
+        // ...rest of existing code...
+    </script>
+</body>
+</html>

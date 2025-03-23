@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الملف الشخصي - {{ user.username }}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap">
+    <style>
+        :root {
+            --primary-red: #e50914;
+            --dark-red: #b30710;
+            --accent-gold: #ffc107;
+            --black: #121212;
+            --dark-gray: #1a1a1a;
+            --lighter-gray: #333333;
+        }
+
+        body {
+            background-color: var(--black);
+            color: white;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            background: linear-gradient(to right, #000000, #440000);
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.2);
+            padding: 15px 0;
+        }
+        
+        .navbar-brand {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-red) !important;
+            text-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+        
+        .nav-link {
+            color: var(--text-light) !important;
+            font-weight: 600;
+            margin: 0 10px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary-red);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .coins-display {
+            background-color: rgba(255, 193, 7, 0.2);
+            border-radius: 20px;
+            padding: 5px 15px;
+            margin-left: 15px;
+            color: var(--accent-gold);
+            font-weight: 700;
+        }
+        
+
+        /* Header Styling */
+        .profile-header {
+            background: linear-gradient(135deg, var(--dark-red), var(--black));
+            padding: 40px 0;
+            border-bottom: 3px solid var(--primary-red);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://cdnjs.cloudflare.com/ajax/libs/World-Cup-Teams-Icons/2.0.0/flags/iso/svg/qatar.svg');
+            background-size: 300px;
+            background-position: right;
+            background-repeat: no-repeat;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background-color: var(--lighter-gray);
+            border-radius: 50%;
+            border: 3px solid var(--primary-red);
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Card Styling */
+        .custom-card {
+            background: linear-gradient(145deg, var(--dark-gray), var(--black));
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .custom-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .wallet-card {
+            border: 1px solid var(--primary-red);
+        }
+
+        .ranking-card {
+            border: 1px solid var(--accent-gold);
+        }
+
+        .stats-card {
+            border: 1px solid #0dcaf0;
+        }
+
+        .achievements-card {
+            border: 1px solid #20c997;
+        }
+
+        /* User Ranking */
+        .user-rank {
+            font-size: 3rem;
+            color: var(--accent-gold);
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            text-shadow: 0px 0px 10px rgba(255, 193, 7, 0.5);
+        }
+
+        .nearby-users {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nearby-users li {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .nearby-users li:hover {
+            background: rgba(255,255,255,0.15);
+            transform: scale(1.02);
+        }
+
+        .nearby-users li.current-user {
+            background: var(--primary-red);
+            font-weight: bold;
+            position: relative;
+        }
+
+        .nearby-users li.current-user::before {
+            content: "\f058";
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent-gold);
+        }
+
+        /* Button Styling */
+        .custom-btn {
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .custom-btn::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            z-index: -1;
+        }
+
+        .custom-btn:hover::before {
+            width: 100%;
+        }
+
+        .custom-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-red {
+            background: var(--primary-red);
+        }
+
+        .btn-red:hover {
+            background: var(--dark-red);
+        }
+
+        /* Modal Styling */
+        .custom-modal .modal-content {
+            background: linear-gradient(145deg, var(--dark-gray), var(--black));
+            border: 1px solid var(--primary-red);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .custom-modal .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .custom-modal .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Payment Options */
+        .payment-option {
+            background: linear-gradient(145deg, var (--dark-gray), var(--lighter-gray));
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .payment-option:hover {
+            border-color: var(--primary-red);
+            transform: translateY(-5px);
+        }
+
+        .payment-option.selected {
+            border-color: var(--primary-red);
+            background: linear-gradient(145deg, var(--dark-red), var(--dark-gray));
+        }
+
+        .payment-method {
+            background: linear-gradient(145deg, var(--dark-gray), var(--lighter-gray));
+            cursor: pointer;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .payment-method:hover {
+            border-color: var(--primary-red);
+            transform: translateY(-5px);
+        }
+
+        .payment-method.selected {
+            border-color: var(--primary-red);
+            background: linear-gradient(145deg, var(--dark-red), var(--dark-gray));
+        }
+
+        .payment-method img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        /* Stats Section */
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #0dcaf0;
+        }
+
+        /* Achievements */
+        .achievement {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .achievement-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+        }
+
+        .achievement-locked {
+            opacity: 0.5;
+        }
+
+        /* World Cup Badge */
+        .world-cup-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--primary-red);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        /* Loader */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid var(--primary-red);
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 767px) {
+            .profile-header {
+                padding: 30px 0;
+            }
+            
+            .user-rank {
+                font-size: 2.5rem;
+            }
+            
+            .profile-avatar {
+                width: 80px;
+                height: 80px;
+            }
+        }
+
+        /* Responsive Navbar Styling */
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                background: linear-gradient(to bottom, var(--black), var(--dark-gray));
+                padding: 1rem;
+                border-radius: 10px;
+                margin-top: 1rem;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            .navbar-nav {
+                text-align: center;
+            }
+
+            .nav-link {
+                padding: 0.8rem 1rem;
+                margin: 5px 0;
+                border-radius: 5px;
+            }
+
+            .nav-link:hover {
+                background-color: rgba(229, 9, 20, 0.1);
+            }
+
+            .coins-display {
+                margin: 10px auto;
+                display: inline-block;
+            }
+
+            .navbar-toggler {
+                border: none;
+                background: transparent;
+                padding: 0.5rem;
+            }
+
+            .navbar-toggler:focus {
+                box-shadow: none;
+            }
+
+            .navbar-toggler-icon {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(229, 9, 20, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+            }
+        }
+
+        /* World Cup Badge Responsive */
+        @media (max-width: 768px) {
+            .world-cup-badge {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('home') }}">Star Catcher</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <span class="coins-display">
+                            <i class="fas fa-coins me-2"></i>
+                            {{ user.coins }} عملة
+                        </span>
+                        <a class="nav-link" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user me-2"></i>
+                            الملف الشخصي
+                        </a>
+                        <a class="nav-link" href="{{ url_for('myplayers') }}">
+                            <i class="fas fa-users me-2"></i>
+                            لاعبيني
+                        </a>
+                        <a class="nav-link" href="{{ url_for('catalog') }}">
+                            <i class="fas fa-book me-2"></i>
+                            الكتالوج
+                        </a>
+                        <a class="nav-link" href="{{ url_for('market') }}">
+                            <i class="fas fa-store me-2"></i>
+                            السوق
+                        </a>
+                        <a class="nav-link text-danger" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            تسجيل خروج
+                        </a>
+                    {% else %}
+                        <a class="nav-link" href="{{ url_for('login') }}">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            تسجيل الدخول
+                        </a>
+                        <a class="nav-link" href="{{ url_for('register') }}">
+                            <i class="fas fa-user-plus me-2"></i>
+                            التسجيل
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- World Cup Badge -->
+    <div class="world-cup-badge">
+        <i class="fas fa-trophy me-1"></i> كأس العالم 2026
+    </div>
+
+    <!-- Header -->
+    <div class="profile-header">
+        <div class="container">
+            <div class="d-flex align-items-center">
+                <div class="profile-avatar">
+                    <img src="{{ url_for('static', filename='../static/uploads/profile_images/' ~ user.image_url) }}" alt="صورة البروفايل">
+                </div>
+                <div class="ms-3">
+                    <h1>{{ user.username }}</h1>
+                    <p class="mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i> عضو منذ {{ user.created_at.strftime('%Y-%m-%d') }}
+                    </p>
+                    <div>
+                        {% if user.premuim %}
+                            <span class="badge bg-warning text-dark me-1">
+                                <i class="fas fa-star me-1"></i> بريميوم
+                            </span>
+                        {% endif %}
+                        {% if user.gold %}
+                            <span class="badge bg-warning text-dark">
+                                <i class="fas fa-crown me-1"></i> ذهبي
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-4">
+                <!-- Wallet Section -->
+                <div class="custom-card wallet-card">
+                    <h3>
+                        <i class="fas fa-wallet me-2"></i> المحفظة
+                    </h3>
+                    <div class="d-flex justify-content-between align-items-center my-4">
+                        <span>رصيدك الحالي:</span>
+                        <span class="h3 mb-0 text-warning">
+                            <i class="fas fa-coins me-2"></i>
+                            <span id="userCoins">{{ user.coins }}</span>
+                        </span>
+                    </div>
+                    <button class="custom-btn btn-red w-100" id="rechargeBtn">
+                        <i class="fas fa-plus-circle me-2"></i> شحن المحفظة
+                    </button>
+                </div>
+
+                <!-- Stats Section -->
+                <div class="custom-card stats-card">
+                    <h3>
+                        <i class="fas fa-chart-line me-2"></i> إحصائياتك
+                    </h3>
+                    <div class="row text-center g-3 mt-2">
+                        <div class="col-6">
+                            <div class="p-3 rounded" style="background: rgba(255,255,255,0.05);">
+                                <div class="stat-value">{{ owned_count }}</div>
+                                <div>اللاعبين</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 rounded" style="background: rgba(255,255,255,0.05);">
+                                <div class="stat-value text-warning">{{ catalog_count }}</div>
+                                <div>الكتالوج</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Column - Ranking -->
+            <div class="col-lg-4">
+                <div class="custom-card ranking-card">
+                    <h3>
+                        <i class="fas fa-trophy me-2"></i> الترتيب العام
+                    </h3>
+                    <div class="user-rank">
+                        <i class="fas fa-medal me-2"></i> #{{ user_rank }}
+                    </div>
+                    <div class="text-center mb-4">
+                        <div class="fw-bold mb-2">مجموع اللاعبين في الكتالوجات</div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-danger" role="progressbar" style="width: {{ (catalog_count/500)*100 }}%"></div>
+                        </div>
+                        <div class="text-muted mt-2">{{ catalog_count }} من 500</div>
+                    </div>
+                    <ul class="nearby-users">
+                        {% for nearby_user in nearby_users %}
+                        <li class="{{ 'current-user' if nearby_user.id == user.id else '' }}">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <i class="fas fa-user me-2"></i>
+                                    <span>{{ nearby_user.username }}</span>
+                                </div>
+                                <div>
+                                    <span>{{ nearby_user.catalog_count }} لاعب</span>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Right Column - Achievements -->
+            <div class="col-lg-4">
+                <div class="custom-card achievements-card">
+                    <h3>
+                        <i class="fas fa-award me-2"></i> الإنجازات
+                    </h3>
+                    <div class="achievements-list">
+                        <div class="achievement">
+                            <div class="achievement-icon">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">عضو جديد</h5>
+                                <small>اكمل تسجيل حسابك</small>
+                            </div>
+                            <div class="ms-auto">
+                                <i class="fas fa-check-circle text-success fs-4"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="achievement">
+                            <div class="achievement-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">المشتري الأول</h5>
+                                <small>اشتر أول لاعب من السوق</small>
+                            </div>
+                            <div class="ms-auto">
+                                <i class="fas fa-check-circle text-success fs-4"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="achievement achievement-locked">
+                            <div class="achievement-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">جامع الفريق</h5>
+                                <small>اجمع كل لاعبي فريق كامل</small>
+                            </div>
+                            <div class="ms-auto">
+                                <i class="fas fa-lock fs-4"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="achievement achievement-locked">
+                            <div class="achievement-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">خبير النوادر</h5>
+                                <small>اجمع 10 لاعبين من فئة نادر جداً</small>
+                            </div>
+                            <div class="ms-auto">
+                                <i class="fas fa-lock fs-4"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="achievement achievement-locked">
+                            <div class="achievement-icon">
+                                <i class="fas fa-crown"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">ملك الكتالوج</h5>
+                                <small>اكمل كتالوج كامل من اللاعبين</small>
+                            </div>
+                            <div class="ms-auto">
+                                <i class="fas fa-lock fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button class="custom-btn btn-red">
+                            <i class="fas fa-trophy me-2"></i> عرض جميع الإنجازات
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recharge Modal -->
+    <div class="modal fade custom-modal" id="rechargeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-coins me-2 text-warning"></i> شحن المحفظة
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="amountSelectionView">
+                        <h6 class="text-center mb-4">اختر كمية العملات التي ترغب بشحنها</h6>
+                        <div class="row g-3 mb-3">
+                            {% for option in wallet_options %}
+                            <div class="col-6">
+                                <div class="payment-option" data-amount="{{ option.amount }}" data-price="{{ option.price }}">
+                                    <div class="text-warning mb-2">
+                                        <i class="fas fa-coins"></i> {{ option.amount }} عملة
+                                    </div>
+                                    <div class="fw-bold">{{ option.price }} جنيه</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="text-center mt-4">
+                            <button id="continueToPaymentBtn" class="custom-btn btn-red" disabled>
+                                استمرار للدفع
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="paymentMethodView" style="display: none;">
+                        <h6 class="text-center mb-4">اختر طريقة الدفع</h6>
+                        
+                        <div class="d-flex justify-content-between align-items-center p-3 mb-4 rounded" style="background: rgba(255,255,255,0.05);">
+                            <div>المبلغ المطلوب:</div>
+                            <div class="fw-bold"><span id="selectedPriceDisplay">0</span> جنيه</div>
+                        </div>
+                        
+                        <div class="row g-3 mb-4">
+                            {% for method in payment_methods %}
+                            <div class="col-6">
+                                <div class="payment-method" data-method="{{ method.id }}">
+                                    <img src="{{ url_for('static', filename='images/payment/' + method.icon) }}" alt="{{ method.name }}">
+                                    <p>{{ method.name }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button id="backToAmountsBtn" class="btn btn-outline-light">
+                                <i class="fas fa-arrow-right me-2"></i> رجوع
+                            </button>
+                            <button id="processPaymentBtn" class="custom-btn btn-red" disabled>
+                                إتمام الدفع
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="processingView" style="display: none;">
+                        <div class="text-center py-5">
+                            <span class="loader"></span>
+                            <h4 class="mt-4">جاري معالجة طلب الدفع</h4>
+                            <p class="text-muted">يرجى الانتظار...</p>
+                        </div>
+                    </div>
+
+                    <div id="successView" style="display: none;">
+                        <div class="text-center py-4">
+                            <div class="mb-4">
+                                <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                            </div>
+                            <h4>تمت عملية الدفع بنجاح!</h4>
+                            <p>تم إضافة <span id="addedCoinsDisplay" class="fw-bold text-warning">0</span> عملة إلى حسابك</p>
+                            <button class="custom-btn btn-red mt-3" data-bs-dismiss="modal">
+                                العودة للملف الشخصي
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Variables to store selection
+        let selectedAmount = 0;
+        let selectedPrice = 0;
+        let selectedPaymentMethod = '';
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show recharge modal
+            document.getElementById('rechargeBtn').addEventListener('click', function() {
+                let rechargeModal = new bootstrap.Modal(document.getElementById('rechargeModal'));
+                rechargeModal.show();
+            });
+            
+            // Payment option selection
+            let paymentOptions = document.querySelectorAll('.payment-option');
+            paymentOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selection from all options
+                    paymentOptions.forEach(opt => opt.classList.remove('selected'));
+                    
+                    // Add selection to clicked option
+                    this.classList.add('selected');
+                    
+                    // Store selected amount and price
+                    selectedAmount = parseInt(this.getAttribute('data-amount'));
+                    selectedPrice = parseInt(this.getAttribute('data-price'));
+                    
+                    // Enable continue button
+                    document.getElementById('continueToPaymentBtn').removeAttribute('disabled');
+                });
+            });
+            
+            // Payment method selection
+            let paymentMethods = document.querySelectorAll('.payment-method');
+            paymentMethods.forEach(method => {
+                method.addEventListener('click', function() {
+                    // Remove selection from all methods
+                    paymentMethods.forEach(m => m.classList.remove('selected'));
+                    
+                    // Add selection to clicked method
+                    this.classList.add('selected');
+                    
+                    // Store selected payment method
+                    selectedPaymentMethod = this.getAttribute('data-method');
+                    
+                    // Enable process payment button
+                    document.getElementById('processPaymentBtn').removeAttribute('disabled');
+                });
+            });
+            
+            // Continue to payment button
+            document.getElementById('continueToPaymentBtn').addEventListener('click', function() {
+                document.getElementById('amountSelectionView').style.display = 'none';
+                document.getElementById('paymentMethodView').style.display = 'block';
+                document.getElementById('selectedPriceDisplay').textContent = selectedPrice;
+            });
+            
+            // Back to amounts button
+            document.getElementById('backToAmountsBtn').addEventListener('click', function() {
+                document.getElementById('paymentMethodView').style.display = 'none';
+                document.getElementById('amountSelectionView').style.display = 'block';
+            });
+            
+            // Process payment button
+            document.getElementById('processPaymentBtn').addEventListener('click', function() {
+                // Show processing view
+                document.getElementById('paymentMethodView').style.display = 'none';
+                document.getElementById('processingView').style.display = 'block';
+                
+                // Process payment (simulated with setTimeout)
+                setTimeout(function() {
+                    processPayment(selectedAmount, selectedPrice, selectedPaymentMethod);
+                }, 2000);
+            });
+            
+            // Reset modal views when modal is hidden
+            document.getElementById('rechargeModal').addEventListener('hidden.bs.modal', function() {
+                resetModalViews();
+            });
+        });
+        
+        // Process payment function
+        function processPayment(amount, price, paymentMethod) {
+            fetch('/recharge-wallet', {  // تم تغيير المسار للتوافق مع الروت
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    amount: amount,
+                    payment_method: paymentMethod
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Update display
+                    document.getElementById('processingView').style.display = 'none';
+                    document.getElementById('successView').style.display = 'block';
+                    document.getElementById('addedCoinsDisplay').textContent = amount;
+                    
+                    // Update user's coins display
+                    let currentCoins = parseInt(document.getElementById('userCoins').textContent);
+                    document.getElementById('userCoins').textContent = currentCoins + amount;
+                } else {
+                    alert('حدث خطأ أثناء معالجة الدفع');
+                    resetModalViews();
+                }
+            })
+            .catch(error => {
+                alert('حدث خطأ أثناء معالجة الدفع');
+                resetModalViews();
+                console.error('Error:', error);
+            });
+        }
+
+        // Reset modal views function
+        function resetModalViews() {
+            document.getElementById('amountSelectionView').style.display = 'block';
+            document.getElementById('paymentMethodView').style.display = 'none';
+            document.getElementById('processingView').style.display = 'none';
+            document.getElementById('successView').style.display = 'none';
+            
+            // Reset selections
+            document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+            document.getElementById('continueToPaymentBtn').setAttribute('disabled', '');
+            document.getElementById('processPaymentBtn').setAttribute('disabled', '');
+            
+            selectedAmount = 0;
+            selectedPrice = 0;
+            selectedPaymentMethod = '';
+        }
+    </script>
+</body>
+</html>

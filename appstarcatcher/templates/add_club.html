@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - إضافة نادي</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="static/css/add_club.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="/api/placeholder/45/45" alt="Logo">
+            <span>لوحة التحكم</span>
+        </div>
+        
+        <nav class="nav-section">
+            <div class="nav-section-title">القائمة الرئيسية</div>
+            <a href="/dashboard" class="nav-item">
+                <i>🏠</i>
+                <span>الرئيسية</span>
+            </a>
+            <a href="/add_player" class="nav-item">
+                <i>👥</i>
+                <span>اللاعبين</span>
+            </a>
+            <a href="/add_club" class="nav-item active">
+                <i>⚽</i>
+                <span>الأنديه</span>
+            </a>
+            <a href="/add_subscription" class="nav-item">
+                <i>🏆</i>
+                <span>الباقات</span>
+            </a>
+        </nav>
+
+        <nav class="nav-section">
+            <div class="nav-section-title">الإدارة</div>
+            <a href="#" class="nav-item">
+                <i>📊</i>
+                <span>الإحصائيات</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i>⚙️</i>
+                <span>الإعدادات</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i>📝</i>
+                <span>التقارير</span>
+            </a>
+        </nav>
+
+        <div class="nav-section">
+            <a href="/logout" class="nav-item logout-btn">
+                <i>🚪</i>
+                <span>تسجيل الخروج</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <h2 class="header-title">Catcher<span class="brand-highlight">Star</span></h2>
+        
+        <div class="header-actions">
+            <div class="search-box">
+                <input type="text" placeholder="بحث...">
+                <i>🔍</i>
+            </div>
+            
+            <div class="header-links">
+                <div class="header-icon">
+                    <i>🔔</i>
+                    <span class="notification-badge">3</span>
+                </div>
+                <div class="header-icon">
+                    <i>✉️</i>
+                    <span class="notification-badge">5</span>
+                </div>
+            </div>
+
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name">{{username}}</div>
+                    <div class="user-role">مدير النظام</div>
+                </div>
+                <div class="user-avatar">{{username[:1]}}</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="form-container">
+            <h2 class="form-title">إضافة نادي جديد</h2>
+            <form action="{{ url_for('add_club') }}" method="POST" enctype="multipart/form-data">
+                {{ form.csrf_token }}
+                
+                <div class="form-group">
+                    {{ form.club_name.label(class="form-label") }}
+                    {{ form.club_name(class="form-input", required=true) }}
+                </div>
+    
+                <div class="upload-container">
+                    <div class="form-group">
+                        <label class="form-label">شعار النادي</label>
+                        <div class="image-upload-container" id="logo-upload">
+                            <i class="fas fa-image fa-2x"></i>
+                            <p>اختر شعار النادي</p>
+                            {{ form.club_image(class="form-input file-input") }}
+                        </div>
+                    </div>
+    
+                    <div class="form-group">
+                        <label class="form-label">بانر النادي</label>
+                        <div class="image-upload-container" id="banner-upload">
+                            <i class="fas fa-panorama fa-2x"></i>
+                            <p>اختر صورة البانر</p>
+                            {{ form.banner_image(class="form-input file-input") }}
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="form-group">
+                    <label class="form-label">لون النادي</label>
+                    <div class="color-picker-container">
+                        <input type="color" name="club_color" class="form-input" required="true" value="{{ form.club_color.data }}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form.num_players.label(class="form-label") }}
+                    {{ form.num_players(class="form-input", required=true) }}
+                </div>
+    
+                <div class="form-group">
+                    {{ form.founded_year.label(class="form-label") }}
+                    {{ form.founded_year(class="form-input", required=true) }}
+                </div>
+    
+                <div class="form-group">
+                    {{ form.coach_name.label(class="form-label") }}
+                    {{ form.coach_name(class="form-input", required=true) }}
+                </div>
+                {{ form.submit(class="submit-btn") }}
+            </form>
+        </div>
+
+        <!-- Clubs Grid -->
+        <div class="clubs-container">
+            {% for club in clubs %}
+            <div class="club-card" style="--club-color: {{ club.club_color }}  " data-id="{{ club.club_id }}">
+                <div class="club-banner">
+                    <img src="static/uploads/clubs/bannerclub/{{ club.banner_image_url or '/api/placeholder/350/200' }}" 
+                         alt="{{ club.club_name }} banner">
+                </div>
+    
+                <div class="club-logo">
+                    <img src="static/uploads/clubs/{{ club.club_image_url or '/api/placeholder/120/120' }}" 
+                         alt="{{ club.club_name }} logo">
+                </div>
+    
+                <div class="club-actions">
+                    <button class="action-btn" onclick="editClub('{{ club.club_id }}')">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>                    
+                    <button type="button" class="action-btn" onclick="deleteClub({{ club.club_id }})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+    
+                <div class="club-content">
+                    <h3 class="club-name">{{ club.club_name }}|<span class ="num_players"> {{club.num_players}} لاعب</span></h3>
+                    <div class="club-info">
+                        <div class="info-item">
+                            <div class="info-label">تأسس عام</div>
+                            <div class="info-value">{{ club.founded_year }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">المدرب</div>
+                            <div class="info-value">{{ club.coach_name }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+<!-- Modal HTML -->
+<!-- HTML -->
+<!-- نافذة التعديل المنبثقة -->
+<div class="edit-club-modal" id="editClubModal">
+    <div class="edit-club-modal-content">
+        <span class="edit-club-close">&times;</span>
+        <h2>تعديل بيانات النادي</h2>
+        <form id="editClubForm" enctype="multipart/form-data">
+            <div class="edit-club-form-group">
+                <label class="edit-club-label" for="edit_club_name">اسم النادي</label>
+                <input type="text" id="edit_club_name" name="edit_club_name" class="edit-club-input" required>
+            </div>
+
+            <div class="edit-club-upload-section">
+                <div class="edit-club-form-group">
+                    <label class="edit-club-label" for="edit_club_image">شعار النادي</label>
+                    <div class="edit-club-image-upload" id="editLogoUpload">
+                        <i class="fas fa-image fa-2x"></i>
+                        <p>اختر شعار النادي</p>
+                        <input type="file" id="edit_club_image" name="edit_club_image" class="edit-club-file-input" accept="image/*">
+                        <img id="currentLogo" class="edit-club-preview" src="" alt="">
+                    </div>
+                </div>
+
+                <div class="edit-club-form-group">
+                    <label class="edit-club-label" for="edit_banner_image">بانر النادي</label>
+                    <div class="edit-club-image-upload" id="editBannerUpload">
+                        <i class="fas fa-panorama fa-2x"></i>
+                        <p>اختر صورة البانر</p>
+                        <input type="file" id="edit_banner_image" name="edit_banner_image" class="edit-club-file-input" accept="image/*">
+                        <img id="currentBanner" class="edit-club-preview" src="" alt="">
+                    </div>
+                </div>
+            </div>
+
+            <div class="edit-club-form-group">
+                <label class="edit-club-label" for="edit_club_color">لون النادي</label>
+                <input type="color" id="edit_club_color" name="edit_club_color" class="edit-club-color-input" required>
+            </div>
+
+            <div class="edit-club-form-group">
+                <label class="edit-club-label" for="edit_num_players">عدد اللاعبين</label>
+                <input type="number" id="edit_num_players" name="edit_num_players" class="edit-club-input" required min="1">
+            </div>
+
+            <div class="edit-club-form-group">
+                <label class="edit-club-label" for="edit_founded_year">سنة التأسيس</label>
+                <input type="number" id="edit_founded_year" name="edit_founded_year" class="edit-club-input" required min="1800" max="2024">
+            </div>
+
+            <div class="edit-club-form-group">
+                <label class="edit-club-label" for="edit_coach_name">اسم المدرب</label>
+                <input type="text" id="edit_coach_name" name="edit_coach_name" class="edit-club-input" required>
+            </div>
+
+            <button type="submit" class="edit-club-submit">حفظ التغييرات</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('editClubModal');
+        const closeBtn = document.querySelector('.edit-club-close');
+        const form = document.getElementById('editClubForm');
+
+        window.editClub = async function(clubId) {
+            modal.style.display = 'block';
+            
+            try {
+                const response = await fetch(`/get_club/${clubId}`);
+                if (!response.ok) throw new Error('فشل في جلب بيانات النادي');
+                const data = await response.json();
+                
+                document.querySelector('[name="edit_club_name"]').value = data.club_name || '';
+                document.querySelector('[name="edit_coach_name"]').value = data.coach_name || '';
+                document.querySelector('[name="edit_founded_year"]').value = data.founded_year || '';
+                document.querySelector('[name="edit_num_players"]').value = data.num_players || '';
+                document.querySelector('[name="edit_club_color"]').value = data.club_color || '#000000';
+                
+                const currentLogo = document.getElementById('currentLogo');
+                const currentBanner = document.getElementById('currentBanner');
+                
+                if (data.club_image_url) {
+                    currentLogo.src = `/static/uploads/clubs/${data.club_image_url}`;
+                    currentLogo.style.display = 'block';
+                } else {
+                    currentLogo.style.display = 'none';
+                }
+                
+                if (data.banner_image_url) {
+                    currentBanner.src = `/static/uploads/clubs/bannerclub/${data.banner_image_url}`;
+                    currentBanner.style.display = 'block';
+                } else {
+                    currentBanner.style.display = 'none';
+                }
+                
+                form.dataset.clubId = clubId;
+            } catch (error) {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء جلب بيانات النادي');
+            }
+        };
+
+        document.querySelectorAll('.edit-club-file-input').forEach(input => {
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    const preview = e.target.parentElement.querySelector('.edit-club-preview');
+                    
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                    };
+                    
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('الرجاء اختيار ملف صورة صالح');
+                }
+            };
+        });
+
+        form.onsubmit = async function(e) {
+            e.preventDefault();
+            
+            const numPlayers = document.querySelector('[name="edit_num_players"]').value;
+            if (numPlayers === "" || numPlayers <= 0) {
+                alert("الرجاء إدخال عدد اللاعبين بشكل صحيح.");
+                return;
+            }
+            
+            const clubId = this.dataset.clubId;
+            const formData = new FormData(this);
+            const submitButton = this.querySelector('.edit-club-submit');
+            const originalText = submitButton.textContent;
+            
+            submitButton.textContent = 'جاري الحفظ...';
+            submitButton.disabled = true;
+            
+            try {
+                const response = await fetch(`/edit_club/${clubId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const text = await response.text();
+                const data = JSON.parse(text);
+                
+                alert('تم تحديث بيانات النادي بنجاح');
+                modal.style.display = 'none';
+                location.reload();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء تحديث بيانات النادي');
+            } finally {
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+            }
+        };
+
+        closeBtn.onclick = function() {
+            modal.style.display = 'none';
+        };
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        };
+    });
+</script>
+
+    <script>
+        // Image preview functionality
+        document.querySelectorAll('.file-input').forEach(input => {
+            input.addEventListener('change', function() {
+                const container = this.closest('.image-upload-container');
+                const file = this.files[0];
+                
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        container.style.backgroundImage = `url(${e.target.result})`;
+                        container.style.backgroundSize = 'cover';
+                        container.style.backgroundPosition = 'center';
+                        container.querySelector('i').style.display = 'none';
+                        container.querySelector('p').style.display = 'none';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+
+    
+
+        function deleteClub(clubId) {
+            if (confirm("هل أنت متأكد من حذف هذا النادي؟")) {
+                const clubCard = document.querySelector(`.club-card[data-id="${clubId}"]`);
+                
+                // Get CSRF token from the meta tag
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                
+                // Disable buttons during deletion
+                if (clubCard) {
+                    const buttons = clubCard.querySelectorAll('.action-btn');
+                    buttons.forEach(btn => btn.disabled = true);
+                }
+        
+                // Add animation class
+                clubCard.classList.add('deleting');
+        
+                fetch(`/delete_club/${clubId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken  // Add CSRF token to headers
+                    },
+                    credentials: 'same-origin'  // Required for CSRF
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Wait for animation to complete before removing the element
+                        setTimeout(() => {
+                            clubCard.remove();
+                        }, 500);
+                        
+                        // Show success message
+                        const notification = document.createElement('div');
+                        notification.textContent = "تم الحذف بنجاح!";
+                        notification.style.position = 'fixed';
+                        notification.style.top = '20px';
+                        notification.style.right = '20px';
+                        notification.style.backgroundColor = '#4CAF50';
+                        notification.style.color = 'white';
+                        notification.style.padding = '15px';
+                        notification.style.borderRadius = '5px';
+                        notification.style.zIndex = '1000';
+                        
+                        document.body.appendChild(notification);
+                        
+                        setTimeout(() => {
+                            notification.remove();
+                        }, 3000);
+                    } else {
+                        alert("فشل الحذف. يرجى المحاولة مرة أخرى.");
+                        clubCard.classList.remove('deleting');
+                        const buttons = clubCard.querySelectorAll('.action-btn');
+                        buttons.forEach(btn => btn.disabled = false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("حدث خطأ أثناء الحذف.");
+                    clubCard.classList.remove('deleting');
+                    const buttons = clubCard.querySelectorAll('.action-btn');
+                    buttons.forEach(btn => btn.disabled = false);
+                });
+            }
+        }
+        
+    </script>
+</body>
+</html>

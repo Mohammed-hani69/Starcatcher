@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سوق اللاعبين</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css">
+    <style>
+        :root {
+            --primary-red: #e63946;
+            --dark-gray: #1d1d1d;
+            --lighter-gray: #2a2a2a;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+            --light-text: #f1faee;
+            --accent-gold: #ffd700;
+            --text-light: #ffffff;
+        }
+        
+        body {
+            background-color: var(--dark-gray);
+            color: var(--light-text);
+            font-family: 'Cairo', sans-serif;
+            padding-bottom: 30px;
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            background: linear-gradient(to right, #000000, #440000);
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.2);
+            padding: 15px 0;
+        }
+        
+        .navbar-brand {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-red) !important;
+            text-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
+            transition: all 0.3s ease;
+            padding-left: 20px;
+        }
+        
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+        
+        .nav-link {
+            color: var(--text-light) !important;
+            font-weight: 600;
+            margin: 0 10px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary-red);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .coins-display {
+            background-color: rgba(255, 193, 7, 0.2);
+            border-radius: 20px;
+            padding: 5px 15px ;
+            margin-left: 15px;
+            color: var(--accent-gold);
+            font-weight: 700;
+        }
+
+        /* World Cup Badge */
+        .world-cup-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--primary-red);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+        
+        .site-header {
+            background: linear-gradient(135deg, var(--primary-red), var(--dark-gray));
+            padding: 20px 0;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--gold);
+            position: relative;
+            overflow: hidden;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .site-header::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('/api/placeholder/1200/300') center/cover;
+            opacity: 0.1;
+            z-index: 0;
+        }
+        
+        .site-header h2 {
+            position: relative;
+            z-index: 1;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            color: white;
+            font-size: 2rem;
+            display: inline-block;
+            padding: 5px 15px;
+            background-color: rgba(0,0,0,0.3);
+            border-radius: 10px;
+        }
+        
+        .filter-bar {
+            background-color: var(--lighter-gray);
+            border-radius: 15px;
+            padding: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .filter-bar .form-control {
+            border-radius: 20px;
+            background-color: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--light-text);
+        }
+        
+        .filter-bar .form-control:focus {
+            background-color: rgba(255,255,255,0.15);
+            box-shadow: 0 0 0 0.2rem rgba(230, 57, 70, 0.25);
+        }
+        
+        .search-input {
+            border-radius: 20px;
+            padding-right: 35px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 25px;
+            top: 10px;
+            color: var(--primary-red);
+        }
+        
+        .cards-container {
+            perspective: 1000px;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            background-color: var(--lighter-gray);
+            color: var(--light-text);
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px) rotateY(5deg);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+        }
+        
+        .card-img-wrapper {
+            height: 250px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-img-top {
+            height: 100%;
+            width: 100%;
+            object-fit: fill;
+            transition: transform 0.5s;
+        }
+        
+        .card:hover .card-img-top {
+            transform: scale(1.05);
+        }
+        
+        .player-stats-container {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .card-body {
+            padding: 12px;
+        }
+        
+        .card-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+            border-bottom: 2px solid var(--primary-red);
+            padding-bottom: 5px;
+            color: white;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .player-rarity {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.75rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .player-rarity-gold {
+            background-color: var(--gold);
+            color: #000;
+        }
+        
+        .player-rarity-silver {
+            background-color: var(--silver);
+            color: #000;
+        }
+        
+        .player-rarity-bronze {
+            background-color: var(--bronze);
+            color: #000;
+        }
+        
+        .player-stat {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2px;
+        }
+        
+        .player-stat:last-child {
+            border-bottom: none;
+        }
+        
+        .player-stat-label {
+            font-weight: 500;
+        }
+        
+        .player-stat-value {
+            background-color: rgba(255,255,255,0.1);
+            padding: 0 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+        
+        .price-tag {
+            display: inline-block;
+            background-color: var(--primary-red);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin: 5px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .timer {
+            color: #ffcc00;
+            font-weight: bold;
+            font-size: 0.8rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .club-info {
+            display: flex;
+            align-items: center;
+            background-color: rgba(0,0,0,0.2);
+            padding: 5px;
+            border-radius: 8px;
+            margin-top: 5px;
+            font-size: 0.85rem;
+        }
+        
+        .club-logo {
+            width: 25px;
+            height: 25px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 1px solid var(--gold);
+            margin-left: 5px;
+        }
+        
+        .buy-button {
+            background: linear-gradient(135deg, var(--primary-red), #c81d25);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 12px;
+            width: 100%;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        
+        .buy-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 8px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #c81d25, var(--primary-red));
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: var(--lighter-gray);
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            color: var(--primary-red);
+            margin-bottom: 15px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .pagination {
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .page-link {
+            background-color: var(--lighter-gray);
+            color: var(--light-text);
+            border-color: var(--primary-red);
+            border-radius: 50%;
+            margin: 0 3px;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .page-link:hover, .page-item.active .page-link {
+            background-color: var(--primary-red);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .rating-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 30px;
+            height: 30px;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border: 2px solid var(--primary-red);
+        }
+
+        .section-title {
+            position: relative;
+            margin-bottom: 20px;
+            padding-right: 15px;
+            display: inline-block;
+        }
+        
+        .section-title:before {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 25px;
+            background-color: var(--primary-red);
+            border-radius: 4px;
+        }
+        
+        .grid-switcher {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .grid-btn {
+            background-color: var(--lighter-gray);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--light-text);
+            border-radius: 5px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .grid-btn.active, .grid-btn:hover {
+            background-color: var(--primary-red);
+            color: white;
+        }
+
+        .shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: shimmer 1.5s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        @media (max-width: 768px) {
+            .card-img-wrapper {
+                height: 140px;
+            }
+            
+            .card {
+                margin-bottom: 10px;
+                font-size: 0.85rem;
+                max-width: 95%;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .card-body {
+                padding: 8px;
+            }
+
+            .card-title {
+                font-size: 0.85rem;
+                margin-bottom: 6px;
+            }
+
+            .player-stats-container {
+                padding: 4px;
+                margin-bottom: 6px;
+            }
+
+            .player-stat {
+                font-size: 0.75rem;
+                margin-bottom: 2px;
+            }
+
+            .price-tag {
+                font-size: 0.75rem;
+                padding: 2px 6px;
+            }
+
+            .timer {
+                font-size: 0.7rem;
+            }
+
+            .buy-button {
+                padding: 4px 8px;
+                font-size: 0.8rem;
+                margin-top: 4px;
+            }
+
+            .col-md-6 {
+                padding-right: 4px;
+                padding-left: 4px;
+            }
+
+            .club-info {
+                padding: 3px;
+                font-size: 0.75rem;
+            }
+
+            .club-logo {
+                width: 20px;
+                height: 20px;
+            }
+
+            .rating-badge {
+                width: 25px;
+                height: 25px;
+                font-size: 0.8rem;
+            }
+
+            .d-flex.justify-content-between {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            .price-tag {
+                font-size: 0.7rem;
+                padding: 2px 6px;
+                margin: 2px 0;
+                display: flex;
+                align-items: center;
+                gap: 3px;
+            }
+
+            .price-tag .fa-coins {
+                font-size: 0.65rem;
+            }
+
+            .timer {
+                font-size: 0.65rem;
+                margin-bottom: 2px;
+                display: flex;
+                align-items: center;
+                gap: 3px;
+            }
+
+            .timer .fa-clock {
+                font-size: 0.65rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .card-img-wrapper {
+                height: 120px;
+            }
+            
+            .card {
+                max-width: 100%;
+            }
+
+            .cards-container {
+                margin: 0 -5px;
+            }
+
+            .col-xl-3, .col-lg-4, .col-md-6 {
+                padding: 0 5px;
+            }
+
+            .price-tag {
+                font-size: 0.65rem;
+                padding: 1px 5px;
+            }
+
+            .timer {
+                font-size: 0.6rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .card-img-wrapper {
+                height: 120px;
+            }
+            
+            .site-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .grid-switcher {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                margin-bottom: 15px;
+                font-size: 0.85rem;
+                width: 160px; /* عرض ثابت للكارت */
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .card-img-wrapper {
+                height: 180px; /* ارتفاع أكبر للصورة */
+            }
+
+            .card-body {
+                padding: 8px 6px;
+            }
+
+            .col-md-6 {
+                width: 50%; /* جعل عرض العمود نصف الشاشة */
+                display: flex;
+                justify-content: center;
+            }
+
+            /* تحسين حجم العناصر الداخلية */
+            .player-stats-container {
+                padding: 6px 4px;
+                margin-bottom: 8px;
+            }
+
+            .rating-badge {
+                width: 28px;
+                height: 28px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .card {
+                width: 150px; /* عرض أصغر للشاشات الصغيرة جداً */
+            }
+
+            .card-img-wrapper {
+                height: 160px;
+            }
+
+            .col-md-6 {
+                padding: 0 5px;
+            }
+        }
+
+        /* Toastify Custom Styles */
+        .toast-success {
+            background: linear-gradient(135deg, #28a745, #20c997) !important;
+            border-radius: 10px !important;
+            font-family: 'Tajawal', sans-serif !important;
+        }
+        
+        .toast-error {
+            background: linear-gradient(135deg, #dc3545, #c81d25) !important;
+            border-radius: 10px !important;
+            font-family: 'Tajawal', sans-serif !important;
+        }
+
+        .toast-container {
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast-icon {
+            font-size: 1.2rem;
+        }
+
+        .toast-message {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        /* Responsive Navbar Styling */
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                background: linear-gradient(to bottom, var(--black), var(--dark-gray));
+                padding: 1rem;
+                border-radius: 10px;
+                margin-top: 1rem;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            .navbar-nav {
+                text-align: center;
+            }
+
+            .nav-link {
+                padding: 0.8rem 1rem;
+                margin: 5px 0;
+                border-radius: 5px;
+            }
+
+            .nav-link:hover {
+                background-color: rgba(229, 9, 20, 0.1);
+            }
+
+            .coins-display {
+                margin: 10px auto;
+                display: inline-block;
+            }
+
+            .navbar-toggler {
+                border: none;
+                background: transparent;
+                padding: 0.5rem;
+            }
+
+            .navbar-toggler:focus {
+                box-shadow: none;
+            }
+
+            .navbar-toggler-icon {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(229, 9, 20, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+            }
+        }
+
+        /* World Cup Badge Responsive */
+        @media (max-width: 768px) {
+            .world-cup-badge {
+                display: none;
+            }
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('home') }}">Star Catcher</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <span class="coins-display">
+                            <i class="fas fa-coins me-2"></i>
+                            {{ user.coins }} عملة
+                        </span>
+                        <a class="nav-link" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user me-2"></i>
+                            الملف الشخصي
+                        </a>
+                        <a class="nav-link" href="{{ url_for('myplayers') }}">
+                            <i class="fas fa-users me-2"></i>
+                            لاعبيني
+                        </a>
+                        <a class="nav-link" href="{{ url_for('catalog') }}">
+                            <i class="fas fa-book me-2"></i>
+                            الكتالوج
+                        </a>
+                        <a class="nav-link" href="{{ url_for('market') }}">
+                            <i class="fas fa-store me-2"></i>
+                            السوق
+                        </a>
+                        <a class="nav-link text-danger" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            تسجيل خروج
+                        </a>
+                    {% else %}
+                        <a class="nav-link" href="{{ url_for('login') }}">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            تسجيل الدخول
+                        </a>
+                        <a class="nav-link" href="{{ url_for('register') }}">
+                            <i class="fas fa-user-plus me-2"></i>
+                            التسجيل
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- World Cup Badge -->
+    <div class="world-cup-badge">
+        <i class="fas fa-trophy me-1"></i> كأس العالم 2026
+    </div>
+
+     
+    <!-- Header Section -->
+    <header class="site-header">
+        <div class="container">
+            <h2 class="mb-0"><i class="fas fa-store-alt ml-2 shimmer"></i> سوق اللاعبين</h2>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="row align-items-center">
+                <div class="col-lg-3 col-md-6 mb-2">
+                    <div class="input-group">
+                        <select class="form-control">
+                            <option>جميع المراكز</option>
+                            <option>حارس مرمى</option>
+                            <option>مدافع</option>
+                            <option>وسط</option>
+                            <option>مهاجم</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-2">
+                    <div class="input-group">
+                        <select class="form-control">
+                            <option>جميع الندرة</option>
+                            <option>ذهبي</option>
+                            <option>فضي</option>
+                            <option>برونزي</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-2">
+                    <div class="input-group">
+                        <select class="form-control">
+                            <option>الأحدث</option>
+                            <option>الأقدم</option>
+                            <option>السعر: من الأعلى للأقل</option>
+                            <option>السعر: من الأقل للأعلى</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-2">
+                    <div class="input-group position-relative">
+                        <input type="text" class="form-control search-input" placeholder="ابحث عن لاعب...">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Grid Switcher -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="section-title mb-0">اللاعبين المتوفرين</h5>
+            <div class="grid-switcher">
+                <button class="grid-btn active" title="عرض كبير">
+                    <i class="fas fa-th-large"></i>
+                </button>
+                <button class="grid-btn" title="عرض متوسط">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button class="grid-btn" title="عرض قائمة">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Players Market -->
+        <div class="row cards-container">
+            {% for item in listings %}
+            <div class="col-xl-3 col-lg-4 col-md-6 mb-3">
+                <div class="card h-100" data-listing-id="{{ item.listing_id }}">
+                    <div class="card-img-wrapper">
+                        {% if item.player.image_url %}
+                        <img src="{{ url_for('static', filename='uploads/image_player/' ~ item.player.image_url) }}" class="card-img-top" alt="{{ item.player.name }}">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='img/placeholder.png') }}" class="card-img-top" alt="No Image">
+                        {% endif %}
+                        
+                        
+                        
+                        <!-- Rating Badge -->
+                        <div class="rating-badge">{{ item.player.rating }}</div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <h5 class="card-title">{{ item.player.name }}</h5>
+                        
+                        <div class="player-stats-container">
+                            <div class="player-stat">
+                                <span class="player-stat-label">المركز</span>
+                                <span class="player-stat-value">{{ item.player.position }}</span>
+                            </div>
+                            
+                            <div class="player-stat">
+                                <span class="player-stat-label">الجنسية</span>
+                                <span class="player-stat-value">{{ item.player.nationality }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="price-tag">
+                                <i class="fas fa-coins ml-1"></i> {{ item.price }}
+                            </div>
+                            <span class="timer">
+                                <i class="far fa-clock ml-1"></i> {{ item.expires_at }}
+                            </span>
+                        </div>
+                        
+                        <div class="club-info">
+                            {% if item.club.club_image_url %}
+                            <img src="{{ url_for('static', filename='uploads/clubs/' ~ item.club.club_image_url) }}" alt="Club Logo" class="club-logo">
+                            {% endif %}
+                            <span>{{ item.club.club_name }}</span>
+                        </div>
+                        
+                        <button class="buy-button" onclick="buyPlayer({{ item.listing_id }}, {{ item.price }})">
+                            <i class="fas fa-shopping-cart ml-1"></i> شراء
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12">
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-store-slash"></i>
+                    </div>
+                    <h4>لا توجد عروض حالياً</h4>
+                    <p>يبدو أن سوق اللاعبين فارغ الآن. تحقق مرة أخرى لاحقاً.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.js"></script>
+    <script>
+        function showNotification(message, type = 'success') {
+            const icon = type === 'success' ? '✓' : '✕';
+            Toastify({
+                text: `
+                    <div class="toast-container">
+                        <span class="toast-icon">${icon}</span>
+                        <span class="toast-message">${message}</span>
+                    </div>
+                `,
+                duration: 3000,
+                gravity: "top",
+                position: "center",
+                className: `toast-${type}`,
+                escapeMarkup: false,
+                stopOnFocus: true
+            }).showToast();
+        }
+
+        function buyPlayer(listingId, price) {
+            if (!confirm(`هل أنت متأكد من شراء هذا اللاعب مقابل ${price} عملة؟`)) {
+                return;
+            }
+
+            fetch('/buy_market_player', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    listing_id: listingId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showNotification(`${data.message}`, 'success');
+                    
+                    const playerCard = document.querySelector(`[data-listing-id="${listingId}"]`);
+                    if (playerCard) {
+                        playerCard.parentElement.style.animation = 'fadeOut 0.5s ease';
+                        setTimeout(() => playerCard.parentElement.remove(), 500);
+                    }
+                    
+                    const coinsDisplay = document.querySelector('.user-coins');
+                    if (coinsDisplay && data.data.remaining_coins !== undefined) {
+                        coinsDisplay.textContent = data.data.remaining_coins;
+                    }
+                } else {
+                    showNotification(data.message || 'حدث خطأ أثناء عملية الشراء', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('حدث خطأ أثناء الاتصال بالخادم', 'error');
+            });
+        }
+    </script>
+</body>
+</html>

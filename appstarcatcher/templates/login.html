@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>تسجيل الدخول - لعبة كرة القدم</title>
+    <link rel="stylesheet" href="static/css/login.css">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="bg-elements">
+        <div class="hexagon-grid"></div>
+        <div class="bg-line"></div>
+    </div>
+
+    <!-- Login Container -->
+    <div class="login-container">
+        <!-- Corner Accents -->
+        <div class="corner top-left"></div>
+        <div class="corner top-right"></div>
+        <div class="corner bottom-left"></div>
+        <div class="corner bottom-right"></div>
+
+        <!-- Edge Lights -->
+        <div class="edge-light top"></div>
+        <div class="edge-light bottom"></div>
+
+        <div class="login-header">
+            <h1>تسجيل الدخول</h1>
+        </div>
+
+        <form method="POST" action="{{ url_for('login') }}">
+            {{ form.hidden_tag() }}  <!-- CSRF Token -->
+
+            <div class="form-group">
+                <i class="fas fa-envelope"></i>
+                {{ form.email(class="form-input", placeholder="البريد الإلكتروني") }}
+                {% if form.email.errors %}
+                    <div class="error">
+                        {% for error in form.email.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <i class="fas fa-lock"></i>
+                {{ form.password(class="form-input", placeholder="كلمة المرور") }}
+                {% if form.password.errors %}
+                    <div class="error">
+                        {% for error in form.password.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.remember(class="remember-me") }}
+                {{ form.remember.label }}
+            </div>
+
+            <button type="submit" class="submit-btn">دخول</button>
+
+            <div class="extra-options">
+                <a href="#" class="forgot-password">نسيت كلمة المرور؟</a>
+            </div>
+        </form>
+    </div>
+    <!-- إظهار رسائل Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+</body>
+</html>

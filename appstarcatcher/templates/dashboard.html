@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="static/css/dashboard.css">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- إضافة مكتبة Chart.js للرسوم البيانية -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css">
+        <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"></script>
+        <meta name="csrf-token" content="{{ csrf_token }}">
+    </head>
+    <body>
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="/api/placeholder/45/45" alt="Logo">
+                <span>لوحة التحكم</span>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">القائمة الرئيسية</div>
+                <nav>
+                    <a href="/dashboard" class="nav-item active">
+                        <i>🏠</i>
+                        <span>الرئيسية</span>
+                    </a>
+                    <a href="/add_player" class="nav-item ">
+                        <i>👥</i>
+                        <span>اللاعبين</span>
+                    </a>
+                    <a href="/add_club" class="nav-item">
+                        <i>⚽</i>
+                        <span>الأنديه</span>
+                    </a>
+                    <a href="/add_subscription" class="nav-item">
+                        <i>🏆</i>
+                        <span>الباقات</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">الإدارة</div>
+                <nav>
+                    <a href="#" class="nav-item">
+                        <i>📊</i>
+                        <span>الإحصائيات</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i>⚙️</i>
+                        <span>الإعدادات</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i>📝</i>
+                        <span>التقارير</span>
+                    </a>
+                </nav>
+            </div>
+            <!-- إضافة زر تسجيل الخروج أسفل الشريط الجانبي -->
+        <div class="logout-section">
+            <a href="/logout" class="nav-item logout-btn">
+                <i>🚪</i>
+                <span>تسجيل الخروج</span>
+            </a>
+        </div>
+        </aside>
+
+        <!-- Header -->
+        <header class="header">
+            <h2 class="header-title">Catcher<span style="color:red">Star</span></h2>
+            
+            <div class="header-actions">
+                <div class="search-box">
+                    <input type="text" placeholder="بحث...">
+                    <i>🔍</i>
+                </div>
+                
+                <div class="header-links">
+                    <div class="header-icon">
+                        <i>🔔</i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="header-icon">
+                        <i>✉️</i>
+                        <span class="notification-badge">5</span>
+                    </div>
+                </div>
+
+                <div class="user-info">
+                    <div class="user-details">
+                        <div class="user-name">{{username}}</div>
+                        <div class="user-role">مدير النظام</div>
+                    </div>
+                    <div class="user-avatar">{{username[:1]}}</div>
+                </div>
+            </div>
+        </header>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">إجمالي اللاعبين</div>
+                    <div class="stat-value">{{count_player}}</div>
+                    <div class="stat-change">+12% هذا الشهر</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">عمليات البيع</div>
+                    <div class="stat-value">845</div>
+                    <div class="stat-change">+8% هذا الأسبوع</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">البطاقات النادرة</div>
+                    <div class="stat-value">156</div>
+                    <div class="stat-change">+5% هذا الشهر</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">المستخدمين النشطين</div>
+                    <div class="stat-value">2,567</div>
+                    <div class="stat-change">+15% هذا الشهر</div>
+                </div>
+            </div>
+        
+            <!-- Main Content Grid -->
+            <div class="content-grid">
+                <!-- Market Section -->
+                <div class="market-section">
+                    <div class="section-header">
+                        <h3>سوق اللاعبين</h3>
+                        <button class="action-button add_player">إضافة لاعب للسوق</button>
+                    </div>
+        
+                    <!-- Player Cards -->
+                    <div class="players-container">
+                        {% for listings in listings %}
+                        <div class="player-card {{ listings.rarity.lower() }}">
+                            <div class="card-sheen"></div>
+                            
+                            <!-- Image Section (Right Side) -->
+                            <div class="player-image-container">
+                                {% if listings.player_image_url %}
+                                    <img src="static/uploads/image_player/{{ listings.player_image_url }}" alt="{{ listings.player_name }}" class="player-image">
+                                {% else %}
+                                    <div class="player-avatar">{{ listings.player_name[:1] }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Content Section (Left Side) -->
+                            <div class="content-container">
+                                <!-- Rating Circle -->
+                                <div class="rating-circle">
+                                    <span class="rating-number">{{ listings.player_rating }}</span>
+                                    <span class="position">{{ listings.player_position }}</span>
+                                </div>
+                                
+                                <!-- Player Details -->
+                                <div class="player-details">
+                                    <div class="player-name">{{ listings.player_name }}</div>
+                                    <div class="player-meta">
+                                        <span class="status">{{ listings.status }}</span>
+                                    </div>
+                                    <div class="player-price">{{ listings.price }} coins</div>
+                                    <div class="created-date">{{ listings.expires_at }}</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Delete Button -->
+                            <button class="delete-btn" data-id="{{ listings.id }}">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                            
+                            <!-- Rarity Badge -->
+                            <div class="rarity-indicator">
+                                {% if listings.rarity.lower() == 'common' %}
+                                    عادي
+                                {% elif listings.rarity.lower() == 'rare' %}
+                                    نادر
+                                {% elif listings.rarity.lower() == 'epic' %}
+                                    أسطوري
+                                {% elif listings.rarity.lower() == 'legendary' %}
+                                    خارق
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                
+                </div>
+        
+                <!-- Packages Section -->
+                <div class="market-section">
+                    <div class="section-header">
+                        <h3>البطاقات العشوائية</h3>
+                        <button class="action-button add_pack">إنشاء باكج جديد</button>
+                    </div>
+                
+                    {% for pack in packs %}
+                        <div class="player-card">
+                            <div class="player-avatar">
+                                <img src="{{ pack.image_url }}" alt="{{ pack.name }}" style="width: 50px; height: 50px;">
+                            </div>
+                            <div class="player-info">
+                                <div class="player-name">{{ pack.name }}</div>
+                                <div class="player-stats">{{ pack.player_count }} لاعبين | ضمان لاعب نادر</div>
+                            </div>
+                            <div class="player-price">${{ pack.price }}</div>
+                            <button class="action-button delete_pack" data-pack-id="{{ pack.id }}">حذف الباكج</button> <!-- زر الحذف -->
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                
+            </div>
+        
+
+
+        <!-- إضافة باكج جديده -->
+
+        <div class="modal-overlay" id="packModalOverlay"></div>
+        <div class="slide-modal" id="packModal">
+            <div class="modal-header">
+                <h3 class="modal-title">إضافة باكج جديد</h3>
+                <button class="close-modal" id="closePackModal">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <form id="newPackForm">
+                    <div class="form-group">
+                        <label class="form-label">اسم الباكج</label>
+                        <input type="text" class="form-input" name="name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">الوصف</label>
+                        <textarea class="form-input" name="description" rows="4" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">السعر</label>
+                        <input type="number" class="form-input" name="price" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">عدد اللاعبين</label>
+                        <input type="number" class="form-input" name="player_count" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">نسب النادرية</label>
+                        <div class="rarity-grid">
+                            <div class="rarity-input">
+                                <label>عادي</label>
+                                <input type="number" class="form-input" name="rarity_common" value="70">
+                            </div>
+                            <div class="rarity-input">
+                                <label>نادر</label>
+                                <input type="number" class="form-input" name="rarity_rare" value="20">
+                            </div>
+                            <div class="rarity-input">
+                                <label>أسطوري</label>
+                                <input type="number" class="form-input" name="rarity_epic" value="8">
+                            </div>
+                            <div class="rarity-input">
+                                <label>خارق</label>
+                                <input type="number" class="form-input" name="rarity_legendary" value="2">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group image-upload" onclick="document.getElementById('imageInput').click()">
+                        <input type="file" id="imageInput" accept="image/*" style="display: none">
+                        <svg class="upload-icon" viewBox="0 0 24 24">
+                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                        </svg>
+                        <div class="upload-text">اضغط لإضافة صورة الباكج</div>
+                        <div class="upload-subtext">PNG, JPG حتى 5 ميجابايت</div>
+                    </div>
+                    
+                    <div class="preview-container" style="display: none;">
+                        <img class="preview-image" src="" alt="معاينة الصورة">
+                        <button type="button" class="remove-image">×</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" name="is_active" checked>
+                            تفعيل الباكج
+                        </label>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="action-button" id="cancelPackBtn">إلغاء</button>
+                <button class="action-button" id="savePackBtn" style="background: linear-gradient(45deg, #00ff00, #44ff44);">حفظ</button>
+            </div>
+        </div>
+
+        <!-- إضافة لاعب للسوق -->
+
+        <div class="modal-overlay" id="listingModalOverlay"></div>
+        <div class="slide-modal" id="listingModal">
+            <div class="modal-header">
+                <h3 class="modal-title">إضافة لاعب للسوق</h3>
+                <button type="button" class="close-modal" id="closeListingModal" aria-label="إغلاق">×</button>
+            </div>
+            
+            <div class="modal-body">
+                
+                <form method="POST" id="newListingForm">
+                    {{ formmarket.hidden_tag() }}
+                    
+                    <!-- CSRF Token -->
+                    <meta name="csrf-token" content="{{ csrf_token }}">
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="playerSelect">{{ formmarket.player_id.label }}</label>
+                        {{ formmarket.player_id(class="form-input", id="playerSelect", required=True) }}
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="price">{{ formmarket.price.label }}</label>
+                        {{ formmarket.price(class="form-input", type="number", min="1", required=True) }}
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="expires_at">{{ formmarket.expires_at.label }}</label>
+                        {{ formmarket.expires_at(class="form-input", type="datetime-local", required=True) }}
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="status">{{ formmarket.status.label }}</label>
+                        {{ formmarket.status(class="form-input", required=True) }}
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="action-button" id="cancelListingBtn">إلغاء</button>
+                        <button type="submit" class="action-button primary-button" id="saveListingBtn">
+                            حفظ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+
+                <!-- قسم الرسوم البيانية -->
+                <div class="chart-section">
+                    <h3>تحليل البيانات والرسوم البيانية</h3>
+                    <div class="chart-container">
+                        <canvas id="playerStatsChart"></canvas>
+                    </div>
+                </div>
+            </main>
+            
+            <script>
+                // إعداد الرسم البياني باستخدام مكتبة Chart.js
+                const ctx = document.getElementById('playerStatsChart').getContext('2d');
+                const playerStatsChart = new Chart(ctx, {
+                    type: 'bar', // نوع الرسم البياني
+                    data: {
+                        labels: ['اللاعبين', 'عمليات البيع', 'البطاقات النادرة', 'المستخدمين النشطين'], // تسميات البيانات
+                        datasets: [{
+                            label: 'الإحصائيات',
+                            data: [1234, 845, 156, 2567], // القيم التي سيتم عرضها في الرسم البياني
+                            backgroundColor: 'rgba(255,0,0,0.3)',
+                            borderColor: 'rgba(255,0,0,1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+            
+            </script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    document.querySelectorAll('.delete-btn').forEach(button => {
+                        button.addEventListener('click', async function(e) {
+                            e.preventDefault();  // منع الفعل الافتراضي للزر
+                            
+                            const playerId = this.getAttribute('data-id');
+                            
+                            if (!playerId) {
+                                showNotification("خطأ: معرف اللاعب غير موجود", "error");
+                                return;
+                            }
+                            
+                            if (confirm('هل أنت متأكد من حذف هذا اللاعب؟')) {
+                                try {
+                                    const playerCard = this.closest('.player-card');
+                                    if (!playerCard) {
+                                        showNotification("خطأ: لم يتم العثور على بطاقة اللاعب", "error");
+                                        return;
+                                    }
+                                    
+                                    // الحصول على CSRF token من علامة meta
+                                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                                    
+                                    playerCard.classList.add('deleting');
+                                    this.disabled = true;
+                                    
+                                    const response = await fetch(`/delete-player-market/${playerId}`, {
+                                        method: 'DELETE',
+                                        headers: {
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/json',
+                                            'X-CSRFToken': csrfToken  // إضافة CSRF token للطلب
+                                        }
+                                    });
+                                    
+                                    console.log("Response status:", response.status);
+                                    const responseText = await response.text();
+                                    console.log("Response text:", responseText);
+                                    
+                                    let data;
+                                    try {
+                                        data = JSON.parse(responseText);
+                                    } catch (e) {
+                                        throw new Error('استجابة غير صالحة من الخادم: ' + responseText);
+                                    }
+                                    
+                                    if (response.ok) {
+                                        setTimeout(() => {
+                                            playerCard.remove();
+                                            showNotification("تم الحذف بنجاح!", "success");
+                                        }, 500);
+                                    } else {
+                                        playerCard.classList.remove('deleting');
+                                        this.disabled = false;
+                                        showNotification(data.message || "فشل الحذف", "error");
+                                    }
+                                } catch (error) {
+                                    console.error('Error:', error);
+                                    this.disabled = false;
+                                    showNotification("حدث خطأ أثناء الحذف: " + error.message, "error");
+                                }
+                            }
+                        });
+                    });
+                });
+                
+                // دالة لعرض الإشعارات للمستخدم
+                function showNotification(message, type) {
+                    const notification = document.createElement('div');
+                    notification.textContent = message;
+                    notification.className = `notification ${type}`;
+                    notification.style.position = 'fixed';
+                    notification.style.top = '20px';
+                    notification.style.right = '20px';
+                    notification.style.padding = '15px';
+                    notification.style.borderRadius = '5px';
+                    notification.style.zIndex = '1000';
+                    notification.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
+                    notification.style.color = 'white';
+                    
+                    // إضافة الإشعار إلى الصفحة
+                    document.body.appendChild(notification);
+                    
+                    // إزالة الإشعار بعد 3 ثوانٍ
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 3000);
+                }
+            </script>
+            
+
+            <script src="static/js/dashboard.js"></script>
+    </body>
+</html>

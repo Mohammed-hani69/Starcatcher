@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة التحكم - إضافة لاعب</title>
+    <link rel="stylesheet" href="static/css/add_player.css">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
+    <!-- استيراد مكتبة Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="/api/placeholder/45/45" alt="Logo">
+            <span>لوحة التحكم</span>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-title">القائمة الرئيسية</div>
+            <nav>
+                <a href="/dashboard" class="nav-item">
+                    <i>🏠</i>
+                    <span>الرئيسية</span>
+                </a>
+                <a href="#" class="nav-item active">
+                    <i>👥</i>
+                    <span>اللاعبين</span>
+                </a>
+                <a href="/add_club" class="nav-item">
+                    <i>⚽</i>
+                    <span>الأنديه</span>
+                </a>
+                <a href="/add_subscription" class="nav-item">
+                    <i>🏆</i>
+                    <span>الباقات</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">الإدارة</div>
+            <nav>
+                <a href="#" class="nav-item">
+                    <i>📊</i>
+                    <span>الإحصائيات</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i>⚙️</i>
+                    <span>الإعدادات</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i>📝</i>
+                    <span>التقارير</span>
+                </a>
+            </nav>
+        </div>
+        <!-- إضافة زر تسجيل الخروج أسفل الشريط الجانبي -->
+        <div class="logout-section">
+            <a href="/logout" class="nav-item logout-btn">
+                <i>🚪</i>
+                <span>تسجيل الخروج</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <h2 class="header-title">Catcher<span style="color:red">Star</span></h2>
+        
+        <div class="header-actions">
+            <div class="search-box">
+                <input type="text" placeholder="بحث...">
+                <i>🔍</i>
+            </div>
+            
+            <div class="header-links">
+                <div class="header-icon">
+                    <i>🔔</i>
+                    <span class="notification-badge">3</span>
+                </div>
+                <div class="header-icon">
+                    <i>✉️</i>
+                    <span class="notification-badge">5</span>
+                </div>
+            </div>
+
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name">{{username}}</div>
+                    <div class="user-role">مدير النظام</div>
+                </div>
+                <div class="user-avatar">{{username[:1]}}</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="form-container">
+            <h2 class="form-title">معلومات اللاعب</h2>
+            <form action="{{ url_for('add_player') }}" method="POST" enctype="multipart/form-data">
+                {{ form.csrf_token }}
+                
+                <div class="form-group">
+                    {{ form.name.label(class="form-label") }}
+                    {{ form.name(class="form-input", required=true) }}
+                    {% if form.name.errors %}
+                        {% for error in form.name.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+    
+                <div class="form-group">
+                    {{ form.rating.label(class="form-label") }}
+                    {{ form.rating(class="form-input", min="1", max="99", required=true) }}
+                    {% if form.rating.errors %}
+                        {% for error in form.rating.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+    
+                <div class="form-group">
+                    {{ form.position.label(class="form-label") }}
+                    {{ form.position(class="form-input", required=true) }}
+                    {% if form.position.errors %}
+                        {% for error in form.position.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+    
+                <div class="form-group">
+                    <label>صورة اللاعب</label>
+                    <div class="image-upload" id="imageUpload">
+                        <label class="image-upload-label" for="playerImage">
+                            <div class="image-upload-icon">+</div>
+                            <span>اضغط لإضافة صورة أو اسحب الصورة هنا</span>
+                            {{ form.image_url(id="playerImage", accept="image/*", style="display: none") }}
+                        </label>
+                        <img id="imagePreview" class="image-preview" alt="معاينة الصورة">
+                    </div>
+                    {% if form.image_url.errors %}
+                        {% for error in form.image_url.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+    
+                <div class="form-group">
+                    <label>النُدرة</label>
+                    <div class="rarity-options">
+                        <div class="rarity-option" data-value="common">عادي</div>
+                        <div class="rarity-option" data-value="rare">نادر</div>
+                        <div class="rarity-option" data-value="epic">أسطوري</div>
+                        <div class="rarity-option" data-value="legendary">خرافي</div>
+                    </div>
+                    {{ form.rarity(type="hidden", id="rarity") }}
+                    {% if form.rarity.errors %}
+                        {% for error in form.rarity.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+    
+                <div class="form-group">
+                    {{ form.nationality.label(class="form-label") }}
+                    {{ form.nationality(class="form-input", required=true) }}
+                    {% if form.nationality.errors %}
+                        {% for error in form.nationality.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+    
+                <div class="form-group">
+                    {{ form.club.label(class="form-label") }}
+                    {{ form.club(class="form-input", required=true) }}
+                    {% if form.club.errors %}
+                        {% for error in form.club.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+    
+                {{ form.submit(class="submit-btn") }}
+            </form>
+        </div>
+
+
+        <!-- HTML Structure -->
+        <div class="market-section">
+            <div class="section-header">
+                <h3>سوق اللاعبين</h3>
+            </div>
+            
+            <div class="players-container">
+                {% for player in players %}
+                <div class="player-card {{ player.rarity.lower() }}" data-player-id="{{ player.id }}">
+                    <div class="card-sheen"></div>
+                    
+                    <!-- Delete Button -->
+                    <button class="delete-btn" onclick="deletePlayer('{{ player.id }}')">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+
+                    <!-- Rarity Badge -->
+                    <div class="rarity-indicator">
+                        {% if player.rarity.lower() == 'common' %}
+                            عادي
+                        {% elif player.rarity.lower() == 'rare' %}
+                            نادر
+                        {% elif player.rarity.lower() == 'epic' %}
+                            أسطوري
+                        {% elif player.rarity.lower() == 'legendary' %}
+                            خارق
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Rating Circle -->
+                    <div class="rating-circle">
+                        <span class="rating-number">{{ player.rating }}</span>
+                        <span class="position">{{ player.position }}</span>
+                    </div>
+
+                    <!-- Player Image Section -->
+                    <div class="player-image-container">
+                        {% if player.image_url %}
+                            <img src="static/uploads/image_player/{{ player.image_url }}" alt="{{ player.name }}" class="player-image">
+                        {% else %}
+                            <div class="player-avatar">{{ player.name[0] }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Player Details -->
+                    <div class="player-details">
+                        <div class="player-name">{{ player.name }}</div>
+                        <div class="player-meta">
+                            <img src="https://flagcdn.com/w40/{{ player.nationality[:2].lower() }}.png" 
+                                alt="{{ player.nationality }}" 
+                                class="flag-icon">
+                            <span class="club">{{ player.club }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Created Date -->
+                    <div class="created-date">{{ player.created_at.strftime('%Y-%m-%d') }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Image Upload Preview
+            const imageInput = document.getElementById('playerImage');
+            const imagePreview = document.getElementById('imagePreview');
+            const imageUpload = document.getElementById('imageUpload');
+        
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        
+            // Drag and Drop
+            imageUpload.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                imageUpload.style.borderColor = '#ff0000';
+                imageUpload.style.background = 'rgba(255,0,0,0.1)';
+            });
+        
+            imageUpload.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                imageUpload.style.borderColor = 'rgba(255,0,0,0.3)';
+                imageUpload.style.background = 'rgba(255,255,255,0.05)';
+            });
+        
+            imageUpload.addEventListener('drop', (e) => {
+                e.preventDefault();
+                imageUpload.style.borderColor = 'rgba(255,0,0,0.3)';
+                imageUpload.style.background = 'rgba(255,255,255,0.05)';
+                
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    imageInput.files = e.dataTransfer.files;
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        
+            // Rarity Selection
+            const rarityOptions = document.querySelectorAll('.rarity-option');
+            const rarityInput = document.getElementById('rarity');
+        
+            rarityOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    rarityOptions.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    rarityInput.value = option.dataset.value;
+                });
+            });
+        
+            // Form Submit
+            const form = document.querySelector('form');
+            const submitBtn = document.querySelector('.submit-btn');
+        
+            form.addEventListener('submit', (e) => {
+                submitBtn.classList.add('loading');
+                submitBtn.textContent = 'جاري الإضافة...';
+            });
+        });
+
+
+        function deletePlayer(playerId) {
+            if (!playerId) {
+                showNotification("خطأ: معرف اللاعب غير موجود", "error");
+                return;
+            }
+        
+            (async function() {
+                try {
+                    // العثور على بطاقة اللاعب
+                    const playerCard = document.querySelector(`.player-card[data-player-id="${playerId}"]`);
+                    if (!playerCard) {
+                        showNotification("خطأ: لم يتم العثور على بطاقة اللاعب", "error");
+                        return;
+                    }
+        
+                    // الحصول على CSRF token
+                    let csrfToken = "";
+                    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                    if (csrfMeta) {
+                        csrfToken = csrfMeta.getAttribute('content');
+                    }
+                    // إذا كان لديك token في عنصر form
+                    const csrfInput = document.querySelector('input[name="csrf_token"]');
+                    if (csrfInput && !csrfToken) {
+                        csrfToken = csrfInput.value;
+                    }
+        
+                    // إضافة تأثير الحذف
+                    playerCard.classList.add('deleting');
+                    const deleteBtn = playerCard.querySelector('.delete-btn');
+                    if (deleteBtn) deleteBtn.disabled = true;
+        
+                    // إعداد headers مع أو بدون CSRF token
+                    const headers = {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    };
+        
+                    if (csrfToken) {
+                        headers['X-CSRFToken'] = csrfToken;
+                    }
+        
+                    // إرسال الطلب إلى الخادم
+                    const response = await fetch(`/delete_player/`, {
+                        method: 'DELETE',
+                        headers: headers,
+                        body: JSON.stringify({ player_id: playerId })
+                    });
+        
+                    console.log("Response status:", response.status);
+                    const responseText = await response.text();
+                    console.log("Response text:", responseText);
+        
+                    let data;
+                    try {
+                        data = JSON.parse(responseText);
+                    } catch (e) {
+                        throw new Error('استجابة غير صالحة من الخادم: ' + responseText);
+                    }
+        
+                    // إذا كانت الاستجابة ناجحة
+                    if (response.ok) {
+                        setTimeout(() => {
+                            playerCard.remove();
+                            showNotification("تم الحذف بنجاح!", "success");
+                        }, 500);
+                    } else {
+                        playerCard.classList.remove('deleting');
+                        if (deleteBtn) deleteBtn.disabled = false;
+                        showNotification(data.message || "فشل الحذف", "error");
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    const playerCard = document.querySelector(`.player-card[data-player-id="${playerId}"]`);
+                    if (playerCard) {
+                        playerCard.classList.remove('deleting');
+                        const deleteBtn = playerCard.querySelector('.delete-btn');
+                        if (deleteBtn) deleteBtn.disabled = false;
+                    }
+                    showNotification("حدث خطأ أثناء الحذف: " + error.message, "error");
+                }
+            })();
+        }
+        
+        // دالة لعرض الإشعارات للمستخدم
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.padding = '15px';
+            notification.style.borderRadius = '5px';
+            notification.style.zIndex = '1000';
+            notification.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
+            notification.style.color = 'white';
+            
+            // إضافة الإشعار إلى الصفحة
+            document.body.appendChild(notification);
+            
+            // إزالة الإشعار بعد 3 ثوانٍ
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

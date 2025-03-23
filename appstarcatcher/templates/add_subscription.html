@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>إضافة اشتراك جديد</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
+    <link rel="stylesheet" href="static/css/dashboard.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            min-height: 100vh;
+            display: grid;
+            grid-template-areas: 
+                "header header header"
+                "sidebar main main";
+            grid-template-columns: 300px 1fr;
+            grid-template-rows: 80px 1fr;
+        }
+
+        .header {
+            grid-area: header;
+            background: rgba(0,0,0,0.95);
+            padding: 0 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            height: 80px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar {
+            grid-area: sidebar;
+            background: linear-gradient(180deg, #000000 0%, #1a1a1a 100%);
+            border-left: 1px solid rgba(255,0,0,0.1);
+            padding: 0;
+            color: #fff;
+            height: 100vh;
+            position: fixed;
+            width: 300px;
+            overflow-y: auto;
+        }
+
+        .main-content {
+            grid-area: main;
+            padding: 100px 50px 30px;
+            margin-right: 300px;
+            background: #121212;
+        }
+
+        .subscription-card {
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            padding: 30px;
+            color: white;
+            border: 1px solid rgba(255,0,0,0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .subscription-card:hover {
+            border-color: rgba(255,0,0,0.3);
+            box-shadow: 0 5px 15px rgba(255,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #fff;
+            position: relative;
+            padding-right: 15px;
+        }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 5px;
+            height: 25px;
+            background: linear-gradient(to bottom, #ff0000, transparent);
+            border-radius: 2px;
+        }
+
+        .form-row {
+            margin-bottom: 20px;
+        }
+
+        .form-row label {
+            display: block;
+            margin-bottom: 10px;
+            color: rgba(255,255,255,0.8);
+            font-weight: 500;
+        }
+
+        .form-row input, 
+        .form-row select, 
+        .form-row textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.2);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .form-row input:focus, 
+        .form-row select:focus, 
+        .form-row textarea:focus {
+            border-color: rgba(255,0,0,0.5);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255,0,0,0.2);
+        }
+
+        .form-row textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: auto;
+            margin-left: 10px;
+        }
+
+        .action-button {
+            background: linear-gradient(45deg, #ff0000, #ff4444);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            margin-top: 10px;
+            font-size: 1rem;
+        }
+
+        .action-button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,0,0,0.2);
+        }
+
+        .error {
+            color: #ff4444;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* تعديل قائمة الباقات لتكون بجانب بعضها */
+        .subscriptions-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: flex-start;
+        }
+
+        .subscription-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .subscription-item:hover {
+            background: rgba(255,0,0,0.1);
+            transform: translateX(-5px);
+        }
+
+        .subscription-info {
+            flex: 1;
+        }
+
+        .subscription-type {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .subscription-meta {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .location-badge {
+            background: rgba(255,0,0,0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-right: 10px;
+        }
+
+        .delete-button {
+            background: rgba(255,0,0,0.2);
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .delete-button:hover {
+            background: rgba(255,0,0,0.8);
+        }
+
+        .delete-button i {
+            color: rgba(255,255,255,0.8);
+            font-size: 1.1rem;
+        }
+
+        .package-details p {
+            margin: 5px 0;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #ccc;
+        }
+
+        /* ستايل بطاقة الباقة المصغرة بالألوان الأسود والأحمر */
+        .compact-plan {
+            display: flex;
+            justify-content: space-between;
+            background-color: #222;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            transition: all 0.2s ease;
+            border-left: 3px solid #e74c3c;
+            width: 320px;
+            margin: 0;
+        }
+        
+        .compact-plan:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .plan-body {
+            flex: 1;
+            padding-right: 12px;
+        }
+        
+        .plan-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(231, 76, 60, 0.3);
+        }
+        
+        .plan-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .plan-cost {
+            font-size: 18px;
+            font-weight: 600;
+            color: #e74c3c;
+        }
+        
+        .plan-perks {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 5px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        #perks-container p,
+        .perks-container p {
+            margin: 4px 0;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #ccc;
+            position: relative;
+            padding-right: 15px;
+        }
+        
+        #perks-container p:before,
+        .perks-container p:before {
+            content: '•';
+            position: absolute;
+            right: 0;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .plan-location {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #e74c3c;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 500;
+            align-self: flex-start;
+        }
+        
+        .plan-delete {
+            background: transparent;
+            border: none;
+            color: #e74c3c;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            align-self: flex-start;
+        }
+        
+        .plan-delete:hover {
+            background-color: rgba(231, 76, 60, 0.2);
+        }
+                /* تخصيص شريط التمرير */
+        ::-webkit-scrollbar {
+            width: 7px; /* عرض الشريط الجانبي */
+            height: 10px; /* إذا كنت تريد تخصيص السكرول الأفقي */
+        }
+
+        /* تخصيص مظهر المقبض (الجزء الذي يتم سحبه) */
+        ::-webkit-scrollbar-thumb {
+            background-color: red; /* اللون */
+            border-radius: 10px; /* الحواف المستديرة */
+            border: 1px solidrgb(59, 59, 59); /* إضافة حافة حول المقبض */
+        }
+
+        /* تخصيص المسار (الخلفية التي يسير عليها المقبض) */
+        ::-webkit-scrollbar-track {
+            background-color:rgb(63, 61, 61); /* اللون الخلفي */
+            border-radius: 10px; /* الحواف المستديرة */
+        }
+
+        /* تخصيص حالة التمرير عند المرور بالمؤشر فوق المقبض */
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #555; /* تغيير اللون عند التمرير */
+        }
+
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h2 class="header-title">Catcher<span style="color:red">Star</span></h2>
+        
+        <div class="header-actions">
+            <div class="search-box">
+                <input type="text" placeholder="بحث...">
+                <i>🔍</i>
+            </div>
+            
+            <div class="header-links">
+                <div class="header-icon">
+                    <i>🔔</i>
+                    <span class="notification-badge">3</span>
+                </div>
+                <div class="header-icon">
+                    <i>✉️</i>
+                    <span class="notification-badge">5</span>
+                </div>
+            </div>
+
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name">{{username}}</div>
+                    <div class="user-role">مدير النظام</div>
+                </div>
+                <div class="user-avatar">{{username[:1]}}</div>
+            </div>
+        </div>
+    </header>
+
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="/api/placeholder/45/45" alt="Logo">
+            <span>لوحة التحكم</span>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-title">القائمة الرئيسية</div>
+            <nav>
+                <a href="/dashboard" class="nav-item ">
+                    <i>🏠</i>
+                    <span>الرئيسية</span>
+                </a>
+                <a href="/add_player" class="nav-item ">
+                    <i>👥</i>
+                    <span>اللاعبين</span>
+                </a>
+                <a href="/add_club" class="nav-item">
+                    <i>⚽</i>
+                    <span>الأنديه</span>
+                </a>
+                <a href="/add_subscription" class="nav-item active">
+                    <i>🏆</i>
+                    <span>الباقات</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">الإدارة</div>
+            <nav>
+                <a href="#" class="nav-item">
+                    <i>📊</i>
+                    <span>الإحصائيات</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i>⚙️</i>
+                    <span>الإعدادات</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i>📝</i>
+                    <span>التقارير</span>
+                </a>
+            </nav>
+        </div>
+        <!-- إضافة زر تسجيل الخروج أسفل الشريط الجانبي -->
+    <div class="logout-section">
+        <a href="/logout" class="nav-item logout-btn">
+            <i>🚪</i>
+            <span>تسجيل الخروج</span>
+        </a>
+    </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="subscription-card">
+            <h1 class="section-title">إضافة باقه جديده</h1>
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-row">
+                    <label for="package_type">اسم الباقة</label>
+                    <input type="text" id="package_type" name="package_type" size="50">
+                </div>
+                
+                <div class="form-row">
+                    <label for="package_details">تفاصيل الباقة</label>
+                    <textarea id="package_details" name="package_details" cols="50" rows="4"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <label for="price">السعر</label>
+                    <input type="text" id="price" name="price">
+                </div>
+                
+                <div class="form-row">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="is_outside_egypt" name="is_outside_egypt">
+                        <label for="is_outside_egypt">خارج مصر</label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="action-button">
+                    <i class="fas fa-plus-circle"></i>
+                    إضافة باقه
+                </button>
+            </form>
+        </div>
+        <div class="subscription-card">
+            <h2 class="section-title">قائمة الباقات</h2>
+            <ul class="subscriptions-list">
+                {%for subscriptions  in subscriptions%}
+                <!-- بطاقة الباقة المصغرة -->
+                <li class="compact-plan">
+                    <div class="plan-body">
+                        <div class="plan-title">{{ subscriptions.package_type }}</div>
+                        <div class="plan-info">
+                            <div class="plan-cost">{{ subscriptions.price }}</div>
+                            <div class="plan-perks">
+                                <div id="perks-container">{{ subscriptions.package_details }}</div>
+                            </div>
+                            {% if subscriptions.is_outside_egypt == 1 %}
+                                <span class="plan-location">خارج مصر</span>
+                            {% else %}
+                                <span class="plan-location">مصر</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <button class="delete-button" data-id="{{ subscriptions.id }}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </li>
+                
+                {%endfor%}
+            </ul>
+        </div>
+    </main>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // العثور على كل الأزرار التي تحتوي على class 'delete-button'
+            const deleteButtons = document.querySelectorAll('.delete-button');
+            
+            // إضافة حدث لكل زر
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // الحصول على id من خاصية data-id للزر
+                    const subscriptionId = this.getAttribute('data-id');
+                    
+                    // التأكد من أن الـ id موجود
+                    if (!subscriptionId) {
+                        alert("Invalid subscription ID");
+                        return;
+                    }
+                    
+                    // تأكيد الحذف من المستخدم
+                    const confirmDelete = confirm("هل أنت متأكد أنك تريد حذف هذا الباقه؟");
+                    
+                    if (confirmDelete) {
+                        // إرسال طلب DELETE باستخدام Fetch API
+                        fetch(`/delete_subscription/${subscriptionId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.message === "تم الحذف بنجاح") {
+                                alert("تم الحذف بنجاح");
+                                // هنا يمكنك إزالة العنصر من واجهة المستخدم بعد الحذف
+                                this.closest('.subscription-item').remove(); // حذف العنصر في الصفحة
+                            } else {
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert("حدث خطأ أثناء الحذف");
+                        });
+                    }
+                });
+            });
+        });
+
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // الحصول على جميع العناصر التي تحتوي على تفاصيل الباقة
+            const perksContainers = document.querySelectorAll(".plan-perks #perks-container");
+            
+            perksContainers.forEach((perksContainer) => {
+                if (perksContainer) {
+                    // تقسيم النص عند كل نقطة ('.') وإضافة فقرة جديدة لكل ميزة
+                    const detailsText = perksContainer.innerText;
+                    const perks = detailsText.split('.');
+        
+                    // إعادة تنسيق النص ليظهر كل ميزة في فقرة مستقلة
+                    perksContainer.innerHTML = '';
+                    perks.forEach((perk, index) => {
+                        if (perk.trim()) {
+                            const p = document.createElement('p');
+                            p.className = 'perk-item';
+                            p.textContent = perk.trim() + (index < perks.length - 1 ? '.' : '');
+                            perksContainer.appendChild(p);
+                        }
+                    });
+                }
+            });
+        });
+        
+
+        </script>
+        
+</body>
+</html>
