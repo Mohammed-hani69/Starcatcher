@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #e0e0e0;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            padding: 25px 20px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo img {
+            width: 45px;
+            height: 45px;
+            margin-left: 15px;
+            border-radius: 8px;
+        }
+
+        .logo span {
+            font-size: 22px;
+            font-weight: bold;
+            background: linear-gradient(90deg, #ff0000, #ff5252);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-section {
+            flex: 1;
+            padding: 0 15px;
+        }
+
+        .nav-section-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            color: #c2c2c2;
+            margin: 20px 0 10px;
+            padding-right: 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 15px;
+            color: #e6e6e6;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item i {
+            margin-left: 14px;
+            font-size: 18px;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 0, 0, 0.1);
+            color: #ff3e3e;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(45deg, #ff3e3e, #ff5252);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+        }
+
+        .logout-section {
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .logout-btn {
+            background-color: #2a2a2a;
+        }
+
+        .logout-btn:hover {
+            background-color: #ff3e3e;
+            color: white;
+        }
+
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            right: 280px;
+            left: 0;
+            height: 70px;
+            background-color: #1e1e1e;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 99;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+            margin-left: 20px;
+        }
+
+        .search-box input {
+            width: 250px;
+            padding: 10px 40px 10px 15px;
+            border-radius: 25px;
+            border: 1px solid #333;
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .search-box input::placeholder {
+            color: #999;
+        }
+
+        .search-box input:focus {
+            width: 300px;
+            border-color: #ff3e3e;
+            outline: none;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-details {
+            margin-left: 12px;
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #ff3e3e, #ff5252);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            margin-right: 280px;
+            margin-top: 70px;
+            padding: 30px;
+            width: calc(100% - 280px);
+        }
+
+        .filter-section {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .filter-section input,
+        .filter-section select {
+            padding: 12px 15px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .filter-section input::placeholder {
+            color: #999;
+        }
+
+        .filter-section input:focus,
+        .filter-section select:focus {
+            border-color: #ff3e3e;
+            outline: none;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
+        }
+
+        .filter-section select option {
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+        }
+
+        /* Table Styles */
+        .users-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: #1e1e1e;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 15px 20px;
+            text-align: right;
+            border-bottom: 1px solid #333;
+        }
+
+        .users-table th {
+            background-color: #0a0a0a;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+
+        .users-table tbody tr {
+            transition: all 0.3s;
+        }
+
+        .users-table tbody tr:hover {
+            background-color: #2a2a2a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+
+        .users-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-admin {
+            background-color: #1a1a1a;
+            color: #ff3e3e;
+            border: 1px solid #ff3e3e;
+        }
+
+        .status-premium {
+            background-color: #9c27b0;
+            color: white;
+        }
+
+        .status-gold {
+            background: linear-gradient(45deg, #ffd700, #ff9800);
+            color: #1a1a1a;
+        }
+
+        .status-subscribed {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .status-no-subscription {
+            background-color: #424242;
+            color: #e0e0e0;
+        }
+
+        /* Subscription info */
+        .subscription-info {
+            text-align: center;
+        }
+
+        .subscription-info small {
+            display: block;
+            color: #bbb;
+            font-size: 0.8em;
+            margin-top: 4px;
+        }
+
+        /* Rank badge */
+        .rank-badge {
+            background: linear-gradient(45deg, #333, #555);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        /* Special styling for top 3 ranks */
+        tr:nth-child(-n+3) .rank-badge {
+            background: linear-gradient(45deg, #ff3e3e, #ff5252);
+            box-shadow: 0 5px 10px rgba(255, 0, 0, 0.2);
+        }
+
+        /* Rank badge styles */
+        .rank-badge {
+            background: linear-gradient(45deg, #333, #555);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .rank-badge-admin {
+            background: linear-gradient(45deg, #ff3e3e, #ff5252);
+            box-shadow: 0 5px 10px rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        /* Top 3 non-admin ranks */
+        tr:not(:has(.rank-badge-admin)):nth-child(-n+3) .rank-badge {
+            background: linear-gradient(45deg, #ffd700, #ff9800);
+            box-shadow: 0 5px 10px rgba(255, 215, 0, 0.2);
+            color: #1a1a1a;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #2a2a2a;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background: linear-gradient(45deg, #ff3e3e, #ff5252);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .admin-toggle-cell {
+            text-align: center;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+            
+            .header {
+                right: 240px;
+                left: 0;
+            }
+            
+            .main-content {
+                margin-right: 240px;
+                width: calc(100% - 240px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                position: fixed;
+                width: 280px;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .header {
+                right: 0;
+                padding: 0 15px;
+            }
+
+            .main-content {
+                margin-right: 0;
+                width: 100%;
+                padding: 15px;
+            }
+
+            .search-box input {
+                width: 180px;
+            }
+
+            .search-box input:focus {
+                width: 200px;
+            }
+
+            .user-details {
+                display: none;
+            }
+
+            .filter-section {
+                gap: 10px;
+            }
+
+            .filter-section input,
+            .filter-section select {
+                width: 100%;
+                min-width: 100%;
+            }
+
+            /* Responsive Table */
+            .users-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            .users-table th,
+            .users-table td {
+                padding: 12px 15px;
+            }
+
+            /* Mobile Menu Toggle */
+            .mobile-menu-toggle {
+                display: block;
+                position: fixed;
+                top: 15px;
+                right: 15px;
+                z-index: 1000;
+                background: #ff3e3e;
+                color: white;
+                padding: 10px;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            .header-title {
+                margin-right: 50px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-actions {
+                justify-content: flex-end;
+            }
+
+            .search-box {
+                position: fixed;
+                top: 70px;
+                left: 0;
+                right: 0;
+                padding: 10px;
+                background: #1e1e1e;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                display: none;
+            }
+
+            .search-box.active {
+                display: block;
+            }
+
+            .search-box input {
+                width: 100%;
+            }
+
+            .mobile-search-toggle {
+                display: block;
+                margin-left: 15px;
+                color: #fff;
+                cursor: pointer;
+            }
+        }
+
+        /* Dark mode optimization */
+        @media (prefers-color-scheme: dark) {
+            .users-table th {
+                background-color: #1a1a1a;
+            }
+
+            .filter-section {
+                background: #1a1a1a;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Toggle Button -->
+    <div class="mobile-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}" alt="Logo">
+            <span>StarCatcher</span>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-title">القائمة الرئيسية</div>
+            <nav>
+                <a href="/dashboard" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>الرئيسية</span>
+                </a>
+                <a href="/add_player" class="nav-item">
+                    <i class="fas fa-user-alt"></i>
+                    <span>إضافة لاعب</span>
+                </a>
+                <a href="/add_club" class="nav-item">
+                    <i class="fas fa-futbol"></i>
+                    <span>إضافة نادي</span>
+                </a>
+                <a href="/add_subscription" class="nav-item">
+                    <i class="fas fa-flag"></i>
+                    <span>الباقات</span>
+                </a>
+            </nav>
+
+            <div class="nav-section-title">إدارة النظام</div>
+            <nav>
+                <a href="/users" class="nav-item active">
+                    <i class="fas fa-users"></i>
+                    <span>المستخدمين</span>
+                </a>
+                <a href="/add_subscription" class="nav-item">
+                    <i class="fas fa-star"></i>
+                    <span>الاشتراكات</span>
+                </a>
+                <a href="/settings" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>الإعدادات</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="logout-section">
+            <a href="/logout" class="nav-item logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>تسجيل الخروج</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <h2 class="header-title">Star<span style="color:#ff3e3e">Catcher</span></h2>
+        
+        <div class="header-actions">
+            <div class="search-box">
+                <input type="text" placeholder="بحث..." id="searchInput">
+                <i class="fas fa-search"></i>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name">{{username}}</div>
+                    <div class="user-role">مدير النظام</div>
+                </div>
+                <div class="user-avatar">{{username[:1]}}</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="filter-section">
+            <input type="text" id="usernameFilter" placeholder="اسم المستخدم">
+            <input type="text" id="emailFilter" placeholder="البريد الإلكتروني">
+            <select id="statusFilter">
+                <option value="">كل الحالات</option>
+                <option value="admin">مدير</option>
+                <option value="premium">مميز</option>
+                <option value="gold">ذهبي</option>
+                <option value="subscribed">مشترك</option>
+            </select>
+        </div>
+
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>الرقم التعريفي</th>
+                    <th>اسم المستخدم</th>
+                    <th>البريد الإلكتروني</th>
+                    <th>رقم الهاتف</th>
+                    <th>الدولة</th>
+                    <th>المحافظة</th>
+                    <th>المدينة</th>
+                    <th>العملات</th>
+                    <th>الحالة</th>
+                    <th>الاشتراك</th>
+                    <th>الترتيب</th>
+                    <th>عدد اللاعبين</th>
+                    <th>تاريخ التسجيل</th>
+                    <th>آخر دخول</th>
+                    <th>صلاحيات الأدمن</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user_data in users %}
+                <tr>
+                    <td>{{ user_data.user.id }}</td>
+                    <td>{{ user_data.user.username }}</td>
+                    <td>{{ user_data.user.email }}</td>
+                    <td>{{ user_data.user.phone or 'غير متوفر' }}</td>
+                    <td>{{ user_data.user.country or 'غير متوفر' }}</td>
+                    <td>{{ user_data.user.state or 'غير متوفر' }}</td>
+                    <td>{{ user_data.user.city or 'غير متوفر' }}</td>
+                    <td>{{ user_data.user.coins }}</td>
+                    <td>
+                        {% if user_data.user.is_admin %}
+                            <span class="status-badge status-admin">مدير</span>
+                        {% endif %}
+                        {% if user_data.user.premuim %}
+                            <span class="status-badge status-premium">مميز</span>
+                        {% endif %}
+                        {% if user_data.user.gold %}
+                            <span class="status-badge status-gold">ذهبي</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user_data.subscription_info %}
+                            <div class="subscription-info">
+                                <span class="status-badge status-subscribed">{{ user_data.subscription_info.package_type }}</span>
+                                <small>ينتهي في: {{ user_data.subscription_info.expiry_date.strftime('%Y-%m-%d') }}</small>
+                            </div>
+                        {% else %}
+                            <span class="status-badge status-no-subscription">غير مشترك</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="rank-badge {% if user_data.user.is_admin %}rank-badge-admin{% endif %}">
+                            #{{ user_data.rank }}
+                        </span>
+                    </td>
+                    <td>{{ user_data.player_count }}</td>
+                    <td>{{ user_data.user.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ user_data.user.last_login.strftime('%Y-%m-%d %H:%M') if user_data.user.last_login else 'لم يسجل دخول' }}</td>
+                    <td class="admin-toggle-cell">
+                        <label class="toggle-switch">
+                            <input type="checkbox" 
+                                   {% if user_data.user.is_admin %}checked{% endif %}
+                                   onchange="toggleAdmin('{{ user_data.user.id }}', this)"
+                                   {% if user_data.user.id == current_user.id %}disabled{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+
+    <script>
+        // Add mobile menu functionality
+        const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+
+        mobileMenuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        mainContent.addEventListener('click', () => {
+            if (sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+        // Mobile search toggle
+        const searchBox = document.querySelector('.search-box');
+        const mobileSearchToggle = document.createElement('div');
+        mobileSearchToggle.className = 'mobile-search-toggle';
+        mobileSearchToggle.innerHTML = '<i class="fas fa-search"></i>';
+
+        if (window.innerWidth <= 480) {
+            document.querySelector('.header-actions').prepend(mobileSearchToggle);
+        }
+
+        mobileSearchToggle.addEventListener('click', () => {
+            searchBox.classList.toggle('active');
+        });
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('.users-table tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Filter functionality
+        const filters = {
+            username: document.getElementById('usernameFilter'),
+            email: document.getElementById('emailFilter'),
+            status: document.getElementById('statusFilter')
+        };
+
+        Object.values(filters).forEach(filter => {
+            filter.addEventListener('input', applyFilters);
+        });
+
+        function applyFilters() {
+            const rows = document.querySelectorAll('.users-table tbody tr');
+            
+            rows.forEach(row => {
+                const username = row.cells[1].textContent.toLowerCase();
+                const email = row.cells[2].textContent.toLowerCase();
+                const statusCell = row.cells[8];
+                
+                const matchesUsername = username.includes(filters.username.value.toLowerCase());
+                const matchesEmail = email.includes(filters.email.value.toLowerCase());
+                const matchesStatus = !filters.status.value || 
+                                    statusCell.textContent.includes(filters.status.value);
+                
+                row.style.display = (matchesUsername && matchesEmail && matchesStatus) ? '' : 'none';
+            });
+        }
+
+        async function toggleAdmin(userId, checkbox) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            try {
+                const response = await fetch(`/toggle_admin/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    credentials: 'same-origin'
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'حدث خطأ أثناء تحديث الصلاحيات');
+                }
+
+                // إظهار رسالة النجاح
+                showNotification(data.message, 'success');
+
+                // تحديث واجهة المستخدم
+                const row = checkbox.closest('tr');
+                const statusCell = row.querySelector('td:nth-child(9)');
+                if (data.is_admin) {
+                    if (!statusCell.innerHTML.includes('status-admin')) {
+                        statusCell.innerHTML += '<span class="status-badge status-admin">مدير</span>';
+                    }
+                } else {
+                    const adminBadge = statusCell.querySelector('.status-badge.status-admin');
+                    if (adminBadge) {
+                        adminBadge.remove();
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                checkbox.checked = !checkbox.checked; // إرجاع حالة الـ checkbox
+                showNotification(error.message || 'حدث خطأ أثناء تحديث الصلاحيات', 'error');
+            }
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
+            notification.style.color = 'white';
+            notification.style.padding = '15px';
+            notification.style.borderRadius = '5px';
+            notification.style.zIndex = '1000';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

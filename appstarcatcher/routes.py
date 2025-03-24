@@ -3,7 +3,7 @@ import random
 from flask_jwt_extended import create_access_token, create_refresh_token, decode_token, get_jwt_identity, jwt_required
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 from numpy import identity
-from sqlalchemy import desc, func
+from sqlalchemy import desc, func, text
 from appstarcatcher import db , app ,limiter,csrf
 from flask import jsonify, render_template, request, redirect, session, url_for, flash
 from werkzeug.utils import secure_filename
@@ -18,7 +18,7 @@ import time
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 from appstarcatcher.forms import AdminMarketListingForm, ClubForm, LoginForm, PackForm, PlayerForm, RegistrationForm, SubscriptionForm
-from appstarcatcher.models import AdminMarketListing, ClubDetail, GeneratedPlayer, Pack, PackPurchase, Player, Subscription, User, UserClub, UserPlayer, UserSubscriptionPurchase, generate_random_code
+from appstarcatcher.models import AdminMarketListing, ClubDetail, GeneratedPlayer, Pack, PackPurchase, Player, Subscription, Transaction, User, UserClub, UserPlayer, UserSubscriptionPurchase, generate_random_code
 
 # دالة التحقق من كلمة المرور
 def verify_password(password_hash, password):
@@ -194,6 +194,162 @@ def forbidden(error):
 
 
 
+
+
+from flask import jsonify
+from flask_login import current_user, login_required
+
+@app.route('/toggle_admin/<int:user_id>', methods=['POST'])
+@login_required
+def toggle_admin(user_id):
+    # التحقق من أن المستخدم الحالي هو أدمن
+    if not current_user.is_admin:
+        return jsonify({'message': 'غير مصرح لك بهذا الإجراء'}), 403
+    
+    # البحث عن المستخدم المراد تعديل صلاحياته
+    user = User.query.get_or_404(user_id)
+    
+    # منع المستخدم من تغيير صلاحياته الخاصة
+    if user.id == current_user.id:
+        return jsonify({'message': 'لا يمكنك تغيير صلاحياتك الخاصة'}), 403
+    
+    try:
+        # تبديل حالة الأدمن
+        user.is_admin = not user.is_admin
+        db.session.commit()
+        
+        message = f"تم {'منح' if user.is_admin else 'إلغاء'} صلاحيات الأدمن للمستخدم {user.username}"
+        return jsonify({
+            'success': True,
+            'message': message,
+            'is_admin': user.is_admin
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'حدث خطأ أثناء تحديث الصلاحيات'}), 500
+
+
+
+
+@app.route('/update_profile_image', methods=['POST'])
+@login_required
+def update_profile_image():
+    try:
+        if 'image' not in request.files:
+            return jsonify({
+                'status': 'error',
+                'message': 'لم يتم تحديد صورة'
+            }), 400
+
+        file = request.files['image']
+        if file.filename == '':
+            return jsonify({
+                'status': 'error',
+                'message': 'لم يتم اختيار صورة'
+            }), 400
+
+        if file:
+            # التأكد من أن الملف هو صورة
+            if not file.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
+                return jsonify({
+                    'status': 'error',
+                    'message': 'نوع الملف غير مدعوم. يرجى اختيار صورة'
+                }), 400
+
+            filename = secure_filename(f"profile_{current_user.id}_{int(time.time())}{os.path.splitext(file.filename)[1]}")
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+            # حذف الصورة القديمة إذا وجدت
+            if current_user.image_url:
+                old_filepath = os.path.join(app.config['UPLOAD_FOLDER'], current_user.image_url)
+                if os.path.exists(old_filepath):
+                    os.remove(old_filepath)
+
+            # حفظ الصورة الجديدة
+            file.save(filepath)
+            current_user.image_url = filename
+            db.session.commit()
+
+            return jsonify({
+                'status': 'success',
+                'message': 'تم تحديث الصورة بنجاح',
+                'image_url': url_for('static', filename=f'uploads/profile_images/{filename}')
+            })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': f'حدث خطأ أثناء تحديث الصورة: {str(e)}'
+        }), 500
+
+
+
+
+@app.route('/collect_achievement_coins', methods=['POST'])
+@login_required
+def collect_achievement_coins():
+    try:
+        # التحقق مما إذا كان المستخدم قد جمع هذه المكافأة من قبل
+        if current_user.new_member_reward_collected:
+            return jsonify({
+                'status': 'error',
+                'message': 'تم تحصيل هذه المكافأة مسبقاً'
+            }), 400
+            
+        # إضافة العملات للمستخدم
+        current_user.coins += 50
+        # تحديث حالة تحصيل المكافأة
+        current_user.new_member_reward_collected = True
+        
+        # حفظ التغييرات في قاعدة البيانات
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'تم تحصيل 50 عملة بنجاح!',
+            'new_balance': current_user.coins
+        })
+            
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+
+
+
+@app.route('/collect_first_purchase_reward', methods=['POST'])
+@login_required
+def collect_first_purchase_reward():
+    try:
+        if not current_user.first_purchase_reward_collected:
+            # إضافة العملات للمستخدم
+            current_user.coins += 60
+            # تحديث حالة تحصيل المكافأة
+            current_user.first_purchase_reward_collected = True
+            db.session.commit()
+            
+            return jsonify({
+                'status': 'success',
+                'message': 'تم تحصيل 60 عملة بنجاح!',
+                'new_balance': current_user.coins
+            })
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': 'تم تحصيل هذه المكافأة مسبقاً'
+            }), 400
+            
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
 
 # إنشاء باكج جديد
 @app.route('/packs', methods=['POST'])
@@ -402,6 +558,67 @@ def get_club_players(club_id):
             'is_collected': p.id in collected_ids
         } for p in players]
     })
+
+
+@app.route('/users')
+@login_required
+@admin_required
+def users():
+    try:
+        # Get rankings for all users based on player count first
+        user_rankings = db.session.query(
+            User,
+            func.count(UserClub.id).label('player_count'),
+            func.dense_rank().over(
+                order_by=func.count(UserClub.id).desc()
+            ).label('rank'),
+            UserSubscriptionPurchase
+        ).outerjoin(UserClub).outerjoin(
+            UserSubscriptionPurchase,
+            db.and_(
+                User.id == UserSubscriptionPurchase.user_id,
+                UserSubscriptionPurchase.status == 'active'
+            )
+        ).group_by(User.id)\
+         .all()
+
+        # Get subscription details
+        subscription_details = {}
+        for user, _, _, subscription in user_rankings:
+            if subscription:
+                subscription_info = Subscription.query.get(subscription.subscription_id)
+                subscription_details[user.id] = {
+                    'package_type': subscription_info.package_type if subscription_info else None,
+                    'expiry_date': subscription.expiry_date
+                }
+
+        # Separate admins and regular users while preserving their ranks
+        admin_users = []
+        regular_users = []
+        
+        for user, player_count, rank, _ in user_rankings:
+            user_data = {
+                'user': user,
+                'player_count': player_count,
+                'rank': rank,  # Keep the original rank for all users
+                'subscription_info': subscription_details.get(user.id, None)
+            }
+            
+            if user.is_admin:
+                admin_users.append(user_data)
+            else:
+                regular_users.append(user_data)
+        
+        # Combine the lists with admins at the top
+        users_data = admin_users + regular_users
+
+        return render_template('users.html',
+                            users=users_data,
+                            username=current_user.username)
+    except Exception as e:
+        app.logger.error(f"Error in users route: {str(e)}")
+        flash('حدث خطأ أثناء تحميل صفحة المستخدمين', 'error')
+        return redirect(url_for('dashboard'))
 
 
 #اضافة لاعب للسوق
@@ -909,36 +1126,61 @@ def buy_market_player():
                 'message': 'اللاعب غير موجود'
             }), 404
 
-        # إنشاء سجل جديد في UserPlayer
-        user_player = UserPlayer(
-            user_id=current_user.id,
-            player_id=player.id,
-            position=player.position,
-            is_listed=False,
-            price=listing.price,
-            acquired_at=datetime.utcnow(),
-            sale_code=generate_random_code()
-        )
+        try:
+            # إنشاء سجل جديد في UserPlayer وحفظه للحصول على الـ id
+            user_player = UserPlayer(
+                user_id=current_user.id,
+                player_id=player.id,
+                position=player.position,
+                is_listed=False,
+                price=listing.price,
+                acquired_at=datetime.utcnow(),
+                sale_code=generate_random_code()
+            )
+            db.session.add(user_player)
+            db.session.flush()  # للحصول على الـ id قبل الـ commit
 
-        # خصم العملات من المستخدم
-        current_user.coins -= listing.price
+            # خصم العملات من المستخدم
+            current_user.coins -= listing.price
 
-        # تحديث حالة القائمة
+            # إنشاء سجل المعاملة بعد التأكد من وجود user_player_id
+            transaction = Transaction(
+                buyer_id=current_user.id,
+                seller_id=listing.admin_id,
+                user_player_id=user_player.id,  # الآن لدينا id صالح
+                listing_id=listing_id,
+                price=listing.price,
+                transaction_type='market',
+                status='completed',
+                payment_method='coins'
+            )
+            db.session.add(transaction)
+            
+            # حفظ جميع التغييرات
+            db.session.commit()
 
-        # حفظ التغييرات
-        db.session.add(user_player)
-        db.session.commit()
+            # التحقق من أول عملية شراء
+            is_first_purchase = not Transaction.query.filter(
+                Transaction.buyer_id == current_user.id,
+                Transaction.id != transaction.id,
+                Transaction.status == 'completed'
+            ).first()
 
-        return jsonify({
-            'status': 'success',
-            'message': 'تم شراء اللاعب بنجاح',
-            'data': {
-                'player_name': player.name,
-                'price_paid': listing.price,
-                'remaining_coins': current_user.coins,
-                'sale_code': user_player.sale_code
-            }
-        }), 200
+            return jsonify({
+                'status': 'success',
+                'message': 'تم شراء اللاعب بنجاح',
+                'is_first_purchase': is_first_purchase,
+                'data': {
+                    'player_name': player.name,
+                    'price_paid': listing.price,
+                    'remaining_coins': current_user.coins,
+                    'sale_code': user_player.sale_code
+                }
+            }), 200
+
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
     except Exception as e:
         db.session.rollback()
@@ -1918,7 +2160,13 @@ def profile():
         # حساب إجمالي اللاعبين المملوكين
         owned_count = UserPlayer.query.filter_by(user_id=current_user.id).count()
         
-        # حساب الترتيب العام
+        # التحقق من حالة الشراء الأول
+        has_completed_purchase = Transaction.query.filter_by(
+            buyer_id=current_user.id,
+            status='completed'
+        ).first() is not None
+
+        # الحصول على معلومات الترتيب والمستخدمين القريبين
         all_users = db.session.query(
             User.id,
             User.username,
@@ -1958,6 +2206,8 @@ def profile():
                             owned_count=owned_count,
                             user_rank=user_rank,
                             nearby_users=nearby_users,
+                            has_completed_purchase=has_completed_purchase,
+                            Transaction=Transaction,  # Pass Transaction model to template
                             wallet_options=wallet_options,
                             payment_methods=payment_methods)
 
@@ -2419,3 +2669,56 @@ def market():
         app.logger.error(f"Error in market route: {str(e)}")
         flash('حدث خطأ أثناء تحميل صفحة السوق', 'error')
         return redirect(url_for('index'))
+
+
+@app.route('/update_profile', methods=['POST'])
+@login_required
+def update_profile():
+    try:
+        data = request.get_json()
+        field = data.get('field')
+        value = data.get('value')
+        
+        if not field or value is None:
+            return jsonify({
+                'status': 'error',
+                'message': 'معلومات غير كاملة'
+            }), 400
+
+        # التحقق من الحقول المسموح تحديثها
+        allowed_fields = ['username', 'email', 'phone', 'country', 'state', 'city']
+        if field not in allowed_fields:
+            return jsonify({
+                'status': 'error',
+                'message': 'حقل غير مسموح به'
+            }), 400
+
+        # التحقق من تفرد اسم المستخدم والبريد الإلكتروني
+        if field in ['username', 'email', 'phone']:
+            existing_user = User.query.filter(
+                getattr(User, field) == value,
+                User.id != current_user.id
+            ).first()
+            if existing_user:
+                return jsonify({
+                    'status': 'error',
+                    'message': f'هذا {field} مستخدم بالفعل'
+                }), 400
+
+        # تحديث الحقل
+        setattr(current_user, field, value)
+        db.session.commit()
+
+        return jsonify({
+            'status': 'success',
+            'message': 'تم تحديث المعلومات بنجاح',
+            'value': value
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+

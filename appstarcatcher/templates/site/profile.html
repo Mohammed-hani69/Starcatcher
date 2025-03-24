@@ -189,7 +189,7 @@
             right: -10px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--accent-gold);
+            color: var (--accent-gold);
         }
 
         /* Button Styling */
@@ -433,6 +433,100 @@
                 display: none;
             }
         }
+
+        .editable-field {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .edit-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            padding: 4px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn:hover {
+            color: var(--primary-red);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .editing {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .editing input {
+            background: transparent;
+            border: none;
+            color: white;
+            outline: none;
+        }
+
+        .save-btn, .cancel-btn {
+            background: none;
+            border: none;
+            padding: 4px 8px;
+            color: white;
+            margin-left: 5px;
+        }
+
+        .save-btn:hover {
+            color: #28a745;
+        }
+
+        .cancel-btn:hover {
+            color: var(--primary-red);
+        }
+
+        /* Coins Animation */
+        .coin {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: #ffc107;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-size: 12px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        @keyframes flyToWallet {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.5);
+            }
+            100% {
+                transform: scale(0);
+            }
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+            }
+        }
     </style>
 </head>
 <body>
@@ -492,14 +586,55 @@
     <div class="profile-header">
         <div class="container">
             <div class="d-flex align-items-center">
-                <div class="profile-avatar">
-                    <img src="{{ url_for('static', filename='../static/uploads/profile_images/' ~ user.image_url) }}" alt="صورة البروفايل">
+                <div class="profile-avatar position-relative">
+                    <img src="{{ url_for('static', filename='../static/uploads/profile_images/' ~ user.image_url) }}" alt="صورة البروفايل" id="profileImage">
+                    <button class="btn btn-sm btn-danger position-absolute bottom-0 start-50 translate-middle-x mb-2" id="changePhotoBtn">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
                 </div>
-                <div class="ms-3">
-                    <h1>{{ user.username }}</h1>
-                    <p class="mb-0">
-                        <i class="fas fa-calendar-alt me-2"></i> عضو منذ {{ user.created_at.strftime('%Y-%m-%d') }}
-                    </p>
+                <div class="ms-3 flex-grow-1">
+                    <!-- Editable Fields -->
+                    <div class="editable-fields">
+                        <div class="editable-field mb-2">
+                            <h1 class="d-inline" id="username-display">{{ user.username }}</h1>
+                            <button class="edit-btn ms-2" data-field="username">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                        </div>
+                        <div class="editable-field mb-2">
+                            <span id="email-display">{{ user.email }}</span>
+                            <button class="edit-btn ms-2" data-field="email">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                        </div>
+                        <div class="editable-field mb-2">
+                            <span id="phone-display">{{ user.phone or 'لم يتم إضافة رقم الهاتف' }}</span>
+                            <button class="edit-btn ms-2" data-field="phone">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                        </div>
+                        <div class="d-flex gap-3">
+                            <div class="editable-field">
+                                <span id="country-display">{{ user.country or 'الدولة' }}</span>
+                                <button class="edit-btn ms-2" data-field="country">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                            </div>
+                            <div class="editable-field">
+                                <span id="state-display">{{ user.state or 'المحافظة' }}</span>
+                                <button class="edit-btn ms-2" data-field="state">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                            </div>
+                            <div class="editable-field">
+                                <span id="city-display">{{ user.city or 'المدينة' }}</span>
+                                <button class="edit-btn ms-2" data-field="city">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <div>
                         {% if user.premuim %}
                             <span class="badge bg-warning text-dark me-1">
@@ -608,9 +743,46 @@
                             <div>
                                 <h5 class="mb-0">عضو جديد</h5>
                                 <small>اكمل تسجيل حسابك</small>
+                                <div class="mt-2">
+                                    <span class="text-warning">
+                                        <i class="fas fa-coins"></i> 50 عملة
+                                    </span>
+                                </div>
                             </div>
-                            <div class="ms-auto">
-                                <i class="fas fa-check-circle text-success fs-4"></i>
+                            <div class="ms-auto d-flex align-items-center reward-status">
+                                {% if user.new_member_reward_collected %}
+                                    <i class="fas fa-check-circle text-success fs-4"></i>
+                                {% else %}
+                                    <button class="btn btn-sm btn-warning collect-coins" id="newMemberReward">
+                                        <i class="fas fa-hand-holding-usd"></i> تحصيل
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="achievement">
+                            <div class="achievement-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">المشتري الأول</h5>
+                                <small>اشتر أول لاعب من السوق</small>
+                                <div class="mt-2">
+                                    <span class="text-warning">
+                                        <i class="fas fa-coins"></i> 60 عملة
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="ms-auto d-flex align-items-center reward-status">
+                                {% if not has_completed_purchase %}
+                                    <i class="fas fa-lock fs-4 text-muted"></i>
+                                {% elif user.first_purchase_reward_collected %}
+                                    <i class="fas fa-check-circle text-success fs-4"></i>
+                                {% else %}
+                                    <button class="btn btn-sm btn-warning collect-coins" id="firstPurchaseReward">
+                                        <i class="fas fa-hand-holding-usd"></i> تحصيل
+                                    </button>
+                                {% endif %}
                             </div>
                         </div>
                         
@@ -896,6 +1068,257 @@
             selectedPrice = 0;
             selectedPaymentMethod = '';
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle edit buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const field = this.dataset.field;
+                    const displayElement = document.getElementById(`${field}-display`);
+                    const currentValue = displayElement.textContent;
+                    
+                    // Create edit interface
+                    const editContainer = document.createElement('div');
+                    editContainer.className = 'editing d-flex align-items-center';
+                    editContainer.innerHTML = `
+                        <input type="text" value="${currentValue}" class="me-2">
+                        <button class="save-btn"><i class="fas fa-check"></i></button>
+                        <button class="cancel-btn"><i class="fas fa-times"></i></button>
+                    `;
+                    
+                    displayElement.parentElement.replaceChild(editContainer, displayElement);
+                    
+                    // Focus input
+                    const input = editContainer.querySelector('input');
+                    input.focus();
+                    
+                    // Handle save
+                    editContainer.querySelector('.save-btn').addEventListener('click', function() {
+                        updateField(field, input.value, editContainer, currentValue);
+                    });
+                    
+                    // Handle cancel
+                    editContainer.querySelector('.cancel-btn').addEventListener('click', function() {
+                        restoreDisplay(field, currentValue, editContainer);
+                    });
+                });
+            });
+        });
+
+        function updateField(field, value, editContainer, oldValue) {
+            fetch('/update_profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ field, value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    restoreDisplay(field, value, editContainer);
+                } else {
+                    alert(data.message);
+                    restoreDisplay(field, oldValue, editContainer);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء التحديث');
+                restoreDisplay(field, oldValue, editContainer);
+            });
+        }
+
+        function restoreDisplay(field, value, editContainer) {
+            const displayElement = document.createElement('span');
+            displayElement.id = `${field}-display`;
+            displayElement.textContent = value;
+            editContainer.parentElement.replaceChild(displayElement, editContainer);
+        }
+
+        // إضافة كود التعامل مع تغيير الصورة
+        document.getElementById('changePhotoBtn').addEventListener('click', function() {
+            document.getElementById('imageInput').click();
+        });
+
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const file = e.target.files[0];
+                
+                // التحقق من حجم الملف (5MB كحد أقصى)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('image', file);
+
+                fetch('/update_profile_image', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // تحديث الصورة في الصفحة
+                        document.getElementById('profileImage').src = data.image_url + '?t=' + new Date().getTime();
+                        alert('تم تحديث الصورة بنجاح');
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('حدث خطأ أثناء تحديث الصورة');
+                });
+            }
+        });
+
+        // دالة إنشاء العملات المتطايرة
+        function createFloatingCoins(startElement, endElement, amount) {
+            const startRect = startElement.getBoundingClientRect();
+            const endRect = endElement.getBoundingClientRect();
+            const coinsCount = 5;
+            
+            // إنشاء قصاصات ورقية
+            for(let i = 0; i < 20; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = startRect.left + Math.random() * startRect.width + 'px';
+                confetti.style.top = startRect.top + 'px';
+                confetti.style.background = ['#ffc107', '#28a745', '#dc3545', '#007bff'][Math.floor(Math.random() * 4)];
+                confetti.style.animation = `confettiFall ${1 + Math.random()}s linear forwards`;
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => confetti.remove(), 2000);
+            }
+
+            // إنشاء العملات المتطايرة
+            for(let i = 0; i < coinsCount; i++) {
+                const coin = document.createElement('div');
+                coin.className = 'coin';
+                coin.innerHTML = '<i class="fas fa-coins"></i>';
+                
+                // تحديد نقطة البداية
+                coin.style.left = startRect.left + Math.random() * startRect.width + 'px';
+                coin.style.top = startRect.top + 'px';
+                
+                document.body.appendChild(coin);
+
+                // حساب المسار
+                const endX = endRect.left + endRect.width/2;
+                const endY = endRect.top + endRect.height/2;
+                
+                // تحريك العملة
+                coin.animate([
+                    { transform: 'scale(1)', left: coin.style.left, top: coin.style.top },
+                    { transform: 'scale(1.5)', left: `${endX}px`, top: `${endY}px` }
+                ], {
+                    duration: 1000,
+                    delay: i * 200,
+                    easing: 'ease-out',
+                    fill: 'forwards'
+                }).onfinish = () => {
+                    coin.remove();
+                    if(i === coinsCount - 1) {
+                        // تحديث عدد العملات بشكل متحرك
+                        updateCoinsDisplay(amount);
+                    }
+                };
+            }
+        }
+
+        // دالة تحديث عرض العملات
+        function updateCoinsDisplay(amount) {
+            const coinsDisplay = document.getElementById('userCoins');
+            const currentCoins = parseInt(coinsDisplay.textContent);
+            const targetCoins = currentCoins + amount;
+            let currentCount = currentCoins;
+            
+            const interval = setInterval(() => {
+                currentCount += 1;
+                coinsDisplay.textContent = currentCount;
+                if(currentCount >= targetCoins) {
+                    clearInterval(interval);
+                }
+            }, 50);
+        }
+
+        // إضافة مستمع الحدث لزر التحصيل
+        document.getElementById('newMemberReward')?.addEventListener('click', function(e) {
+            const button = e.currentTarget;
+            button.disabled = true;
+            
+            fetch('/collect_achievement_coins', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    const coinsDisplay = document.querySelector('.coins-display');
+                    const rewardStatus = button.closest('.reward-status');
+                    
+                    createFloatingCoins(button, coinsDisplay, 50);
+                    
+                    // إنشاء أيقونة النجاح
+                    const successIcon = document.createElement('i');
+                    successIcon.className = 'fas fa-check-circle text-success fs-4';
+                    
+                    // تبديل الزر بأيقونة النجاح
+                    rewardStatus.innerHTML = '';
+                    rewardStatus.appendChild(successIcon);
+                } else {
+                    alert(data.message);
+                    button.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء تحصيل المكافأة');
+                button.disabled = false;
+            });
+        });
+
+        document.getElementById('firstPurchaseReward')?.addEventListener('click', function(e) {
+            const button = e.currentTarget;
+            button.disabled = true;
+            
+            fetch('/collect_first_purchase_reward', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    const coinsDisplay = document.querySelector('.coins-display');
+                    const rewardStatus = button.closest('.reward-status');
+                    
+                    createFloatingCoins(button, coinsDisplay, 60);
+                    
+                    // إنشاء أيقونة النجاح
+                    const successIcon = document.createElement('i');
+                    successIcon.className = 'fas fa-check-circle text-success fs-4';
+                    
+                    // تبديل الزر بأيقونة النجاح
+                    rewardStatus.innerHTML = '';
+                    rewardStatus.appendChild(successIcon);
+                } else {
+                    alert(data.message);
+                    button.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء تحصيل المكافأة');
+                button.disabled = false;
+            });
+        });
     </script>
 </body>
 </html>

@@ -36,6 +36,8 @@ class User(UserMixin, db.Model):
     type_subscription = db.Column(db.String(80), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime)
+    new_member_reward_collected = db.Column(db.Boolean, default=False)
+    first_purchase_reward_collected = db.Column(db.Boolean, default=False)  # عمود جديد
     
     # العلاقات
     owned_players = db.relationship('UserPlayer', backref='owner', lazy=True, foreign_keys='UserPlayer.user_id')
@@ -203,17 +205,18 @@ class Transaction(db.Model):
     __tablename__ = 'transactions'
     
     id = db.Column(db.Integer, primary_key=True)
-    buyer_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
-    seller_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
-    user_player_id = db.Column(db.Integer, db.ForeignKey('user_players.id', ondelete='CASCADE'), nullable=False)
+    buyer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    seller_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_player_id = db.Column(db.Integer, db.ForeignKey('user_players.id'), nullable=False)
+    listing_id = db.Column(db.Integer)  # معرف القائمة في السوق
     price = db.Column(db.Integer, nullable=False)
     transaction_date = db.Column(db.DateTime, default=datetime.utcnow)
     transaction_type = db.Column(db.String(50))  # market, pack_opening
-    status = db.Column(db.String(50))  # completed, failed, refunded
+    status = db.Column(db.String(50), default='completed')  # completed, failed, refunded
+    payment_method = db.Column(db.String(50), default='coins')  # coins, subscription, etc
 
-    # دالة __repr__
     def __repr__(self):
-        return f"Transaction('{self.id}', '{self.price}', '{self.status}', '{self.transaction_type}')"
+        return f"Transaction(id={self.id}, buyer_id={self.buyer_id}, price={self.price}, status={self.status})"
 
 class Pack(db.Model):
     __tablename__ = 'packs'
