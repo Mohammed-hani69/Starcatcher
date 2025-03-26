@@ -38,14 +38,80 @@ class User(UserMixin, db.Model):
     last_login = db.Column(db.DateTime)
     new_member_reward_collected = db.Column(db.Boolean, default=False)
     first_purchase_reward_collected = db.Column(db.Boolean, default=False)  # عمود جديد
+    team_collector_reward_collected = db.Column(db.Boolean, default=False)  # Add this new column
+    rare_expert_reward_collected = db.Column(db.Boolean, default=False)
+    catalog_king_reward_collected = db.Column(db.Boolean, default=False)
     
     # العلاقات
     owned_players = db.relationship('UserPlayer', backref='owner', lazy=True, foreign_keys='UserPlayer.user_id')
-    transactions_as_buyer = db.relationship('Transaction', foreign_keys='Transaction.buyer_id', backref='buyer', lazy=True)
-    transactions_as_seller = db.relationship('Transaction', foreign_keys='Transaction.seller_id', backref='seller', lazy=True)
     pack_purchases = db.relationship('PackPurchase', backref='user', lazy=True)
     user_clubs = db.relationship('UserClub', backref='user', lazy=True)
 
+    @property
+    def has_bought_player(self):
+        """Check if user has any completed market transactions"""
+        return Transaction.query.filter_by(
+            buyer_id=self.id,
+            transaction_type='market',
+            status='completed'
+        ).first() is not None
+
+    @property
+    def has_full_team(self):
+        """Check if user has collected all players from any team"""
+        # Get all clubs
+        clubs = ClubDetail.query.all()
+        
+        for club in clubs:
+            # Get total players in this club
+            total_players = Player.query.filter_by(club_id=club.club_id).count()
+            
+            # Skip if club has no players
+            if total_players == 0:
+                continue
+                
+            # Get collected players from this club
+            collected_players = UserClub.query.filter_by(
+                user_id=self.id,
+                club_id=club.club_id
+            ).count()
+            
+            # If collected all players from any club, return True
+            if collected_players == total_players:
+                return True
+        
+        return False
+
+    @property
+    def has_rare_experts(self):
+        """Check if user has collected 10 rare players"""
+        rare_count = UserClub.query.join(Player)\
+            .filter(
+                UserClub.user_id == self.id,
+                Player.rarity == 'legendary'
+            ).count()
+        return rare_count >= 10
+
+    @property
+    def has_four_catalogs(self):
+        """Check if user has completed 4 club catalogs"""
+        completed_clubs = 0
+        clubs = ClubDetail.query.all()
+        
+        for club in clubs:
+            total_players = Player.query.filter_by(club_id=club.club_id).count()
+            if total_players == 0:
+                continue
+                
+            collected_players = UserClub.query.filter_by(
+                user_id=self.id,
+                club_id=club.club_id
+            ).count()
+            
+            if collected_players == total_players:
+                completed_clubs += 1
+                
+        return completed_clubs >= 4
 
     # دالة __repr__
     def __repr__(self):
@@ -113,7 +179,6 @@ class UserPlayer(db.Model):
     # العلاقات
     market_listing = db.relationship('UserMarketListing', backref='user_player', uselist=False, 
                                     foreign_keys='UserMarketListing.user_player_id')
-    transactions = db.relationship('Transaction', backref='user_player', lazy=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -205,9 +270,10 @@ class Transaction(db.Model):
     __tablename__ = 'transactions'
     
     id = db.Column(db.Integer, primary_key=True)
-    buyer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    seller_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    user_player_id = db.Column(db.Integer, db.ForeignKey('user_players.id'), nullable=False)
+    buyer_id = db.Column(db.Integer,  nullable=False)
+    seller_id = db.Column(db.Integer,  nullable=False)
+    # Remove the foreign key constraint and keep only the integer column
+    user_player_id = db.Column(db.Integer, nullable=True)  # Changed from ForeignKey to simple Integer
     listing_id = db.Column(db.Integer)  # معرف القائمة في السوق
     price = db.Column(db.Integer, nullable=False)
     transaction_date = db.Column(db.DateTime, default=datetime.utcnow)

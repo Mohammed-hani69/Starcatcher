@@ -253,7 +253,7 @@
         
         .premium-btn {
             background-color: var(--accent-gold);
-            color: var(--black);
+            color: var (--black);
         }
         
         .premium-btn:hover {
@@ -1260,16 +1260,16 @@
             
             function updateCountdown() {
                 const now = Math.floor(Date.now() / 1000);
-                const timeRemaining = dailyPackEndTimestamp - now;
+                const timeRemaining = Math.floor(dailyPackEndTimestamp - now);
 
                 if (timeRemaining > 0) {
                     const hours = Math.floor(timeRemaining / 3600);
                     const minutes = Math.floor((timeRemaining % 3600) / 60);
-                    const seconds = timeRemaining % 60;
+                    const seconds = Math.floor(timeRemaining % 60);
 
-                    document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-                    document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-                    document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+                    document.getElementById('hours').textContent = Math.floor(hours).toString().padStart(2, '0');
+                    document.getElementById('minutes').textContent = Math.floor(minutes).toString().padStart(2, '0');
+                    document.getElementById('seconds').textContent = Math.floor(seconds).toString().padStart(2, '0');
                 } else {
                     // عند انتهاء الوقت
                     const countdownText = document.querySelector('.countdown-text');

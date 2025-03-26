@@ -820,3 +820,185 @@ h2::after {
 .form-group {
     flex: 1; /* يجعل كل عنصر يأخذ نصف العرض */
 }
+
+/* Enhanced Responsive Design */
+@media screen and (max-width: 1200px) {
+    body {
+        grid-template-columns: 250px 1fr;
+    }
+
+    .clubs-container {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+}
+
+@media screen and (max-width: 768px) {
+    body {
+        grid-template-areas: 
+            "header"
+            "main";
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        transform: translateX(100%);
+        z-index: 1000;
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .menu-toggle {
+        display: block;
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        z-index: 1001;
+        background: rgba(255,0,0,0.1);
+        border: none;
+        border-radius: 8px;
+        width: 45px;
+        height: 45px;
+        color: white;
+        cursor: pointer;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    }
+
+    .menu-toggle:hover {
+        background: rgba(255,0,0,0.2);
+        transform: scale(1.05);
+    }
+
+    .menu-toggle:active {
+        transform: scale(0.95);
+    }
+
+    .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+        backdrop-filter: blur(3px);
+    }
+
+    .overlay.active {
+        display: block;
+    }
+
+    .main-content {
+        margin-right: 0;
+        padding: 80px 15px 15px;
+    }
+
+    .form-container {
+        padding: 20px;
+        margin: 0;
+        border-radius: 0;
+        width: 100%;
+    }
+
+    .upload-container {
+        grid-template-columns: 1fr;
+    }
+
+    .header {
+        padding: 0 60px 0 15px;
+    }
+
+    .search-box {
+        width: 100%;
+        max-width: 200px;
+    }
+
+    .header-actions {
+        gap: 10px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .header-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .search-box {
+        max-width: 100%;
+    }
+
+    .club-card {
+        height: auto;
+        min-height: 350px;
+    }
+
+    .club-name {
+        font-size: 1.4em;
+    }
+
+    .form-input {
+        font-size: 16px; /* Prevents zoom on mobile */
+    }
+}
+
+/* Enhanced Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.nav-item, .club-card {
+    animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Smooth Scrolling */
+.sidebar, .main-content {
+    scroll-behavior: smooth;
+}
+
+/* Touch-friendly Interactions */
+@media (hover: none) {
+    .nav-item {
+        padding: 15px 25px;
+    }
+
+    .action-btn {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+/* Loading States */
+.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--primary-color);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

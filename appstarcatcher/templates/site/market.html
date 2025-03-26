@@ -663,31 +663,86 @@
 
         /* Toastify Custom Styles */
         .toast-success {
-            background: linear-gradient(135deg, #28a745, #20c997) !important;
-            border-radius: 10px !important;
-            font-family: 'Tajawal', sans-serif !important;
+            background: linear-gradient(135deg, #2ecc71, #27ae60) !important;
+            border-radius: 12px !important;
+            font-family: 'Cairo', sans-serif !important;
+            font-weight: 500 !important;
+            padding: 0 !important;
+            opacity: 0;
+            animation: fadeInOut 3s ease forwards;
+            direction: rtl !important;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2) !important;
+            overflow: hidden;
+            position: relative;
         }
         
         .toast-error {
-            background: linear-gradient(135deg, #dc3545, #c81d25) !important;
-            border-radius: 10px !important;
-            font-family: 'Tajawal', sans-serif !important;
+            background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+            border-radius: 12px !important;
+            font-family: 'Cairo', sans-serif !important;
+            font-weight: 500 !important;
+            padding: 0 !important;
+            opacity: 0;
+            animation: fadeInOut 3s ease forwards;
+            direction: rtl !important;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.2) !important;
+            overflow: hidden;
+            position: relative;
         }
 
         .toast-container {
-            padding: 15px 25px;
+            position: relative;
             display: flex;
-            align-items: center;
-            gap: 10px;
+            align-items: stretch;
+            min-width: 280px;
+            max-width: 100%;
         }
 
         .toast-icon {
-            font-size: 1.2rem;
+            display: none;
         }
 
         .toast-message {
             font-size: 0.95rem;
             font-weight: 500;
+            color: white;
+            padding: 12px 20px;
+            position: relative;
+            width: 100%;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .toast-message::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            clip-path: circle(180% at 0 50%);
+            z-index: -1;
+        }
+
+        @media (max-width: 576px) {
+            .toast-container {
+                min-width: auto;
+                width: calc(100% - 32px);
+                margin: 0 16px;
+            }
+
+            .toast-message {
+                font-size: 0.9rem;
+                padding: 10px 15px;
+            }
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-20px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
         }
 
         /* Responsive Navbar Styling */
@@ -738,6 +793,222 @@
         @media (max-width: 768px) {
             .world-cup-badge {
                 display: none;
+            }
+        }
+
+        /* Fixed Header */
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, var(--primary-red), var(--dark-gray));
+        }
+
+        .site-header.scrolled {
+            padding: 10px 0;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Toastify Custom Styles */
+        .toast-success, .toast-error {
+            position: fixed !important;
+            z-index: 9999 !important;
+            background: #2ecc71 !important;
+            border-radius: 15px !important;
+            font-family: 'Cairo', sans-serif !important;
+            font-weight: 600 !important;
+            padding: 0 !important;
+            min-width: 300px !important;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            backdrop-filter: blur(10px) !important;
+        }
+
+        .toast-container {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            gap: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+        }
+
+        .toast-icon-wrapper {
+            width: 35px;
+            height: 35px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast-icon {
+            font-size: 1.2rem;
+            color: white;
+            animation: scaleUp 0.3s ease;
+        }
+
+        .toast-message {
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 500;
+            flex: 1;
+            text-align: right;
+        }
+
+        @keyframes scaleUp {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 576px) {
+            .toast-container {
+                width: 90vw;
+                margin: 0 auto;
+                padding: 12px 15px;
+            }
+
+            .toast-icon-wrapper {
+                width: 30px;
+                height: 30px;
+            }
+
+            .toast-message {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Custom Confirmation Modal */
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .confirm-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .confirm-dialog {
+            background: linear-gradient(135deg, var(--lighter-gray), var(--dark-gray));
+            border-radius: 15px;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            margin: auto;
+            position: relative;
+            transform: translateY(-50px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .confirm-modal.active .confirm-dialog {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .confirm-title {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .confirm-content {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+
+        .price-display {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            color: var(--gold);
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .confirm-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cairo', sans-serif;
+            min-width: 100px;
+        }
+
+        .confirm-btn-yes {
+            background: var(--primary-red);
+            color: white;
+        }
+
+        .confirm-btn-yes:hover {
+            background: #c81d25;
+            transform: translateY(-2px);
+        }
+
+        .confirm-btn-no {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .confirm-btn-no:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 576px) {
+            .confirm-dialog {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .confirm-title {
+                font-size: 1.1rem;
+            }
+
+            .confirm-content {
+                font-size: 0.9rem;
+            }
+
+            .confirm-buttons {
+                flex-direction: column;
+            }
+
+            .confirm-btn {
+                width: 100%;
+                padding: 10px;
             }
         }
         
@@ -954,17 +1225,56 @@
         </nav>
     </div>
     
+    <!-- Confirmation Modal -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-dialog">
+            <h3 class="confirm-title">تأكيد الشراء</h3>
+            <div class="confirm-content">
+                هل أنت متأكد من شراء هذا اللاعب؟
+                <div class="price-display">
+                    <i class="fas fa-coins"></i>
+                    <span id="playerPrice">0</span>
+                    <span>عملة</span>
+                </div>
+            </div>
+            <div class="confirm-buttons">
+                <button class="confirm-btn confirm-btn-yes" id="confirmYes">
+                    <i class="fas fa-check me-1"></i> نعم، اشتري
+                </button>
+                <button class="confirm-btn confirm-btn-no" id="confirmNo">
+                    <i class="fas fa-times me-1"></i> إلغاء
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.js"></script>
     <script>
+        // Header Scroll Effect
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('.site-header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
         function showNotification(message, type = 'success') {
-            const icon = type === 'success' ? '✓' : '✕';
+            const icons = {
+                success: '<i class="fas fa-check-circle"></i>',
+                error: '<i class="fas fa-times-circle"></i>'
+            };
+            
             Toastify({
                 text: `
                     <div class="toast-container">
-                        <span class="toast-icon">${icon}</span>
+                        <div class="toast-icon-wrapper">
+                            <span class="toast-icon">${icons[type]}</span>
+                        </div>
                         <span class="toast-message">${message}</span>
                     </div>
                 `,
@@ -973,15 +1283,47 @@
                 position: "center",
                 className: `toast-${type}`,
                 escapeMarkup: false,
-                stopOnFocus: true
+                stopOnFocus: true,
+                offset: {
+                    y: 100
+                },
+                style: {
+                    fontFamily: 'Cairo, sans-serif',
+                    background: 'transparent'
+                }
             }).showToast();
         }
 
-        function buyPlayer(listingId, price) {
-            if (!confirm(`هل أنت متأكد من شراء هذا اللاعب مقابل ${price} عملة؟`)) {
-                return;
-            }
+        function showConfirmModal(listingId, price) {
+            const modal = document.getElementById('confirmModal');
+            const priceDisplay = document.getElementById('playerPrice');
+            const confirmYes = document.getElementById('confirmYes');
+            const confirmNo = document.getElementById('confirmNo');
+            
+            priceDisplay.textContent = price;
+            modal.classList.add('active');
+            
+            confirmYes.onclick = () => {
+                modal.classList.remove('active');
+                processPurchase(listingId, price);
+            };
+            
+            confirmNo.onclick = () => {
+                modal.classList.remove('active');
+            };
+            
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            };
+        }
 
+        function buyPlayer(listingId, price) {
+            showConfirmModal(listingId, price);
+        }
+
+        function processPurchase(listingId, price) {
             fetch('/buy_market_player', {
                 method: 'POST',
                 headers: {
@@ -1002,9 +1344,9 @@
                         setTimeout(() => playerCard.parentElement.remove(), 500);
                     }
                     
-                    const coinsDisplay = document.querySelector('.user-coins');
+                    const coinsDisplay = document.querySelector('.coins-display');
                     if (coinsDisplay && data.data.remaining_coins !== undefined) {
-                        coinsDisplay.textContent = data.data.remaining_coins;
+                        coinsDisplay.innerHTML = `<i class="fas fa-coins me-2"></i>${data.data.remaining_coins} عملة`;
                     }
                 } else {
                     showNotification(data.message || 'حدث خطأ أثناء عملية الشراء', 'error');

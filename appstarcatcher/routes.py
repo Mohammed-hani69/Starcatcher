@@ -19,6 +19,7 @@ from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 from appstarcatcher.forms import AdminMarketListingForm, ClubForm, LoginForm, PackForm, PlayerForm, RegistrationForm, SubscriptionForm
 from appstarcatcher.models import AdminMarketListing, ClubDetail, GeneratedPlayer, Pack, PackPurchase, Player, Subscription, Transaction, User, UserClub, UserPlayer, UserSubscriptionPurchase, generate_random_code
+from appstarcatcher.utils.image_handler import save_image, delete_image
 
 # دالة التحقق من كلمة المرور
 def verify_password(password_hash, password):
@@ -234,6 +235,7 @@ def toggle_admin(user_id):
 
 @app.route('/update_profile_image', methods=['POST'])
 @login_required
+@csrf.exempt
 def update_profile_image():
     try:
         if 'image' not in request.files:
@@ -250,31 +252,28 @@ def update_profile_image():
             }), 400
 
         if file:
-            # التأكد من أن الملف هو صورة
-            if not file.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
+            # حفظ الصورة الجديدة مع التحسين
+            filename = f"profile_{current_user.id}_{int(time.time())}"
+            new_filename = save_image(file, app.config['UPLOAD_FOLDER'], filename)
+            
+            if not new_filename:
                 return jsonify({
                     'status': 'error',
-                    'message': 'نوع الملف غير مدعوم. يرجى اختيار صورة'
+                    'message': 'فشل في معالجة الصورة'
                 }), 400
-
-            filename = secure_filename(f"profile_{current_user.id}_{int(time.time())}{os.path.splitext(file.filename)[1]}")
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
             # حذف الصورة القديمة إذا وجدت
             if current_user.image_url:
-                old_filepath = os.path.join(app.config['UPLOAD_FOLDER'], current_user.image_url)
-                if os.path.exists(old_filepath):
-                    os.remove(old_filepath)
+                delete_image(current_user.image_url, app.config['UPLOAD_FOLDER'])
 
-            # حفظ الصورة الجديدة
-            file.save(filepath)
-            current_user.image_url = filename
+            # تحديث قاعدة البيانات
+            current_user.image_url = new_filename
             db.session.commit()
 
             return jsonify({
                 'status': 'success',
-                'message': 'تم تحديث الصورة بنجاح',
-                'image_url': url_for('static', filename=f'uploads/profile_images/{filename}')
+                'message': 'تم تحديث وتحسين الصورة بنجاح',
+                'image_url': url_for('static', filename=f'uploads/profile_images/{new_filename}')
             })
 
     except Exception as e:
@@ -289,6 +288,7 @@ def update_profile_image():
 
 @app.route('/collect_achievement_coins', methods=['POST'])
 @login_required
+@csrf.exempt
 def collect_achievement_coins():
     try:
         # التحقق مما إذا كان المستخدم قد جمع هذه المكافأة من قبل
@@ -324,6 +324,7 @@ def collect_achievement_coins():
 
 @app.route('/collect_first_purchase_reward', methods=['POST'])
 @login_required
+@csrf.exempt
 def collect_first_purchase_reward():
     try:
         if not current_user.first_purchase_reward_collected:
@@ -353,6 +354,7 @@ def collect_first_purchase_reward():
 
 # إنشاء باكج جديد
 @app.route('/packs', methods=['POST'])
+@csrf.exempt  # إضافة استثناء CSRF
 def create_pack():
     if request.method == 'POST':
         try:
@@ -366,7 +368,7 @@ def create_pack():
                 filename = secure_filename(file.filename)  # تأكيد الاسم الآمن
                 filepath = os.path.join(app.config['UPLOAD_FOLDER_PACKS'], filename)  # تحديد المسار الكامل
                 file.save(filepath)  # حفظ الصورة في المجلد
-                image_url = f'/static/uploads/packs/{filename}'  # المسار الذي سيتم عرضه للمستخدم   
+                image_url = f'{filename}'  # المسار الذي سيتم عرضه للمستخدم   
             
             # تجميع نسب النادرية
             rarity_odds = {
@@ -413,11 +415,102 @@ def create_pack():
         
 
 
+
+@app.route('/update_user_coins/<int:user_id>', methods=['POST'])
+@login_required
+@admin_required
+def update_user_coins(user_id):
+    try:
+        data = request.get_json()
+        amount = data.get('amount', 0)
+
+        # التحقق من وجود المستخدم
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'المستخدم غير موجود'
+            }), 404
+
+        # التحقق من صحة القيمة
+        if not isinstance(amount, (int, float)):
+            return jsonify({
+                'status': 'error',
+                'message': 'قيمة غير صحيحة للعملات'
+            }), 400
+
+        # التأكد من أن الرصيد لن يصبح سالباً
+        new_balance = user.coins + amount
+        if new_balance < 0:
+            return jsonify({
+                'status': 'error',
+                'message': 'لا يمكن أن يكون رصيد العملات سالباً'
+            }), 400
+
+        # تحديث قيمة العملات
+        user.coins = new_balance
+        db.session.commit()
+
+        return jsonify({
+            'status': 'success',
+            'message': f'تم تحديث رصيد العملات بنجاح',
+            'new_balance': new_balance
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': f'حدث خطأ أثناء تحديث العملات: {str(e)}'
+        }), 500
+
+
+@app.route('/set_user_coins/<int:user_id>', methods=['POST'])
+@login_required
+@admin_required
+def set_user_coins(user_id):
+    try:
+        data = request.get_json()
+        new_coins = data.get('coins', 0)
+
+        # التحقق من وجود المستخدم
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'المستخدم غير موجود'
+            }), 404
+
+        # التحقق من صحة القيمة
+        if not isinstance(new_coins, (int, float)) or new_coins < 0:
+            return jsonify({
+                'status': 'error',
+                'message': 'قيمة غير صحيحة للعملات'
+            }), 400
+
+        # تحديث قيمة العملات
+        user.coins = new_coins
+        db.session.commit()
+
+        return jsonify({
+            'status': 'success',
+            'message': 'تم تحديث رصيد العملات بنجاح',
+            'new_balance': new_coins
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': f'حدث خطأ أثناء تحديث العملات: {str(e)}'
+        }), 500
+
+
 #==================================  حذف الباكج
 
 # حذف باكج
 @app.route('/packs/<int:pack_id>', methods=['DELETE'])
-@csrf.exempt
+@csrf.exempt  # إضافة استثناء CSRF
 def delete_pack(pack_id):
     try:
         if not current_user.is_authenticated or not current_user.is_admin:
@@ -1053,30 +1146,36 @@ def add_subscription():
                            subscriptions=subscriptions,
                            username=current_user.username)
 
-
 @app.route('/delete_subscription/<int:id>', methods=['DELETE'])
+@csrf.exempt  # Add CSRF exemption
 def delete_subscription(id):
-    try:
-        # طباعة رسالة تشخيص
-        print(f"Attempting to delete club with ID: {id}")
+    if not request.is_json:
+        return jsonify({
+            "status": "error",
+            "message": "Content-Type must be application/json"
+        }), 400
         
+    try:
         subscription = Subscription.query.get(id)
         
         if subscription is None:
-            print(f"Club with ID {id} not found")
-            return jsonify({"message": "النادي غير موجود"}), 404
+            return jsonify({
+                "status": "error",
+                "message": "الاشتراك غير موجود"
+            }), 404
             
         db.session.delete(subscription)
         db.session.commit()
         
-        print(f"Successfully deleted club with ID: {id}")
-        return jsonify({"message": "تم الحذف بنجاح"}), 200
+        return jsonify({
+            "status": "success", 
+            "message": "تم حذف الاشتراك بنجاح"
+        }), 200
         
     except Exception as e:
-        # طباعة تفاصيل الخطأ
-        print(f"Error deleting club: {str(e)}")
         db.session.rollback()
         return jsonify({
+            "status": "error",
             "message": "حدث خطأ أثناء الحذف",
             "error": str(e)
         }), 500
@@ -1085,6 +1184,7 @@ def delete_subscription(id):
 
 @app.route('/buy_market_player', methods=['POST'])
 @login_required
+@csrf.exempt
 def buy_market_player():
     try:
         data = request.get_json()
@@ -1766,7 +1866,7 @@ def add_to_catalog():
         existing_entry = UserClub.query.filter_by(user_id=user_id, player_id=player_id).first()
         if existing_entry:
             return jsonify({"status": "error", "message": "اللاعب مضاف بالفعل إلى الكتالوج"}), 409
-
+        
         # ✅ إضافة اللاعب إلى `UserClub`
         new_entry = UserClub(user_id=user_id, player_id=player_id, club_id=player.club_id)
         db.session.add(new_entry)
@@ -2222,6 +2322,7 @@ def profile():
         
 # إضافة route للتعامل مع طلبات شحن المحفظة
 @app.route('/recharge-wallet', methods=['POST'])
+@csrf.exempt
 @login_required
 def recharge_wallet():
     try:
@@ -2450,6 +2551,7 @@ def sell_player():
 
 @app.route('/open_package/<int:pack_id>', methods=['POST', 'OPTIONS'])
 @csrf.exempt
+@login_required
 def open_package(pack_id):
     if request.method == 'OPTIONS':
         return '', 200
@@ -2569,6 +2671,7 @@ def open_package(pack_id):
 # 🎯 API لتوليد اللاعبين من فئة معينة مرة واحدة يوميًا
 @app.route('/generate_daily_pack', methods=['POST'])
 @login_required
+@csrf.exempt
 def generate_daily_pack():
     try:
         # Check if user already generated today
@@ -2673,6 +2776,7 @@ def market():
 
 @app.route('/update_profile', methods=['POST'])
 @login_required
+@csrf.exempt
 def update_profile():
     try:
         data = request.get_json()
@@ -2721,4 +2825,120 @@ def update_profile():
             'status': 'error',
             'message': str(e)
         }), 500
+
+
+@app.route('/collect_team_collector_reward', methods=['POST'])
+@login_required
+@csrf.exempt
+def collect_team_collector_reward():
+    try:
+        if not current_user.has_full_team:
+            return jsonify({
+                'status': 'error',
+                'message': 'لم تجمع فريق كامل بعد'
+            }), 400
+            
+        if current_user.team_collector_reward_collected:
+            return jsonify({
+                'status': 'error',
+                'message': 'تم تحصيل هذه المكافأة مسبقاً'
+            }), 400
+            
+        # إضافة العملات للمستخدم
+        current_user.coins += 100
+        # تحديث حالة تحصيل المكافأة
+        current_user.team_collector_reward_collected = True
+        
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'تم تحصيل 100 عملة بنجاح!',
+            'new_balance': current_user.coins
+        })
+            
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+# ...existing code...
+
+@app.route('/collect_rare_expert_reward', methods=['POST'])
+@login_required
+@csrf.exempt
+def collect_rare_expert_reward():
+    try:
+        if not current_user.has_rare_experts:
+            return jsonify({
+                'status': 'error',
+                'message': 'لم تجمع 10 لاعبين خارقين بعد'
+            }), 400
+            
+        if current_user.rare_expert_reward_collected:
+            return jsonify({
+                'status': 'error',
+                'message': 'تم تحصيل هذه المكافأة مسبقاً'
+            }), 400
+            
+        # إضافة العملات للمستخدم
+        current_user.coins += 150
+        # تحديث حالة تحصيل المكافأة
+        current_user.rare_expert_reward_collected = True
+        
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'تم تحصيل 150 عملة بنجاح!',
+            'new_balance': current_user.coins
+        })
+            
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@app.route('/collect_catalog_king_reward', methods=['POST'])
+@login_required
+@csrf.exempt
+def collect_catalog_king_reward():
+    try:
+        if not current_user.has_four_catalogs:
+            return jsonify({
+                'status': 'error',
+                'message': 'لم تكمل 4 كتالوجات بعد'
+            }), 400
+            
+        if current_user.catalog_king_reward_collected:
+            return jsonify({
+                'status': 'error',
+                'message': 'تم تحصيل هذه المكافأة مسبقاً'
+            }), 400
+            
+        # إضافة العملات للمستخدم
+        current_user.coins += 200
+        # تحديث حالة تحصيل المكافأة
+        current_user.catalog_king_reward_collected = True
+        
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'تم تحصيل 200 عملة بنجاح!',
+            'new_balance': current_user.coins
+        })
+            
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+# ...existing code...
 

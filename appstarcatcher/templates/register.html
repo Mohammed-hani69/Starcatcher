@@ -12,6 +12,7 @@
         
         :root {
             --neon-red: #ff1744;
+            --neon-yellow:rgb(255, 230, 0);
             --neon-black: #2d2d2d;
             --neon-glow: #ff447c;
             --dark-gradient-1: #1a1a1a;
@@ -19,7 +20,7 @@
         }
 
         body {
-            background-color: var(--neon-black);
+            background: linear-gradient(135deg, var(--dark-gradient-1), var(--dark-gradient-2));
             color: white;
             font-family: 'Cairo', sans-serif;
             position: relative;
@@ -27,90 +28,129 @@
             min-height: 100vh;
         }
 
-        .background-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at center, rgba(255, 23, 68, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
-            z-index: -1;
-            animation: pulse 8s infinite alternate;
-        }
-
-        @keyframes pulse {
-            0% {
-                opacity: 0.2;
-                transform: scale(1);
-            }
-            100% {
-                opacity: 0.5;
-                transform: scale(1.2);
-            }
-        }
-
         .register-container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 30px auto;
-            padding: 30px;
-            background: rgba(20, 20, 20, 0.9);
-            border-radius: 20px;
-            box-shadow: 0 0 25px var(--neon-red),
-                        0 0 45px rgba(255, 23, 68, 0.3);
-            border: 2px solid var(--neon-red);
+            padding: 40px;
+            background: rgba(20, 20, 20, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             position: relative;
             overflow: hidden;
-            transition: all 0.4s ease;
+        }
+
+        /* إضافة العناصر المتحركة للحدود */
+        .register-container::before,
+        .register-container::after,
+        .register-container .border-top,
+        .register-container .border-bottom {
+            content: '';
+            position: absolute;
+            background: linear-gradient(90deg, transparent, var(--neon-yellow), transparent);
+        }
+
+        /* الحدود الأفقية */
+        .register-container::before,
+        .register-container::after {
+            width: 100%;
+            height: 3px;
+            left: 0;
         }
 
         .register-container::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            width: calc(100% + 4px);
-            height: calc(100% + 4px);
-            background: linear-gradient(45deg, 
-                var(--neon-red), transparent, transparent, var(--neon-red),
-                transparent, transparent, var(--neon-red));
-            z-index: -1;
-            animation: glowing 20s linear infinite;
-            background-size: 400%;
-            border-radius: 20px;
-            opacity: 0.5;
+            top: 0;
+            animation: slideRight 3s linear infinite;
         }
 
-        @keyframes glowing {
-            0% { background-position: 0 0; }
-            50% { background-position: 400% 0; }
-            100% { background-position: 0 0; }
+        .register-container::after {
+            bottom: 0;
+            animation: slideLeft 3s linear infinite;
+        }
+
+        /* الحدود الرأسية */
+        .register-container .border-top,
+        .register-container .border-bottom {
+            width: 3px;
+            height: 100%;
+            top: 0;
+        }
+
+        .register-container .border-top {
+            right: 0;
+            animation: slideDown 3s linear infinite;
+            background: linear-gradient(180deg, transparent, var(--neon-yellow), transparent);
+        }
+
+        .register-container .border-bottom {
+            left: 0;
+            animation: slideUp 3s linear infinite;
+            background: linear-gradient(180deg, transparent, var(--neon-yellow), transparent);
+        }
+
+        /* تعريف الحركات */
+        @keyframes slideRight {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes slideLeft {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes slideDown {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        @keyframes slideUp {
+            0% { transform: translateY(100%); }
+            100% { transform: translateY(-100%); }
         }
 
         .form-control {
-            background-color: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--neon-red);
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 23, 68, 0.2);
             color: white;
             transition: all 0.3s ease;
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 15px;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .form-control:focus {
-            background-color: rgba(255, 255, 255, 0.15);
-            border-color: var(--neon-glow);
-            box-shadow: 0 0 15px var(--neon-red);
-            color: white;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: var(--neon-red);
+            box-shadow: 0 0 20px rgba(255, 23, 68, 0.2);
             transform: translateY(-2px);
+            color: white;
+        }
+
+        /* Add styles for select elements */
+        select.form-control {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        select.form-control option {
+            background-color: var(--neon-black);
+            color: white;
         }
 
         .form-label {
-            color: var(--neon-red);
+            color: rgba(255, 255, 255, 0.9);
             font-weight: 500;
-            margin-bottom: 8px;
-            text-shadow: 0 0 5px rgba(255, 23, 68, 0.5);
+            margin-bottom: 12px;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
+            gap: 8px;
         }
 
         .form-label i {
@@ -118,17 +158,15 @@
         }
 
         .btn-primary {
-            background: var(--neon-red);
+            background: linear-gradient(45deg, var(--neon-red), var(--neon-glow));
             border: none;
-            padding: 12px 40px;
-            text-transform: uppercase;
-            font-weight: bold;
-            box-shadow: 0 0 15px var(--neon-red);
+            padding: 15px 50px;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(255, 23, 68, 0.3);
             transition: all 0.3s ease;
-            border-radius: 50px;
+            border-radius: 100px;
             position: relative;
             overflow: hidden;
-            letter-spacing: 1px;
         }
 
         .btn-primary::before {
@@ -143,9 +181,9 @@
         }
 
         .btn-primary:hover {
-            background: var(--neon-glow);
-            box-shadow: 0 0 25px var(--neon-red), 0 0 50px rgba(255, 23, 68, 0.5);
-            transform: scale(1.05) translateY(-3px);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 23, 68, 0.4);
+            background: linear-gradient(45deg, var(--neon-glow), var(--neon-red));
         }
 
         .btn-primary:hover::before {
@@ -153,10 +191,9 @@
         }
 
         h2 {
-            color: var(--neon-red);
-            text-shadow: 0 0 10px var(--neon-red), 0 0 20px rgba(255, 23, 68, 0.5);
+            color: white;
             font-weight: 700;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             position: relative;
             display: inline-block;
             padding-bottom: 15px;
@@ -166,11 +203,10 @@
             content: '';
             position: absolute;
             bottom: 0;
-            left: 30%;
-            width: 40%;
+            left: 25%;
+            width: 50%;
             height: 3px;
-            background: var(--neon-red);
-            box-shadow: 0 0 10px var(--neon-red);
+            background: linear-gradient(90deg, transparent, var(--neon-red), transparent);
             border-radius: 50px;
         }
 
@@ -189,14 +225,12 @@
         }
 
         .preview-image {
-            max-width: 150px;
-            max-height: 150px;
-            margin-top: 10px;
-            border: 2px solid var(--neon-red);
-            box-shadow: 0 0 10px var(--neon-red);
-            border-radius: 50%;
+            max-width: 120px;
+            max-height: 120px;
+            border-radius: 20px;
             object-fit: cover;
             transition: all 0.3s ease;
+            border: 2px solid rgba(255, 23, 68, 0.2);
         }
 
         .preview-image:hover {
@@ -290,12 +324,11 @@
         }
 
         .login-link {
-            margin-top: 20px;
-            text-align: center;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            transition: all 0.3s ease;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
         }
 
         .login-link:hover {
@@ -400,6 +433,8 @@
     
     <div class="container">
         <div class="register-container">
+            <div class="border-top"></div>
+            <div class="border-bottom"></div>
             <h2 class="text-center mb-4">إنشاء حساب جديد</h2>
             
             <div class="alert alert-info">

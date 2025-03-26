@@ -714,16 +714,24 @@
                     // إزالة العنصر بعد انتهاء التأثير
                     setTimeout(() => {
                         playerCard.remove();
-                        reorganizeGrid();
+                        checkEmptyGrid();
                     }, 500);
                 }
             }
 
-            // دالة إعادة تنظيم الشبكة
-            function reorganizeGrid() {
+            // دالة التحقق من الشبكة الفارغة
+            function checkEmptyGrid() {
                 const grid = document.querySelector('.players-grid');
-                if (grid) {
-                    grid.style.gap = '15px';
+                const remainingCards = grid.querySelectorAll('.player-card');
+
+                if (remainingCards.length === 0) {
+                    // إذا لم يتبق أي لاعبين، أظهر رسالة "لا يوجد لاعبين"
+                    grid.innerHTML = `
+                        <div class="no-players-message">
+                            <i class="fas fa-user-slash"></i>
+                            <h3>لا يوجد لاعبين</h3>
+                            <p>لم تقم بإضافة أي لاعبين بعد</p>
+                        </div>`;
                 }
             }
 
@@ -755,7 +763,7 @@
                 })
                 .then(data => {
                     if (data.status === 'success') {
-                        // إزالة بطاقة اللاعب من العرض بتأثير متحرك
+                        // إزالة بطاقة اللاعب من العرض
                         removePlayerCard(window.selectedPlayer.id);
                         
                         // إغلاق النافذة المنبثقة
@@ -873,13 +881,18 @@
                 })
                 .then(data => {
                     if (data.status === 'success') {
-                        // إزالة بطاقة اللاعب بتأثير متحرك
+                        // إزالة بطاقة اللاعب
                         removePlayerCard(window.selectedPlayer.id);
                         
                         // إغلاق النافذة المنبثقة
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('playerActionsModal'));
-                        if (modal) {
-                            modal.hide();
+                        document.getElementById('sellConfirmOverlay').classList.remove('show');
+                        document.getElementById('sellConfirmModal').classList.remove('show');
+
+                        // تحديث عرض العملات في الناف بار
+                        const coinsDisplay = document.querySelector('.coins-display');
+                        if (coinsDisplay) {
+                            const currentCoins = parseInt(coinsDisplay.textContent.match(/\d+/)[0]);
+                            coinsDisplay.innerHTML = `<i class="fas fa-coins me-2"></i>${currentCoins + price} عملة`;
                         }
 
                         // عرض رسالة نجاح
@@ -901,27 +914,93 @@
             const filterButtons = document.querySelectorAll('.filter-btn');
             const playerCards = document.querySelectorAll('.player-card');
 
-            searchInput.addEventListener('input', filterPlayers);
-            filterButtons.forEach(btn => btn.addEventListener('click', function() {
-                filterButtons.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                filterPlayers();
-            }));
-
             function filterPlayers() {
-                const searchTerm = searchInput.value.toLowerCase();
+                const searchQuery = searchInput.value.toLowerCase().trim();
                 const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+                let hasVisibleCards = false;
 
                 playerCards.forEach(card => {
-                    const playerName = card.querySelector('.player-name').textContent.toLowerCase();
+                    const playerData = JSON.parse(card.getAttribute('data-player').replace(/&quot;/g, '"').replace(/&#39;/g, "'"));
+                    const playerName = playerData.name.toLowerCase();
                     const playerRarity = card.dataset.rarity;
-                    
-                    const matchesSearch = playerName.includes(searchTerm);
+                    const playerNationality = playerData.nationality.toLowerCase();
+                    const playerPosition = playerData.position.toLowerCase();
+                    const playerClub = playerData.club_name.toLowerCase();
+
+                    // تحسين البحث ليشمل عدة معايير
+                    const matchesSearch = searchQuery === '' || 
+                        playerName.includes(searchQuery) ||
+                        playerNationality.includes(searchQuery) ||
+                        playerPosition.includes(searchQuery) ||
+                        playerClub.includes(searchQuery);
+
                     const matchesFilter = activeFilter === 'all' || playerRarity === activeFilter;
 
-                    card.style.display = matchesSearch && matchesFilter ? 'block' : 'none';
+                    if (matchesSearch && matchesFilter) {
+                        // إظهار البطاقة مع تأثير حركي
+                        card.style.display = 'block';
+                        requestAnimationFrame(() => {
+                            card.style.opacity = '1';
+                            card.style.transform = 'scale(1)';
+                        });
+                        hasVisibleCards = true;
+                    } else {
+                        // إخفاء البطاقة مع تأثير حركي
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            card.style.display = 'none';
+                        }, 300);
+                    }
                 });
+
+                // عرض رسالة عندما لا توجد نتائج
+                const grid = document.querySelector('.players-grid');
+                const existingMessage = grid.querySelector('.no-players-message');
+
+                if (!hasVisibleCards) {
+                    if (!existingMessage) {
+                        const noResults = document.createElement('div');
+                        noResults.className = 'no-players-message';
+                        noResults.innerHTML = `
+                            <i class="fas fa-search"></i>
+                            <h3>لا توجد نتائج</h3>
+                            <p>لم يتم العثور على لاعبين مطابقين لـ "${searchQuery}"</p>
+                        `;
+                        grid.appendChild(noResults);
+
+                        requestAnimationFrame(() => {
+                            noResults.style.opacity = '0';
+                            noResults.style.transition = 'opacity 0.3s ease';
+                            requestAnimationFrame(() => {
+                                noResults.style.opacity = '1';
+                            });
+                        });
+                    }
+                } else if (existingMessage) {
+                    existingMessage.remove();
+                }
             }
+
+            // تحسين أداء البحث باستخدام debounce
+            let searchTimeout;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    filterPlayers();
+                }, 300);
+            });
+
+            // تحديث placeholder لتوضيح إمكانيات البحث
+            searchInput.placeholder = "ابحث عن لاعب (الاسم، الجنسية، المركز، النادي)";
+
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    filterButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    filterPlayers();
+                });
+            });
         });
     </script>
 </body>

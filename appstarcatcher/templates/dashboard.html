@@ -68,6 +68,13 @@
 
         <!-- Header -->
         <header class="header">
+            <!-- إضافة زر القائمة -->
+            <div class="burger-menu">
+                <div class="burger-line"></div>
+                <div class="burger-line"></div>
+                <div class="burger-line"></div>
+            </div>
+            
             <h2 class="header-title">Catcher<span style="color:red">Star</span></h2>
             
             <div class="header-actions">
@@ -140,7 +147,10 @@
                             <!-- Image Section (Right Side) -->
                             <div class="player-image-container">
                                 {% if listings.player_image_url %}
-                                    <img src="static/uploads/image_player/{{ listings.player_image_url }}" alt="{{ listings.player_name }}" class="player-image">
+                                    <img src="{{ url_for('static', filename='uploads/image_player/' + listings.player_image_url) }}" 
+                                         alt="{{ listings.player_name }}" 
+                                         class="player-image"
+                                         onerror="this.src='static/image/STAR CATCHER FINAL LOGO-11.png';">
                                 {% else %}
                                     <div class="player-avatar">{{ listings.player_name[:1] }}</div>
                                 {% endif %}
@@ -197,15 +207,22 @@
                 
                     {% for pack in packs %}
                         <div class="player-card">
-                            <div class="player-avatar">
-                                <img src="{{ pack.image_url }}" alt="{{ pack.name }}" style="width: 50px; height: 50px;">
+                            <div class="player-image-container">
+                                {% if pack.image_url %}
+                                    <img src="{{ url_for('static', filename='uploads/packs/' + pack.image_url) }}" 
+                                         alt="{{ pack.name }}" 
+                                         class="player-image"
+                                         onerror="this.src='static/image/STAR CATCHER FINAL LOGO-11.png';">
+                                {% else %}
+                                    <div class="player-avatar">{{ pack.name[:1] }}</div>
+                                {% endif %}
                             </div>
-                            <div class="player-info">
+                            <div class="content-container">
                                 <div class="player-name">{{ pack.name }}</div>
                                 <div class="player-stats">{{ pack.player_count }} لاعبين | ضمان لاعب نادر</div>
+                                <div class="player-price">${{ pack.price }}</div>
+                                <button class="action-button delete_pack" data-pack-id="{{ pack.id }}">حذف الباكج</button>
                             </div>
-                            <div class="player-price">${{ pack.price }}</div>
-                            <button class="action-button delete_pack" data-pack-id="{{ pack.id }}">حذف الباكج</button> <!-- زر الحذف -->
                         </div>
                     {% endfor %}
                 </div>
@@ -476,7 +493,9 @@
                 }
             </script>
             
+            <div class="sidebar-overlay"></div>
 
             <script src="static/js/dashboard.js"></script>
+            <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
     </body>
 </html>

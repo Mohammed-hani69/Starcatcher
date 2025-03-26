@@ -429,6 +429,70 @@
             text-align: center;
         }
 
+        /* إضافة الأنماط الجديدة */
+        .coins-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .coin-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .coin-btn.increase {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+        }
+
+        .coin-btn.decrease {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+        }
+
+        .coin-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .coins-value {
+            min-width: 60px;
+            text-align: center;
+            font-weight: bold;
+            color: #ffd700;
+            cursor: pointer;
+            padding: 2px 5px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .coins-value:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .coins-value.editing {
+            background: #2a2a2a;
+            border: 1px solid #ff3e3e;
+            outline: none;
+        }
+
+        .coins-input {
+            background: #2a2a2a;
+            border: 1px solid #ff3e3e;
+            color: #ffd700;
+            font-weight: bold;
+            text-align: center;
+            width: 80px;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
         /* Responsive Styles */
         @media (max-width: 1024px) {
             .sidebar {
@@ -681,7 +745,7 @@
             </thead>
             <tbody>
                 {% for user_data in users %}
-                <tr>
+                <tr data-user-id="{{ user_data.user.id }}">
                     <td>{{ user_data.user.id }}</td>
                     <td>{{ user_data.user.username }}</td>
                     <td>{{ user_data.user.email }}</td>
@@ -689,7 +753,13 @@
                     <td>{{ user_data.user.country or 'غير متوفر' }}</td>
                     <td>{{ user_data.user.state or 'غير متوفر' }}</td>
                     <td>{{ user_data.user.city or 'غير متوفر' }}</td>
-                    <td>{{ user_data.user.coins }}</td>
+                    <td>
+                        <div class="coins-control">
+                            <button onclick="updateCoins('{{ user_data.user.id }}', -50)" class="coin-btn decrease">-</button>
+                            <span class="coins-value" onclick="makeEditable(this, '{{ user_data.user.id }}')" data-user-id="{{ user_data.user.id }}">{{ user_data.user.coins }}</span>
+                            <button onclick="updateCoins('{{ user_data.user.id }}', 50)" class="coin-btn increase">+</button>
+                        </div>
+                    </td>
                     <td>
                         {% if user_data.user.is_admin %}
                             <span class="status-badge status-admin">مدير</span>
@@ -860,6 +930,116 @@
             setTimeout(() => {
                 notification.remove();
             }, 3000);
+        }
+
+        async function updateCoins(userId, amount) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            try {
+                const response = await fetch(`/update_user_coins/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ amount: amount }),
+                    credentials: 'same-origin'
+                });
+                
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'حدث خطأ أثناء تحديث العملات');
+                }
+
+                // تحديث قيمة العملات في الواجهة
+                const coinsElement = document.querySelector(`span.coins-value[data-user-id="${userId}"]`);
+                if (coinsElement) {
+                    coinsElement.textContent = data.new_balance;
+                    
+                    // إضافة تأثير بصري للتحديث
+                    coinsElement.style.backgroundColor = amount > 0 ? 'rgba(76, 175, 80, 0.2)' : 'rgba(244, 67, 54, 0.2)';
+                    setTimeout(() => {
+                        coinsElement.style.backgroundColor = '';
+                    }, 500);
+                }
+
+                showNotification(data.message, 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification(error.message || 'حدث خطأ أثناء تحديث العملات', 'error');
+            }
+        }
+
+        async function makeEditable(element, userId) {
+            const currentValue = parseInt(element.textContent);
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.value = currentValue;
+            input.className = 'coins-input';
+            input.min = 0;
+            
+            const saveChanges = async () => {
+                const newValue = parseInt(input.value);
+                if (!isNaN(newValue) && newValue !== currentValue) {
+                    try {
+                        await setCoins(userId, newValue);
+                        element.textContent = newValue;
+                        
+                        // إضافة تأثير بصري للتحديث
+                        element.style.backgroundColor = newValue > currentValue ? 
+                            'rgba(76, 175, 80, 0.2)' : 'rgba(244, 67, 54, 0.2)';
+                        setTimeout(() => {
+                            element.style.backgroundColor = '';
+                        }, 500);
+                    } catch (error) {
+                        element.textContent = currentValue;
+                    }
+                } else {
+                    element.textContent = currentValue;
+                }
+                element.classList.remove('editing');
+            };
+            
+            input.onblur = saveChanges;
+            input.onkeypress = (e) => {
+                if (e.key === 'Enter') {
+                    input.blur();
+                }
+            };
+            
+            element.textContent = '';
+            element.classList.add('editing');
+            element.appendChild(input);
+            input.focus();
+            input.select();
+        }
+
+        async function setCoins(userId, newValue) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            try {
+                const response = await fetch(`/set_user_coins/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ coins: newValue }),
+                    credentials: 'same-origin'
+                });
+                
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'حدث خطأ أثناء تحديث العملات');
+                }
+
+                showNotification(data.message, 'success');
+                return data.new_balance;
+
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification(error.message || 'حدث خطأ أثناء تحديث العملات', 'error');
+                throw error;
+            }
         }
     </script>
 </body>

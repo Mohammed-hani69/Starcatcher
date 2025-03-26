@@ -21,7 +21,7 @@ def create_app():
     app = Flask(__name__)
     
     # إعدادات التطبيق
-    app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://elzoz_hani:zxc65432#@localhost/starcatcher_db"
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/starcatcher'
     app.config['SECRET_KEY'] = '23e54cc55abaab30e316908c8fe67406ee2eda447badb2eb'
     app.config["JWT_SECRET_KEY"] = "b4b38504c6b61a7529e353a1c5b3d42b142739b23ce8ca8ac2c7770c24259bf7"  # استخدم مفتاحًا سريًا قويًا
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
@@ -34,7 +34,7 @@ def create_app():
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)  # مدة صلاحية الجلسة
     app.config['SESSION_COOKIE_SECURE'] = False  # لبيئة التطوير فقط        app.config['SESSION_COOKIE_HTTPONLY'] = True  # منع الوصول عبر JavaScript
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # حماية من هجمات CSRF
-    app.config['WTF_CSRF_ENABLED'] = False     #هذا يقوم بتعطيل عمل اضافة باكج جديده 
+    app.config['WTF_CSRF_ENABLED'] = True     #هذا يقوم بتعطيل عمل اضافة باكج جديده 
     app.config['PROPAGATE_EXCEPTIONS'] = True
     
     # إعدادات رفع الملفات

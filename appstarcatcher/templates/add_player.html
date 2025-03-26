@@ -69,6 +69,9 @@
 
     <!-- Header -->
     <header class="header">
+        <button class="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
         <h2 class="header-title">Catcher<span style="color:red">Star</span></h2>
         
         <div class="header-actions">
@@ -436,6 +439,34 @@
                 notification.remove();
             }, 3000);
         }
+
+        // Mobile Menu Toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+
+            menuToggle.addEventListener('click', function() {
+                menuToggle.classList.toggle('active');
+                sidebar.classList.toggle('active');
+            });
+
+            // Close sidebar when clicking outside
+            mainContent.addEventListener('click', function() {
+                if (sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                    menuToggle.classList.remove('active');
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('active');
+                    menuToggle.classList.remove('active');
+                }
+            });
+        });
     </script>
 </body>
 </html>

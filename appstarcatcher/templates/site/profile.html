@@ -760,7 +760,7 @@
                             </div>
                         </div>
                         
-                        <div class="achievement">
+                        <div class="achievement {{ 'achievement-locked' if not user.has_bought_player }}">
                             <div class="achievement-icon">
                                 <i class="fas fa-shopping-cart"></i>
                             </div>
@@ -774,8 +774,8 @@
                                 </div>
                             </div>
                             <div class="ms-auto d-flex align-items-center reward-status">
-                                {% if not has_completed_purchase %}
-                                    <i class="fas fa-lock fs-4 text-muted"></i>
+                                {% if not user.has_bought_player %}
+                                    <i class="fas fa-lock fs-4"></i>
                                 {% elif user.first_purchase_reward_collected %}
                                     <i class="fas fa-check-circle text-success fs-4"></i>
                                 {% else %}
@@ -786,55 +786,81 @@
                             </div>
                         </div>
                         
-                        <div class="achievement">
-                            <div class="achievement-icon">
-                                <i class="fas fa-shopping-cart"></i>
-                            </div>
-                            <div>
-                                <h5 class="mb-0">المشتري الأول</h5>
-                                <small>اشتر أول لاعب من السوق</small>
-                            </div>
-                            <div class="ms-auto">
-                                <i class="fas fa-check-circle text-success fs-4"></i>
-                            </div>
-                        </div>
-                        
-                        <div class="achievement achievement-locked">
+                        <div class="achievement {{ 'achievement-locked' if not user.has_full_team }}">
                             <div class="achievement-icon">
                                 <i class="fas fa-users"></i>
                             </div>
                             <div>
                                 <h5 class="mb-0">جامع الفريق</h5>
                                 <small>اجمع كل لاعبي فريق كامل</small>
+                                <div class="mt-2">
+                                    <span class="text-warning">
+                                        <i class="fas fa-coins"></i> 100 عملة
+                                    </span>
+                                </div>
                             </div>
-                            <div class="ms-auto">
-                                <i class="fas fa-lock fs-4"></i>
+                            <div class="ms-auto d-flex align-items-center reward-status">
+                                {% if not user.has_full_team %}
+                                    <i class="fas fa-lock fs-4"></i>
+                                {% elif user.team_collector_reward_collected %}
+                                    <i class="fas fa-check-circle text-success fs-4"></i>
+                                {% else %}
+                                    <button class="btn btn-sm btn-warning collect-coins" id="teamCollectorReward">
+                                        <i class="fas fa-hand-holding-usd"></i> تحصيل
+                                    </button>
+                                {% endif %}
                             </div>
                         </div>
                         
-                        <div class="achievement achievement-locked">
+                        <div class="achievement {{ 'achievement-locked' if not user.has_rare_experts }}">
                             <div class="achievement-icon">
                                 <i class="fas fa-star"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0">خبير النوادر</h5>
-                                <small>اجمع 10 لاعبين من فئة نادر جداً</small>
+                                <h5 class="mb-0">خبير الخوارق</h5>
+                                <small>اجمع 10 لاعبين من فئة خارق </small>
+                                <div class="mt-2">
+                                    <span class="text-warning">
+                                        <i class="fas fa-coins"></i> 150 عملة
+                                    </span>
+                                </div>
                             </div>
-                            <div class="ms-auto">
-                                <i class="fas fa-lock fs-4"></i>
+                            <div class="ms-auto d-flex align-items-center reward-status">
+                                {% if not user.has_rare_experts %}
+                                    <i class="fas fa-lock fs-4"></i>
+                                {% elif user.rare_expert_reward_collected %}
+                                    <i class="fas fa-check-circle text-success fs-4"></i>
+                                {% else %}
+                                    <button class="btn btn-sm btn-warning collect-coins" id="rareExpertReward">
+                                        <i class="fas fa-hand-holding-usd"></i> تحصيل
+                                    </button>
+                                {% endif %}
                             </div>
                         </div>
-                        
-                        <div class="achievement achievement-locked">
+
+                        <div class="achievement {{ 'achievement-locked' if not user.has_four_catalogs }}">
                             <div class="achievement-icon">
                                 <i class="fas fa-crown"></i>
                             </div>
                             <div>
                                 <h5 class="mb-0">ملك الكتالوج</h5>
-                                <small>اكمل كتالوج كامل من اللاعبين</small>
+                                <small>اكمل تجميع 4 كتالوج</small>
+                                <div class="mt-2">
+                                    <span class="text-warning">
+                                        <i class="fas fa-coins"></i> 200 عملة
+                                    </span>
+                                </div>
                             </div>
-                            <div class="ms-auto">
-                                <i class="fas fa-lock fs-4"></i>
+                            <div class="ms-auto d-flex align-items-center reward-status">
+                                {% if not user.has_four_catalogs %}
+                                    <i class="fas fa-lock fs-4"></i>
+                                {% elif user.catalog_king_reward_collected %}
+                                    <i class="fas fa-check-circle text-success fs-4"></i>
+                                {% else %}
+                                    <button class="btn btn-sm btn-warning collect-coins" id="catalogKingReward">
+                                        <i class="fas fa-hand-holding-usd"></i> تحصيل
+                                    </button>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -1177,72 +1203,122 @@
 
         // دالة إنشاء العملات المتطايرة
         function createFloatingCoins(startElement, endElement, amount) {
+            // Play coin sound
+            const coinSound = document.getElementById('coinSound');
+            coinSound.currentTime = 0;
+            coinSound.play();
+            
             const startRect = startElement.getBoundingClientRect();
             const endRect = endElement.getBoundingClientRect();
-            const coinsCount = 5;
+            const coinsCount = amount > 10 ? 10 : amount; // تحديد عدد العملات المتحركة
             
-            // إنشاء قصاصات ورقية
-            for(let i = 0; i < 20; i++) {
+            // إنشاء قصاصات ورقية متطايرة
+            for(let i = 0; i < 30; i++) {
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti';
                 confetti.style.left = startRect.left + Math.random() * startRect.width + 'px';
                 confetti.style.top = startRect.top + 'px';
                 confetti.style.background = ['#ffc107', '#28a745', '#dc3545', '#007bff'][Math.floor(Math.random() * 4)];
-                confetti.style.animation = `confettiFall ${1 + Math.random()}s linear forwards`;
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                
                 document.body.appendChild(confetti);
                 
-                setTimeout(() => confetti.remove(), 2000);
-            }
-
-            // إنشاء العملات المتطايرة
-            for(let i = 0; i < coinsCount; i++) {
-                const coin = document.createElement('div');
-                coin.className = 'coin';
-                coin.innerHTML = '<i class="fas fa-coins"></i>';
-                
-                // تحديد نقطة البداية
-                coin.style.left = startRect.left + Math.random() * startRect.width + 'px';
-                coin.style.top = startRect.top + 'px';
-                
-                document.body.appendChild(coin);
-
-                // حساب المسار
-                const endX = endRect.left + endRect.width/2;
-                const endY = endRect.top + endRect.height/2;
-                
-                // تحريك العملة
-                coin.animate([
-                    { transform: 'scale(1)', left: coin.style.left, top: coin.style.top },
-                    { transform: 'scale(1.5)', left: `${endX}px`, top: `${endY}px` }
+                // حركة القصاصات
+                confetti.animate([
+                    { 
+                        top: startRect.top + 'px',
+                        opacity: 1
+                    },
+                    { 
+                        top: startRect.top + Math.random() * 200 + 'px',
+                        opacity: 0
+                    }
                 ], {
-                    duration: 1000,
-                    delay: i * 200,
+                    duration: 1000 + Math.random() * 1000,
                     easing: 'ease-out',
                     fill: 'forwards'
-                }).onfinish = () => {
-                    coin.remove();
-                    if(i === coinsCount - 1) {
-                        // تحديث عدد العملات بشكل متحرك
-                        updateCoinsDisplay(amount);
-                    }
-                };
+                }).onfinish = () => confetti.remove();
+            }
+
+            // إنشاء وتحريك العملات
+            for(let i = 0; i < coinsCount; i++) {
+                setTimeout(() => {
+                    const coin = document.createElement('div');
+                    coin.className = 'coin';
+                    coin.innerHTML = '<i class="fas fa-coins"></i>';
+                    
+                    coin.style.left = startRect.left + Math.random() * startRect.width + 'px';
+                    coin.style.top = startRect.top + 'px';
+                    
+                    document.body.appendChild(coin);
+
+                    // مسار العملة
+                    const controlPoint1X = startRect.left + (endRect.left - startRect.left) * 0.5;
+                    const controlPoint1Y = startRect.top - 100;
+                    const controlPoint2X = startRect.left + (endRect.left - startRect.left) * 0.8;
+                    const controlPoint2Y = startRect.top - 50;
+
+                    // حركة العملة في مسار منحني
+                    coin.animate([
+                        { 
+                            left: coin.style.left,
+                            top: coin.style.top,
+                            offset: 0
+                        },
+                        {
+                            left: controlPoint1X + 'px',
+                            top: controlPoint1Y + 'px',
+                            offset: 0.3
+                        },
+                        {
+                            left: controlPoint2X + 'px',
+                            top: controlPoint2Y + 'px',
+                            offset: 0.6
+                        },
+                        {
+                            left: endRect.left + 'px',
+                            top: endRect.top + 'px',
+                            transform: 'scale(0.5)',
+                            offset: 1
+                        }
+                    ], {
+                        duration: 1000,
+                        easing: 'ease-in-out',
+                        fill: 'forwards'
+                    }).onfinish = () => {
+                        coin.remove();
+                        // تشغيل صوت عند وصول كل عملة
+                        if (i < coinsCount - 1) {
+                            coinSound.currentTime = 0;
+                            coinSound.play();
+                        }
+                        // تحديث العداد بعد آخر عملة
+                        if (i === coinsCount - 1) {
+                            updateCoinsCounter(amount);
+                        }
+                    };
+                }, i * 200); // تأخير بين كل عملة
             }
         }
 
-        // دالة تحديث عرض العملات
-        function updateCoinsDisplay(amount) {
+        // دالة تحديث عداد العملات
+        function updateCoinsCounter(amount) {
             const coinsDisplay = document.getElementById('userCoins');
-            const currentCoins = parseInt(coinsDisplay.textContent);
-            const targetCoins = currentCoins + amount;
-            let currentCount = currentCoins;
+            const startValue = parseInt(coinsDisplay.textContent);
+            const endValue = startValue + amount;
+            let current = startValue;
             
-            const interval = setInterval(() => {
-                currentCount += 1;
-                coinsDisplay.textContent = currentCount;
-                if(currentCount >= targetCoins) {
-                    clearInterval(interval);
+            // تحديث تدريجي للعداد
+            const updateCounter = () => {
+                if (current < endValue) {
+                    const increment = Math.ceil((endValue - current) / 10);
+                    current = Math.min(current + increment, endValue);
+                    coinsDisplay.textContent = current;
+                    requestAnimationFrame(updateCounter);
                 }
-            }, 50);
+            };
+            
+            updateCounter();
         }
 
         // إضافة مستمع الحدث لزر التحصيل
@@ -1319,6 +1395,242 @@
                 button.disabled = false;
             });
         });
+
+        document.getElementById('teamCollectorReward')?.addEventListener('click', function(e) {
+            const button = e.currentTarget;
+            button.disabled = true;
+            
+            fetch('/collect_team_collector_reward', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    const coinsDisplay = document.querySelector('.coins-display');
+                    const rewardStatus = button.closest('.reward-status');
+                    
+                    createFloatingCoins(button, coinsDisplay, 100);
+                    
+                    // إنشاء أيقونة النجاح
+                    const successIcon = document.createElement('i');
+                    successIcon.className = 'fas fa-check-circle text-success fs-4';
+                    
+                    // تبديل الزر بأيقونة النجاح
+                    rewardStatus.innerHTML = '';
+                    rewardStatus.appendChild(successIcon);
+                } else {
+                    alert(data.message);
+                    button.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء تحصيل المكافأة');
+                button.disabled = false;
+            });
+        });
+
+        document.getElementById('rareExpertReward')?.addEventListener('click', function(e) {
+            const button = e.currentTarget;
+            button.disabled = true;
+            
+            fetch('/collect_rare_expert_reward', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    const coinsDisplay = document.querySelector('.coins-display');
+                    const rewardStatus = button.closest('.reward-status');
+                    
+                    createFloatingCoins(button, coinsDisplay, 150);
+                    
+                    const successIcon = document.createElement('i');
+                    successIcon.className = 'fas fa-check-circle text-success fs-4';
+                    
+                    rewardStatus.innerHTML = '';
+                    rewardStatus.appendChild(successIcon);
+                } else {
+                    alert(data.message);
+                    button.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء تحصيل المكافأة');
+                button.disabled = false;
+            });
+        });
+
+        document.getElementById('catalogKingReward')?.addEventListener('click', function(e) {
+            const button = e.currentTarget;
+            button.disabled = true;
+            
+            fetch('/collect_catalog_king_reward', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    const coinsDisplay = document.querySelector('.coins-display');
+                    const rewardStatus = button.closest('.reward-status');
+                    
+                    createFloatingCoins(button, coinsDisplay, 200);
+                    
+                    const successIcon = document.createElement('i');
+                    successIcon.className = 'fas fa-check-circle text-success fs-4';
+                    
+                    rewardStatus.innerHTML = '';
+                    rewardStatus.appendChild(successIcon);
+                } else {
+                    alert(data.message);
+                    button.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء تحصيل المكافأة');
+                button.disabled = false;
+            });
+        });
     </script>
+    <!-- Add before closing body tag -->
+    <audio id="coinSound" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/coin-collect.mp3') }}" type="audio/mp3">
+    </audio>
 </body>
+
+<script>
+// ...existing code...
+
+function createFloatingCoins(startElement, endElement, amount) {
+    // Play coin sound
+    const coinSound = document.getElementById('coinSound');
+    coinSound.currentTime = 0;
+    coinSound.play();
+    
+    const startRect = startElement.getBoundingClientRect();
+    const endRect = endElement.getBoundingClientRect();
+    const coinsCount = amount > 10 ? 10 : amount; // تحديد عدد العملات المتحركة
+    
+    // إنشاء قصاصات ورقية متطايرة
+    for(let i = 0; i < 30; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = startRect.left + Math.random() * startRect.width + 'px';
+        confetti.style.top = startRect.top + 'px';
+        confetti.style.background = ['#ffc107', '#28a745', '#dc3545', '#007bff'][Math.floor(Math.random() * 4)];
+        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+        
+        document.body.appendChild(confetti);
+        
+        // حركة القصاصات
+        confetti.animate([
+            { 
+                top: startRect.top + 'px',
+                opacity: 1
+            },
+            { 
+                top: startRect.top + Math.random() * 200 + 'px',
+                opacity: 0
+            }
+        ], {
+            duration: 1000 + Math.random() * 1000,
+            easing: 'ease-out',
+            fill: 'forwards'
+        }).onfinish = () => confetti.remove();
+    }
+
+    // إنشاء وتحريك العملات
+    for(let i = 0; i < coinsCount; i++) {
+        setTimeout(() => {
+            const coin = document.createElement('div');
+            coin.className = 'coin';
+            coin.innerHTML = '<i class="fas fa-coins"></i>';
+            
+            coin.style.left = startRect.left + Math.random() * startRect.width + 'px';
+            coin.style.top = startRect.top + 'px';
+            
+            document.body.appendChild(coin);
+
+            // مسار العملة
+            const controlPoint1X = startRect.left + (endRect.left - startRect.left) * 0.5;
+            const controlPoint1Y = startRect.top - 100;
+            const controlPoint2X = startRect.left + (endRect.left - startRect.left) * 0.8;
+            const controlPoint2Y = startRect.top - 50;
+
+            // حركة العملة في مسار منحني
+            coin.animate([
+                { 
+                    left: coin.style.left,
+                    top: coin.style.top,
+                    offset: 0
+                },
+                {
+                    left: controlPoint1X + 'px',
+                    top: controlPoint1Y + 'px',
+                    offset: 0.3
+                },
+                {
+                    left: controlPoint2X + 'px',
+                    top: controlPoint2Y + 'px',
+                    offset: 0.6
+                },
+                {
+                    left: endRect.left + 'px',
+                    top: endRect.top + 'px',
+                    transform: 'scale(0.5)',
+                    offset: 1
+                }
+            ], {
+                duration: 1000,
+                easing: 'ease-in-out',
+                fill: 'forwards'
+            }).onfinish = () => {
+                coin.remove();
+                // تشغيل صوت عند وصول كل عملة
+                if (i < coinsCount - 1) {
+                    coinSound.currentTime = 0;
+                    coinSound.play();
+                }
+                // تحديث العداد بعد آخر عملة
+                if (i === coinsCount - 1) {
+                    updateCoinsCounter(amount);
+                }
+            };
+        }, i * 200); // تأخير بين كل عملة
+    }
+}
+
+// دالة تحديث عداد العملات
+function updateCoinsCounter(amount) {
+    const coinsDisplay = document.getElementById('userCoins');
+    const startValue = parseInt(coinsDisplay.textContent);
+    const endValue = startValue + amount;
+    let current = startValue;
+    
+    // تحديث تدريجي للعداد
+    const updateCounter = () => {
+        if (current < endValue) {
+            const increment = Math.ceil((endValue - current) / 10);
+            current = Math.min(current + increment, endValue);
+            coinsDisplay.textContent = current;
+            requestAnimationFrame(updateCounter);
+        }
+    };
+    
+    updateCounter();
+}
+
+// ...existing code...
+</script>
 </html>

@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
     <link rel="stylesheet" href="static/css/dashboard.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         * {
             margin: 0;
@@ -372,6 +373,279 @@
             background-color: #555; /* تغيير اللون عند التمرير */
         }
 
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            body {
+                grid-template-areas: 
+                    "header"
+                    "main";
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                right: -300px;
+                transition: 0.3s;
+                z-index: 1000;
+            }
+
+            .sidebar.active {
+                right: 0;
+            }
+
+            .main-content {
+                margin-right: 0;
+                padding: 100px 20px 30px;
+            }
+
+            .menu-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                background: rgba(255,0,0,0.1);
+                border-radius: 8px;
+                cursor: pointer;
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 1001;
+            }
+
+            .header {
+                padding: 0 60px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .subscriptions-list {
+                justify-content: center;
+            }
+
+            .compact-plan {
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .header-actions {
+                display: none;
+            }
+
+            .header-title {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Custom Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a1a;
+            border-radius: 15px;
+            padding: 25px;
+            z-index: 2001;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid rgba(255,0,0,0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            color: #fff;
+        }
+
+        .modal-content {
+            margin-bottom: 20px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* تحسين استجابة الموبايل */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 80px 15px 20px;
+                margin: 0 auto;
+                max-width: 100%;
+            }
+
+            .modal {
+                width: 95%;
+                margin: 0 auto;
+                top: 50%;
+                transform: translateY(-50%) translateX(-50%);
+            }
+
+            .compact-plan {
+                width: 100%;
+            }
+
+            .subscription-card {
+                padding: 20px;
+            }
+
+            .sidebar {
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+        }
+
+        /* تحسين نافذة التأكيد */
+        .modal-overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            transform: translate(-50%, -40%);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.active {
+            transform: translate(-50%, -50%);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* تحسين أزرار النافذة */
+        .modal-actions {
+            gap: 15px;
+        }
+
+        .modal-actions button {
+            min-width: 100px;
+        }
+
+        .modal-close:hover {
+            color: #ff0000;
+        }
+
+        /* تأثير الحذف المتحرك */
+        .compact-plan {
+            transition: all 0.3s ease;
+        }
+
+        .compact-plan.removing {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        /* تحسين القائمة الجانبية للموبايل */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                position: fixed;
+                top: 0;
+                right: 0;
+                height: 100vh;
+                width: 280px;
+                z-index: 2000;
+                background: rgba(0, 0, 0, 0.95);
+                backdrop-filter: blur(10px);
+                border-right: 1px solid rgba(255,0,0,0.1);
+                box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .menu-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                background: rgba(255,0,0,0.1);
+                border-radius: 8px;
+                cursor: pointer;
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 2001;
+                transition: all 0.3s ease;
+            }
+
+            .menu-toggle.active {
+                background: rgba(255,0,0,0.2);
+            }
+
+            .menu-toggle i {
+                transition: transform 0.3s ease;
+            }
+
+            .menu-toggle.active i {
+                transform: rotate(90deg);
+            }
+
+            /* طبقة شفافة عند فتح القائمة */
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 1999;
+                backdrop-filter: blur(3px);
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            body.menu-open {
+                overflow: hidden;
+            }
+        }
     </style>
 </head>
 <body>
@@ -462,7 +736,9 @@
     <main class="main-content">
         <div class="subscription-card">
             <h1 class="section-title">إضافة باقه جديده</h1>
-            <form method="POST" enctype="multipart/form-data">
+            <form id="subscriptionForm" method="POST" action="{{ url_for('add_subscription') }}">
+                <!-- إضافة CSRF token -->
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="form-row">
                     <label for="package_type">اسم الباقة</label>
                     <input type="text" id="package_type" name="package_type" size="50">
@@ -520,79 +796,159 @@
             </ul>
         </div>
     </main>
+
+    <!-- Modal Template -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="modal" id="confirmModal">
+        <div class="modal-header">
+            <h3 class="modal-title">تأكيد الحذف</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-content">
+            <p>هل أنت متأكد أنك تريد حذف هذه الباقة؟</p>
+        </div>
+        <div class="modal-actions">
+            <button class="action-button" id="confirmDelete">حذف</button>
+            <button class="action-button" id="cancelDelete" style="background: #333;">إلغاء</button>
+        </div>
+    </div>
+
+    <div class="menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // العثور على كل الأزرار التي تحتوي على class 'delete-button'
-            const deleteButtons = document.querySelectorAll('.delete-button');
-            
-            // إضافة حدث لكل زر
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    // الحصول على id من خاصية data-id للزر
-                    const subscriptionId = this.getAttribute('data-id');
-                    
-                    // التأكد من أن الـ id موجود
-                    if (!subscriptionId) {
-                        alert("Invalid subscription ID");
-                        return;
-                    }
-                    
-                    // تأكيد الحذف من المستخدم
-                    const confirmDelete = confirm("هل أنت متأكد أنك تريد حذف هذا الباقه؟");
-                    
-                    if (confirmDelete) {
-                        // إرسال طلب DELETE باستخدام Fetch API
-                        fetch(`/delete_subscription/${subscriptionId}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.message === "تم الحذف بنجاح") {
-                                alert("تم الحذف بنجاح");
-                                // هنا يمكنك إزالة العنصر من واجهة المستخدم بعد الحذف
-                                this.closest('.subscription-item').remove(); // حذف العنصر في الصفحة
-                            } else {
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert("حدث خطأ أثناء الحذف");
-                        });
-                    }
-                });
-            });
+document.addEventListener('DOMContentLoaded', function() {
+    // تهيئة المتغيرات
+    const modalOverlay = document.getElementById('modalOverlay');
+    const confirmModal = document.getElementById('confirmModal');
+    const menuToggle = document.querySelector('.menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    let currentDeleteButton = null;
+
+    // ======== وظائف القائمة الجانبية ========
+    function toggleSidebar(show) {
+        sidebar.classList.toggle('active', show);
+        menuToggle.classList.toggle('active', show);
+        if (show) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            if (!modalOverlay.classList.contains('active')) {
+                document.body.style.overflow = '';
+            }
+        }
+    }
+
+    menuToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = sidebar.classList.contains('active');
+        toggleSidebar(!isOpen);
+    });
+
+    // ======== وظائف نافذة الحذف ========
+    function showDeleteModal() {
+        modalOverlay.style.display = 'block';
+        confirmModal.style.display = 'block';
+        setTimeout(() => {
+            modalOverlay.classList.add('active');
+            confirmModal.classList.add('active');
+        }, 10);
+        document.body.style.overflow = 'hidden';
+    }
+
+    function hideDeleteModal() {
+        modalOverlay.classList.remove('active');
+        confirmModal.classList.remove('active');
+        setTimeout(() => {
+            modalOverlay.style.display = 'none';
+            confirmModal.style.display = 'none';
+        }, 300);
+        if (!sidebar.classList.contains('active')) {
+            document.body.style.overflow = '';
+        }
+        currentDeleteButton = null;
+    }
+
+    // ======== وظيفة الحذف ========
+    function deleteSubscription(id, element) {
+        if (!element) return;
+        
+        element.style.transform = 'translateX(100%)';
+        element.style.opacity = '0';
+        
+        fetch(`/delete_subscription/${id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === "تم الحذف بنجاح") {
+                setTimeout(() => {
+                    element.remove();
+                }, 300);
+            } else {
+                throw new Error('فشل الحذف');
+            }
+        })
+        
+        .finally(() => {
+            hideDeleteModal();
         });
+    }
 
-
-        document.addEventListener("DOMContentLoaded", function() {
-            // الحصول على جميع العناصر التي تحتوي على تفاصيل الباقة
-            const perksContainers = document.querySelectorAll(".plan-perks #perks-container");
-            
-            perksContainers.forEach((perksContainer) => {
-                if (perksContainer) {
-                    // تقسيم النص عند كل نقطة ('.') وإضافة فقرة جديدة لكل ميزة
-                    const detailsText = perksContainer.innerText;
-                    const perks = detailsText.split('.');
-        
-                    // إعادة تنسيق النص ليظهر كل ميزة في فقرة مستقلة
-                    perksContainer.innerHTML = '';
-                    perks.forEach((perk, index) => {
-                        if (perk.trim()) {
-                            const p = document.createElement('p');
-                            p.className = 'perk-item';
-                            p.textContent = perk.trim() + (index < perks.length - 1 ? '.' : '');
-                            perksContainer.appendChild(p);
-                        }
-                    });
-                }
-            });
+    // ======== مستمعات الأحداث ========
+    // أزرار الحذف
+    document.querySelectorAll('.delete-button').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            currentDeleteButton = this;
+            showDeleteModal();
         });
-        
+    });
 
-        </script>
-        
+    // زر تأكيد الحذف
+    document.getElementById('confirmDelete')?.addEventListener('click', function() {
+        if (currentDeleteButton) {
+            const subscriptionId = currentDeleteButton.getAttribute('data-id');
+            const subscriptionElement = currentDeleteButton.closest('.compact-plan');
+            deleteSubscription(subscriptionId, subscriptionElement);
+        }
+    });
+
+    // أزرار إغلاق النافذة المنبثقة
+    document.getElementById('cancelDelete')?.addEventListener('click', hideDeleteModal);
+    document.querySelector('.modal-close')?.addEventListener('click', hideDeleteModal);
+
+    // النقر خارج النافذة المنبثقة
+    modalOverlay?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideDeleteModal();
+        }
+    });
+
+    // إغلاق القائمة عند النقر خارجها
+    document.addEventListener('click', function(e) {
+        if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+            toggleSidebar(false);
+        }
+    });
+
+    // معالجة مفتاح ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            hideDeleteModal();
+            toggleSidebar(false);
+        }
+    });
+
+    // إغلاق القائمة عند تغيير حجم النافذة
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 1024) {
+            toggleSidebar(false);
+        }
+    });
+});
+</script>
 </body>
 </html>
