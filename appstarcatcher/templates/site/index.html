@@ -616,7 +616,7 @@
         }
         
         .player-card {
-            background: linear-gradient(to bottom, var(--dark-gray), var(--black));
+            background: linear-gradient(to bottom, var(--dark-gray), var (--black));
             border-radius: 15px;
             padding: 20px;
             margin: 15px;
@@ -1253,11 +1253,99 @@
 
         // تحسين وظيفة العد التنازلي
         document.addEventListener("DOMContentLoaded", function() {
+            const dailyPackCard = document.querySelector('.daily-pack-card');
             const countdownElement = document.getElementById("hours");
-            if (!countdownElement) return;  // التحقق من وجود العنصر
+            if (!countdownElement) return;
 
             let dailyPackEndTimestamp = {{ daily_pack_end_timestamp | default(0) }};
-            
+            let countdownInterval;
+
+            function handleDailyPack() {
+                // إزالة العناصر الموجودة في البطاقة
+                while (dailyPackCard.firstChild) {
+                    dailyPackCard.firstChild.remove();
+                }
+
+                // إضافة العنوان
+                const title = document.createElement('h3');
+                title.className = 'daily-pack-title';
+                title.textContent = 'الباكج اليومي المجاني';
+                dailyPackCard.appendChild(title);
+
+                const now = Math.floor(Date.now() / 1000);
+                const timeRemaining = Math.floor(dailyPackEndTimestamp - now);
+
+                if (timeRemaining > 0) {
+                    // إضافة العداد إذا كان الوقت متبقي
+                    const countdownHTML = `
+                        <p class="countdown-text">
+                            <div class="countdown-timer">
+                                <div class="countdown-wrapper">
+                                    <div class="countdown-unit">
+                                        <div class="countdown-digit" id="hours">00</div>
+                                        <span class="countdown-label">ساعة</span>
+                                    </div>
+                                    <span class="countdown-separator">:</span>
+                                    <div class="countdown-unit">
+                                        <div class="countdown-digit" id="minutes">00</div>
+                                        <span class="countdown-label">دقيقة</span>
+                                    </div>
+                                    <span class="countdown-separator">:</span>
+                                    <div class="countdown-unit">
+                                        <div class="countdown-digit" id="seconds">00</div>
+                                        <span class="countdown-label">ثانية</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </p>`;
+                    dailyPackCard.insertAdjacentHTML('beforeend', countdownHTML);
+                    updateCountdown();
+                } else {
+                    // إضافة زر فتح الباكج إذا انتهى الوقت
+                    const button = document.createElement('button');
+                    button.className = 'daily-pack-btn';
+                    button.id = 'openDailyPack';
+                    button.innerHTML = '<i class="fas fa-gift me-2"></i>افتح الباكج اليومي';
+                    button.addEventListener('click', handleDailyPackClick);
+                    dailyPackCard.appendChild(button);
+                }
+            }
+
+            async function handleDailyPackClick() {
+                try {
+                    const dailyPackModal = new bootstrap.Modal(document.getElementById('dailyPackModal'));
+                    const response = await fetch('/generate_daily_pack', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.status === 401) {
+                        alert('يرجى تسجيل الدخول أولاً');
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        dailyPackModal.show();
+                        celebrateWithConfetti('rare', 'high');
+                        
+                        const playersReveal = document.getElementById('daily-players-reveal');
+                        displayPlayers(data.players, playersReveal, () => {
+                            dailyPackEndTimestamp = Math.floor(Date.now() / 1000) + 86400; // 24 ساعة
+                            handleDailyPack();
+                        });
+                    } else {
+                        alert(data.message);
+                    }
+                } catch (error) {
+                    console.error('Error opening daily pack:', error);
+                    alert('حدث خطأ أثناء فتح الباكج اليومي');
+                }
+            }
+
             function updateCountdown() {
                 const now = Math.floor(Date.now() / 1000);
                 const timeRemaining = Math.floor(dailyPackEndTimestamp - now);
@@ -1267,37 +1355,21 @@
                     const minutes = Math.floor((timeRemaining % 3600) / 60);
                     const seconds = Math.floor(timeRemaining % 60);
 
-                    document.getElementById('hours').textContent = Math.floor(hours).toString().padStart(2, '0');
-                    document.getElementById('minutes').textContent = Math.floor(minutes).toString().padStart(2, '0');
-                    document.getElementById('seconds').textContent = Math.floor(seconds).toString().padStart(2, '0');
+                    document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+                    document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+                    document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
                 } else {
-                    // عند انتهاء الوقت
-                    const countdownText = document.querySelector('.countdown-text');
-                    if (countdownText) {
-                        countdownText.innerHTML = `
-                            <button class="daily-pack-btn" id="openDailyPack">
-                                <i class="fas fa-gift me-2"></i>
-                                افتح الباكج اليومي
-                            </button>
-                        `;
-
-                        // إضافة المعالج للزر الجديد
-                        const newButton = document.getElementById('openDailyPack');
-                        if (newButton) {
-                            newButton.addEventListener('click', handleDailyPackOpen);
-                        }
-                    }
                     clearInterval(countdownInterval);
+                    handleDailyPack();
                 }
             }
 
+            // بدء التطبيق
+            handleDailyPack();
             if (dailyPackEndTimestamp) {
-                updateCountdown();
-                const countdownInterval = setInterval(updateCountdown, 1000);
+                countdownInterval = setInterval(updateCountdown, 1000);
             }
         });
-
-        // ...rest of existing code...
     </script>
 </body>
 </html>

@@ -2,30 +2,34 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{{ club.club_name }} - كتالوج</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         :root {
             --club-color: {{ club.club_color }};
             --club-color-dark: {{ club.club_color }};
             --club-secondary: #1a1a1a;
+            --primary-red: #e63946;
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
         }
         
         body {
             background: #222;
             overflow-x: hidden;
-            padding: 40px 0;
             font-family: 'Cairo', sans-serif;
-            transition: background 0.5s ease;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding-top: 80px;  /* قم بتعديل القيمة حسب ارتفاع الهيدر */
+            padding: 0;
+            margin: 0;
+            touch-action: manipulation;
         }
         
         /* Navbar Styling */
@@ -35,55 +39,36 @@
             left: 0;
             width: 100%;
             z-index: 2000;
-            background: linear-gradient(to right, #e63946, #000000);  /* تدرج بين الأحمر والأسود */
+            background: linear-gradient(to right, #e63946, #000000);
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             padding: 10px 0;
         }
         
         .navbar-brand {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: #e63946 !important;
             text-shadow: 0 0 8px rgba(230,57,70,0.6);
-            margin-left: 20px;
+            margin-left: 15px;
         }
         
         .nav-link {
             color: #f1faee !important;
             text-transform: uppercase;
             font-weight: 600;
-            margin: 0 10px;
-            transition: color 0.3s ease;
+            margin: 0 8px;
+            font-size: 0.9rem;
         }
         
         .nav-link:hover {
             color: #e63946 !important;
         }
         
-        .coins-display {
-            background-color: rgba(255, 193, 7, 0.2);
-            border-radius: 20px;
-            padding: 5px 15px ;
-            margin-left: 15px;
-            color: #e63946;
-            font-weight: 700;
+        .navbar-toggler {
+            padding: 0.25rem 0.5rem;
+            font-size: 1rem;
         }
-
-        /* World Cup Badge */
-        .world-cup-badge {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: var(--primary-red);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            z-index: 10;
-        }
-
-
+        
         /* تأثير الخلفية المتحركة */
         .background-effect {
             position: fixed;
@@ -103,14 +88,25 @@
             100% { filter: brightness(0.9); }
         }
         
+        /* Main Container */
+        .main-container {
+            padding-top: 70px;
+            padding-bottom: 120px;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
         #catalog-container {
-            width: 90%;
+            width: 95%;
             max-width: 1000px;
-            height: 80vh;
-            margin: 20px auto 0;
+            height: 70vh;
+            margin: 20px auto;
             background: transparent;
             position: relative;
-            perspective: 3000px;
+            perspective: 2000px;
         }
         
         /* تحسين تأثير الظل للكتاب */
@@ -119,35 +115,23 @@
             position: absolute;
             left: 0;
             right: 0;
-            bottom: -30px;
-            height: 40px;
+            bottom: -20px;
+            height: 30px;
             background: radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 70%);
             transform: scaleX(0.8);
             z-index: -1;
-            filter: blur(10px);
+            filter: blur(8px);
         }
         
         .page {
             background: linear-gradient(135deg, #fff, #f5f5f5);
             overflow: hidden;
             position: relative;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
-            transition: transform 0.5s ease;
-        }
-        
-        /* تحسين تأثير التقليب */
-        .page-wrapper {
-            perspective: 2000px;
-            overflow: visible !important;
-            transform-style: preserve-3d;
-        }
-        
-        .turn-page-wrapper {
-            overflow: visible !important;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
         }
         
         .page-content {
-            padding: 30px;
+            padding: 15px;
             height: 100%;
             position: relative;
             background: repeating-linear-gradient(
@@ -159,6 +143,7 @@
             );
             border: 1px solid rgba(0,0,0,0.05);
             box-sizing: border-box;
+            overflow-y: auto;
         }
         
         /* تحسين تصميم الغلاف */
@@ -171,7 +156,7 @@
             justify-content: center;
             text-align: center;
             position: relative;
-            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
             overflow: hidden;
         }
         
@@ -216,73 +201,49 @@
         }
         
         .club-logo {
-            width: 180px;
-            height: 180px;
+            width: 120px;
+            height: 120px;
             object-fit: contain;
-            margin: 0 auto 20px;
-            filter: drop-shadow(0 5px 25px rgba(255,255,255,0.4));
+            margin: 0 auto 15px;
+            filter: drop-shadow(0 5px 15px rgba(255,255,255,0.4));
             animation: floatAnimation 3s ease-in-out infinite;
-            transform-style: preserve-3d;
         }
         
         @keyframes floatAnimation {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        .club-info {
-            margin-bottom: 2rem;
-            position: relative;
+            50% { transform: translateY(-8px); }
         }
         
         .club-info h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            text-shadow: 0 5px 15px rgba(0,0,0,0.7);
-            letter-spacing: 1px;
-            position: relative;
-            display: inline-block;
+            font-size: 2rem;
+            margin-bottom: 0.8rem;
+            text-shadow: 0 3px 10px rgba(0,0,0,0.7);
         }
         
         .club-info h1::after {
             content: '';
             position: absolute;
-            bottom: -10px;
+            bottom: -8px;
             left: 25%;
             right: 25%;
-            height: 4px;
+            height: 3px;
             background: linear-gradient(90deg, transparent, white, transparent);
         }
         
         .cover-details {
             background: rgba(0,0,0,0.7);
-            padding: 20px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
             margin-top: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            position: relative;
-            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
             border: 1px solid rgba(255,255,255,0.1);
         }
         
-        .cover-details::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 60%);
-            transform: rotate(45deg);
-            pointer-events: none;
-        }
-        
         .cover-details p {
-            margin-bottom: 0.7rem;
-            font-size: 1.2rem;
-            position: relative;
-            padding-right: 15px;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            padding-right: 12px;
         }
         
         .cover-details p::before {
@@ -292,34 +253,35 @@
             color: var(--club-color);
         }
         
-        /* تحسين شبكة اللاعبين */
+        /* تصميم كروت اللاعبين المميز */
         .player-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-            height: calc(100% - 50px);
+            gap: 1rem;
+            height: calc(100% - 40px);
+            padding: 5px;
         }
         
         .player-spot {
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             display: flex;
             flex-direction: column;
-            transform: translateY(0);
-            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+            min-height: 180px;
         }
         
         .player-spot:hover {
-            transform: translateY(-10px) scale(1.03);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            z-index: 10;
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
         
         .player-image-container {
+            width: 100%;
             height: 0;
             padding-bottom: 100%;
             position: relative;
@@ -332,21 +294,24 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.7s ease;
-            filter: contrast(1.1);
+            transition: transform 0.5s ease;
         }
         
         .player-spot:hover .player-image-container img {
-            transform: scale(1.15);
+            transform: scale(1.05);
         }
         
         .player-details {
-            padding: 18px;
-            background: white;
+            padding: 12px;
             color: #333;
             text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             position: relative;
-            z-index: 1;
+            background: white;
+            z-index: 2;
         }
         
         .player-details::before {
@@ -355,85 +320,61 @@
             top: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 50px;
-            height: 4px;
+            width: 40px;
+            height: 3px;
             background: var(--club-color);
             border-radius: 0 0 3px 3px;
             transition: width 0.3s ease;
         }
         
         .player-spot:hover .player-details::before {
-            width: 80px;
+            width: 60px;
         }
         
         .player-details .name {
             font-weight: bold;
-            font-size: 1.25rem;
+            font-size: 1rem;
             margin-bottom: 5px;
             color: #000;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             transition: all 0.3s ease;
         }
         
         .player-spot:hover .player-details .name {
-            transform: scale(1.05);
-            color: var(--club-color-dark);
+            color: var(--club-color);
         }
         
         .player-details .rating {
             color: var(--club-color);
-            font-size: 1.6rem;
+            font-size: 1.2rem;
             font-weight: bold;
-            display: block;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             text-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
         .player-details .position {
             opacity: 0.9;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             background: linear-gradient(135deg, #f0f0f0, #e5e5e5);
             display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            font-weight: 500;
-        }
-        
-        .empty-spot {
-            background: rgba(0,0,0,0.03);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
+            padding: 3px 10px;
             border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            border: 2px dashed rgba(0,0,0,0.1);
+            font-weight: 500;
+            width: fit-content;
+            margin: 0 auto;
             transition: all 0.3s ease;
         }
         
-        .empty-spot:hover {
-            background: rgba(0,0,0,0.05);
-            border-color: var(--club-color);
-            transform: translateY(-5px);
-        }
-        
-        .empty-spot .position {
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-            color: #555;
-            font-weight: 500;
-        }
-        
-        .empty-spot .text-muted {
-            color: #999;
+        .player-spot:hover .player-details .position {
+            background: linear-gradient(135deg, #e5e5e5, #f0f0f0);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
         .not-collected {
-            opacity: 0.85;
+            opacity: 0.9;
             position: relative;
-            filter: grayscale(0.4);
         }
         
         .not-collected::after {
@@ -444,25 +385,25 @@
             transform: translate(-50%, -50%) rotate(-30deg);
             background: rgba(255,0,0,0.8);
             color: white;
-            padding: 8px 20px;
+            padding: 6px 15px;
             font-weight: bold;
-            border-radius: 8px;
+            border-radius: 6px;
             z-index: 10;
-            box-shadow: 0 5px 15px rgba(255,0,0,0.3);
-            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
         }
         
         .page-number {
             position: absolute;
-            bottom: 15px;
+            bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 1rem;
+            font-size: 0.9rem;
             color: #777;
             background: rgba(255,255,255,0.7);
-            border-radius: 20px;
-            padding: 3px 15px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            padding: 2px 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
         /* تحسين رسائل المساعدة */
@@ -473,14 +414,16 @@
             transform: translateX(-50%);
             background: rgba(0,0,0,0.8);
             color: white;
-            padding: 12px 25px;
-            border-radius: 30px;
-            font-size: 1rem;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
             z-index: 1000;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             border: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(8px);
             animation: fadeInOut 5s ease-in-out forwards;
+            max-width: 90%;
+            text-align: center;
         }
         
         @keyframes fadeInOut {
@@ -491,139 +434,75 @@
         /* تحسين أزرار التنقل */
         .catalog-nav {
             position: fixed;
-            bottom: 40px;
+            bottom: 10px;
             width: 100%;
             display: flex;
             justify-content: center;
-            gap: 40px;
+            gap: 15px;
             z-index: 1000;
+            padding: 0 10px;
         }
 
         .catalog-nav button {
             background: rgba(0,0,0,0.8);
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 30px;
+            padding: 10px 15px;
+            border-radius: 25px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             border: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(5px);
+            flex: 1;
+            max-width: 150px;
+            justify-content: center;
+            transition: all 0.3s ease;
         }
 
         .catalog-nav button:hover {
             background: var(--club-color);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-
-        .catalog-nav button:active {
             transform: translateY(-2px);
         }
 
         .catalog-nav button:disabled {
             opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
+            transform: none !important;
         }
 
-        /* تصميم متجاوب محسن */
-        @media (max-width: 768px) {
-            #catalog-container {
-                width: 95%;
-                height: 70vh;
-            }
-            
-            .player-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .club-logo {
-                width: 120px;
-                height: 120px;
-            }
-            
-            .club-info h1 {
-                font-size: 2.5rem;
-            }
-            
-            .catalog-nav {
-                gap: 20px;
-            }
-            
-            .catalog-nav button {
-                padding: 10px 15px;
-                font-size: 0.9rem;
-            }
-        }
-
-        /* تحسين تجربة التقليب */
-        .turn-page {
-            transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1.000);
-            transform-origin: 50% 50%;
+        .catalog-nav svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
         }
         
-        .shadow-gradient {
-            position: absolute;
-            top: 0;
-            width: 20px;
-            height: 100%;
-            background: linear-gradient(to right, rgba(0,0,0,0.2), rgba(0,0,0,0));
-        }
-        
-        .hard.cover {
-            background: linear-gradient(135deg, var(--club-color), var(--club-secondary));
-        }
-        
-        /* تأثيرات التقليب المحسنة */
-        .page-folding {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            transition: all 0.6s ease;
-            overflow: hidden;
-            pointer-events: none;
+        .catalog-nav button:hover svg {
+            transform: scale(1.2);
         }
         
         /* القسم الخاص بالعناوين */
         .section-title {
-            font-size: 1.8rem;
+            font-size: 1.4rem;
             font-weight: bold;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             text-align: center;
             color: #333;
             position: relative;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
         
         .section-title::after {
             content: '';
             position: absolute;
             bottom: 0;
-            left: 35%;
-            right: 35%;
-            height: 3px;
+            left: 30%;
+            right: 30%;
+            height: 2px;
             background: linear-gradient(90deg, transparent, var(--club-color), transparent);
         }
         
-        /* إضافة تأثير الماء على الصفحات */
-        .page-ripple {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            background: rgba(255,255,255,0);
-            pointer-events: none;
-            z-index: 100;
-            transition: all 0.3s ease;
-        }
-
         .empty-spot-info {
             width: 100%;
             height: 100%;
@@ -633,19 +512,233 @@
             justify-content: center;
             background: rgba(0,0,0,0.1);
             color: #666;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             text-align: center;
-            padding: 1rem;
+            padding: 0.8rem;
         }
 
         .locked-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
             opacity: 0.5;
         }
 
         .locked-text {
             font-weight: 500;
+            font-size: 0.8rem;
+        }
+        
+        /* تأثيرات التقليب */
+        .turn-page {
+            animation-duration: 0.8s;
+        }
+        
+        /* تحسينات للشاشات الكبيرة */
+        @media (min-width: 768px) {
+            .navbar-brand {
+                font-size: 2rem;
+            }
+            
+            .nav-link {
+                font-size: 1rem;
+                margin: 0 10px;
+            }
+            
+            #catalog-container {
+                height: 75vh;
+            }
+            
+            .club-logo {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .club-info h1 {
+                font-size: 2.5rem;
+            }
+            
+            .cover-details p {
+                font-size: 1.1rem;
+            }
+            
+            .player-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.2rem;
+            }
+            
+            .player-spot {
+                min-height: 200px;
+            }
+            
+            .player-details .name {
+                font-size: 1.1rem;
+            }
+            
+            .player-details .rating {
+                font-size: 1.4rem;
+            }
+            
+            .player-details .position {
+                font-size: 0.85rem;
+            }
+            
+            .catalog-nav {
+                gap: 30px;
+                bottom: 20px;
+            }
+            
+            .catalog-nav button {
+                padding: 12px 20px;
+                font-size: 1rem;
+                max-width: 180px;
+            }
+
+            .player-spot {
+                flex-direction: row;
+                min-height: 180px;
+            }
+            
+            .player-image-container {
+                width: 50%;
+                height: auto;
+                padding-bottom: 0;
+                flex: 0 0 50%;
+            }
+            
+            .player-image-container img {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            
+            .player-details {
+                width: 50%;
+                flex: 0 0 50%;
+                text-align: right;
+                padding: 20px;
+                justify-content: center;
+                position: relative;
+            }
+            
+            .player-details::before {
+                content: '';
+                position: absolute;
+                right: 0;
+                top: 20%;
+                height: 60%;
+                width: 3px;
+                background: var(--club-color);
+                border-radius: 3px;
+                transform: none;
+                left: auto;
+            }
+            
+            .player-details .name {
+                font-size: 1.2rem;
+                white-space: normal;
+                line-height: 1.3;
+                margin-bottom: 10px;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+            }
+            
+            .player-details .rating {
+                font-size: 1.6rem;
+                margin: 10px 0;
+            }
+            
+            .player-details .position {
+                background: linear-gradient(135deg, var(--club-color), var(--club-color-dark));
+                color: white;
+                font-size: 0.9rem;
+                padding: 5px 15px;
+                margin-right: 0;
+                font-weight: 600;
+            }
+        }
+        
+        /* تحسينات للشاشات الكبيرة جداً */
+        @media (min-width: 992px) {
+            #catalog-container {
+                height: 80vh;
+            }
+            
+            .player-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .section-title {
+                font-size: 1.6rem;
+            }
+        }
+        
+        /* منع التكبير على الجوال عند النقر المزدوج */
+        * {
+            touch-action: manipulation;
+        }
+        
+        /* تحسينات للوضع الأفقي على الجوال */
+        @media (max-height: 500px) and (orientation: landscape) {
+            #catalog-container {
+                height: 90vh;
+                width: 98%;
+            }
+            
+            .player-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .player-spot {
+                min-height: 150px;
+            }
+            
+            .catalog-nav {
+                bottom: 5px;
+            }
+        }
+        
+        /* تعديلات للشاشات الصغيرة جداً */
+        @media (max-width: 400px) {
+            .player-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .player-spot {
+                flex-direction: row;
+                min-height: 100px;
+            }
+            
+            .player-image-container {
+                width: 100px;
+                height: 100px;
+                padding-bottom: 0;
+                flex-shrink: 0;
+            }
+            
+            .player-details {
+                text-align: right;
+                padding: 10px;
+                justify-content: flex-start;
+            }
+            
+            .player-details::before {
+                display: none;
+            }
+        }
+        
+        /* تأثيرات الحركة */
+        .flip-effect {
+            animation: flipInY 0.8s ease-out;
+        }
+        
+        .zoom-effect {
+            animation: zoomIn 0.6s ease-out;
+        }
+        
+        .fade-effect {
+            animation: fadeIn 0.5s ease-out;
         }
     </style>
 </head>
@@ -653,45 +746,47 @@
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg">
-        <div class="container">
+        <div class="container-fluid">
             <a class="navbar-brand" href="{{ url_for('home') }}">Star Catcher</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <div class="navbar-nav ms-auto">
-
-                        <a class="nav-link" href="{{ url_for('profile') }}">الملف الشخصي</a>
-                        <a class="nav-link" href="{{ url_for('myplayers') }}">لاعبيني</a>
-                        <a class="nav-link" href="{{ url_for('catalog') }}">الكتالوج</a>
-                        <a class="nav-link" href="{{ url_for('market') }}">السوق</a>
+                    <a class="nav-link" href="{{ url_for('profile') }}">الملف الشخصي</a>
+                    <a class="nav-link" href="{{ url_for('myplayers') }}">لاعبيني</a>
+                    <a class="nav-link" href="{{ url_for('catalog') }}">الكتالوج</a>
+                    <a class="nav-link" href="{{ url_for('market') }}">السوق</a>
                 </div>
             </div>
         </div>
     </nav>
 
-    
     <!-- إضافة مؤثر الخلفية -->
     <div class="background-effect"></div>
     
-    <!-- تحسين رسالة المساعدة -->
-    <div class="navigation-hint">اسحب زاوية الصفحة للتقليب أو استخدم الأزرار</div>
-    
-    <div id="catalog-container">
-        <!-- سيتم إضافة الصفحات ديناميكياً هنا -->
+    <!-- Main Content Container -->
+    <div class="main-container">
+        <!-- رسالة المساعدة -->
+        <div class="navigation-hint">اسحب الصفحة للتقليب أو استخدم الأزرار</div>
+        
+        <!-- Catalog Container -->
+        <div id="catalog-container">
+            <!-- سيتم إضافة الصفحات ديناميكياً هنا -->
+        </div>
     </div>
 
-    <!-- تحسين أزرار التنقل -->
+    <!-- أزرار التنقل -->
     <div class="catalog-nav">
         <button id="prev-page">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             السابق
         </button>
         <button id="next-page">
             التالي
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </button>
@@ -758,14 +853,14 @@
                         <div class="player-spot ${!player.is_collected ? 'not-collected' : ''}">
                             <div class="player-image-container">
                                 ${player.is_collected && player.image_url 
-                                    ? `<img src="{{ url_for('static', filename='uploads/image_player/') }}${player.image_url}" alt="${player.name}">`
-                                    : `<div class="empty-spot-info">
+                                    ? `<img src="{{ url_for('static', filename='uploads/image_player/') }}${player.image_url}" alt="${player.name}" class="zoom-effect">`
+                                    : `<div class="empty-spot-info fade-effect">
                                          <span class="locked-icon">🔒</span>
                                          <span class="locked-text">اجمع اللاعب لرؤية صورته</span>
                                        </div>`
                                 }
                             </div>
-                            <div class="player-details">
+                            <div class="player-details flip-effect">
                                 <span class="name">${player.name}</span>
                                 <span class="rating">${player.rating}</span>
                                 <span class="position">${player.position}</span>
@@ -773,6 +868,19 @@
                         </div>
                     `;
                 });
+                
+                // إضافة أماكن فارغة إذا لزم الأمر
+                const remainingSpots = playersPerPage - pagePlayers.length;
+                for (let j = 0; j < remainingSpots; j++) {
+                    html += `
+                        <div class="player-spot empty-spot fade-effect">
+                            <div class="empty-spot-info">
+                                <span class="locked-icon">➕</span>
+                                <span class="locked-text">مكان فارغ</span>
+                            </div>
+                        </div>
+                    `;
+                }
                 
                 html += `</div>`;
                 html += `<div class="page-number">صفحة ${i + 1}</div>`;
@@ -782,57 +890,93 @@
             // إضافة الصفحات إلى الحاوية
             $('#catalog-container').html(html);
             
-            // تهيئة مكتبة turn.js
+            // تهيئة مكتبة turn.js مع تأثيرات الحركة
             $('#catalog-container').turn({
                 width: $('#catalog-container').width(),
                 height: $('#catalog-container').height(),
                 autoCenter: true,
                 gradients: true,
                 acceleration: true,
-                elevation: 50,
-                duration: 1200,
-                display: 'double',
-                turnCorners: 'bl,br',
-                inclination: 10,
+                elevation: 30,
+                duration: 800,
+                display: 'single',
                 pages: totalPages,
                 when: {
+                    turning: function(e, page, view) {
+                        // إضافة تأثيرات مختلفة حسب اتجاه التقليب
+                        const direction = page > view ? 'next' : 'previous';
+                        const effect = direction === 'next' ? 'flip-effect' : 'zoom-effect';
+                        
+                        $(view).find('.player-spot').addClass('animate__animated animate__fadeOut');
+                        $(page).find('.player-spot').addClass('animate__animated animate__fadeIn');
+                    },
                     turned: function(e, page) {
                         updateNavigationButtons(page);
+                        
+                        // إضافة تأثيرات للاعبين عند ظهور الصفحة
+                        $(this).find('.player-spot').each(function(index) {
+                            $(this).css('animation-delay', `${index * 0.1}s`);
+                        });
+                    },
+                    start: function(e, pageObj) {
+                        // تحسين الأداء على الجوال
+                        $(pageObj).css('backface-visibility', 'hidden');
                     }
                 }
             });
 
-            // تحسين صوت التأثيرات - إذا رغبت في إضافة هذه الميزة
-            function playFlipSound() {
-                // يمكن تعليق هذه الدالة إذا لم ترغب في إضافة صوت
-                // اختياري: إضافة صوت للتقليب
-                // const sound = new Audio('/static/sounds/page-flip.mp3');
-                // sound.volume = 0.5;
-                // sound.play();
-            }
-            
             // وظائف أزرار التنقل المحسنة
             $('#next-page').on('click', function() {
-                $('#catalog-container').turn('next');
-                playFlipSound();
+                if (!$(this).prop('disabled')) {
+                    $('#catalog-container').turn('next');
+                    playFlipSound();
+                }
             });
             
             $('#prev-page').on('click', function() {
-                $('#catalog-container').turn('previous');
-                playFlipSound();
-            });
-            
-            // إضافة دعم لمفاتيح الأسهم
-            $(document).keydown(function(e) {
-                if (e.keyCode == 37) { // سهم يسار
+                if (!$(this).prop('disabled')) {
                     $('#catalog-container').turn('previous');
                     playFlipSound();
-                    return false;
                 }
-                if (e.keyCode == 39) { // سهم يمين
-                    $('#catalog-container').turn('next');
-                    playFlipSound();
-                    return false;
+            });
+            
+            // صوت تأثير التقليب
+            function playFlipSound() {
+                // يمكنك إضافة صوت للتقليب هنا إذا رغبت
+                // const sound = new Audio('/static/sounds/page-flip.mp3');
+                // sound.volume = 0.3;
+                // sound.play();
+            }
+            
+            // إضافة دعم للسحب بالإصبع على الجوال
+            let startX = 0;
+            let isDragging = false;
+            
+            $('#catalog-container').on('touchstart', function(e) {
+                startX = e.originalEvent.touches[0].pageX;
+                isDragging = true;
+            });
+            
+            $('#catalog-container').on('touchmove', function(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+            });
+            
+            $('#catalog-container').on('touchend', function(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                
+                const endX = e.originalEvent.changedTouches[0].pageX;
+                const diffX = startX - endX;
+                
+                if (Math.abs(diffX) > 50) { // حد السحب
+                    if (diffX > 0) {
+                        $('#catalog-container').turn('next');
+                        playFlipSound();
+                    } else {
+                        $('#catalog-container').turn('previous');
+                        playFlipSound();
+                    }
                 }
             });
             
@@ -841,66 +985,49 @@
                 const totalPages = $('#catalog-container').turn('pages');
                 $('#prev-page').prop('disabled', page === 1);
                 $('#next-page').prop('disabled', page >= totalPages);
-                
-                // تغيير لون الخلفية بناءً على الصفحة الحالية
-                if (page === 1) {
-                    // لون خاص للغلاف
-                    $('body').css('background', '#1a1a1a');
-                } else {
-                    // لون عادي للصفحات الداخلية
-                    $('body').css('background', '#222');
-                }
             }
             
             // تحديث حالة الأزرار عند التحميل
             updateNavigationButtons(1);
             
             // تحسين تعديل الحجم عند تغيير حجم النافذة
-            $(window).resize(function() {
-                let width = $('#catalog-container').parent().width() * 0.9;
-                let height = $(window).height() * 0.8;
+            function resizeCatalog() {
+                let width = Math.min($(window).width() * 0.95, 1000);
+                let height = $(window).height() * 0.7;
                 
-                // للتأكد من عدم تجاوز العرض الأقصى
-                width = Math.min(width, 1000);
-                
-                // الحفاظ على نسبة العرض إلى الارتفاع
-                if (width / height > 1.5) {
-                    width = height * 1.5;
+                // تعديل الارتفاع للوضع الأفقي على الجوال
+                if ($(window).height() < 500) {
+                    height = $(window).height() * 0.9;
                 }
                 
                 $('#catalog-container').turn('size', width, height);
                 $('#catalog-container').turn('center');
-            }).resize();
+            }
             
-            // إضافة تأثير فوق الكتاب عند تمرير الماوس
-            $('#catalog-container').on('mousemove', function(e) {
-                const bookOffset = $(this).offset();
-                const relX = e.pageX - bookOffset.left;
-                const relY = e.pageY - bookOffset.top;
-                const width = $(this).width();
-                const height = $(this).height();
-                
-                // حساب الزاوية بناءً على موضع الماوس
-                const rotateY = (relX - width/2) / 20;
-                const rotateX = (height/2 - relY) / 20;
-                
-                // تطبيق تأثير ثلاثي الأبعاد خفيف على الكتاب
-                $(this).css('transform', `perspective(1000px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`);
-            });
-            
-            // إعادة الكتاب إلى وضعه الطبيعي عند مغادرة الماوس
-            $('#catalog-container').on('mouseleave', function() {
-                $(this).css('transform', 'perspective(1000px) rotateY(0deg) rotateX(0deg)');
-            });
+            $(window).on('resize orientationchange', resizeCatalog).resize();
             
             // إخفاء رسالة المساعدة بعد فترة
             setTimeout(function() {
                 $('.navigation-hint').fadeOut(1000);
             }, 5000);
+            
+            // تحسين الأداء على الجوال
+            $('img').on('dragstart', function(e) {
+                e.preventDefault();
+            });
+            
+            // إضافة تأثيرات عند التحميل
+            setTimeout(() => {
+                $('.player-spot').each(function(index) {
+                    $(this).css('animation-delay', `${index * 0.1}s`);
+                });
+            }, 500);
         });
     </script>
     
     <!-- إضافة خط جوجل للعربية -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- إضافة Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -57,21 +57,26 @@ flask run
 
 To contribute to this project:
 
-1. Initialize Git and setup remote:
+1. Configure Git line endings (recommended):
+```bash
+git config --global core.autocrlf false
+```
+
+2. Initialize Git and setup remote:
 ```bash
 git init
 git branch -M main
 git remote add origin https://github.com/Mohammed-hani69/Starcatcher.git
 ```
 
-2. Initial push to repository:
+3. Initial push to repository:
 ```bash
 git add .
 git commit -m "Initial commit"
 git push -f origin main
 ```
 
-3. For future changes:
+4. For future changes:
 ```bash
 git add .
 git commit -m "Your commit message"
