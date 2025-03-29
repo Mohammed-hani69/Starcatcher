@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         img.addEventListener('error', function() {
-            this.src = 'static/image/default-player.png';
+            this.src = 'static/image/STAR CATCHER FINAL LOGO-11.png';
         });
     });
 });

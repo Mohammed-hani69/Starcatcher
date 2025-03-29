@@ -10,8 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta
 from flask_wtf.csrf import CSRFProtect
 from flask_cors import CORS
-
-
+import os
 
 csrf = CSRFProtect()
 
@@ -42,6 +41,9 @@ def create_app():
     app.config['UPLOAD_FOLDER_PACKS'] = 'appstarcatcher/static/uploads/packs'
     app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
     app.config['UPLOAD_FOLDER'] = 'appstarcatcher/static/uploads/profile_images'
+    app.config['UPLOAD_FOLDER_PROMOTIONS'] = 'appstarcatcher/static/uploads/promotions'
+    if not os.path.exists(app.config['UPLOAD_FOLDER_PROMOTIONS']):
+        os.makedirs(app.config['UPLOAD_FOLDER_PROMOTIONS'])
     
     # تهيئة قاعدة البيانات
     db.init_app(app)

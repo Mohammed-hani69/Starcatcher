@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>العروض الخاصة - Star Catcher</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap">
+    <style>
+        :root {
+            --primary-red: #e50914;
+            --dark-red: #b30710;
+            --accent-gold: #ffc107;
+            --black: #121212;
+            --dark-gray: #1a1a1a;
+            --light-gray: #2d2d2d;
+            --text-light: #f8f9fa;
+        }
+
+        body {
+            background-color: var(--black);
+            color: var(--text-light);
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .promotion-header {
+            background: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(130,0,0,0.8) 100%);
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 50px;
+            border-bottom: 4px solid var(--primary-red);
+        }
+
+        .promotion-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-light);
+        }
+
+        .promotion-card {
+            background: linear-gradient(145deg, var(--dark-gray), var(--black));
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            border: 1px solid var(--primary-red);
+        }
+
+        .promotion-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .promotion-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .promotion-content {
+            padding: 20px;
+        }
+
+        .promotion-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--text-light);
+        }
+
+        .promotion-description {
+            color: #adb5bd;
+            margin-bottom: 20px;
+        }
+
+        .promotion-price {
+            font-size: 1.8rem;
+            color: var(--accent-gold);
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .original-price {
+            font-size: 1.2rem;
+            color: #666;
+            text-decoration: line-through;
+        }
+
+        .discount-badge {
+            background-color: var(--primary-red);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .promotion-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        .promotion-features li {
+            margin-bottom: 10px;
+            padding-right: 25px;
+            position: relative;
+            color: #e1e1e1;
+        }
+
+        .promotion-features li::before {
+            content: '\f00c';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 0;
+            color: var(--accent-gold);
+        }
+
+        .buy-btn {
+            background: linear-gradient(to right, var(--primary-red), var(--dark-red));
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            width: 100%;
+        }
+
+        .buy-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(229, 9, 20, 0.4);
+            color: white;
+        }
+
+        .timer-container {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .timer {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .timer-unit {
+            background: var(--dark-gray);
+            padding: 10px;
+            border-radius: 8px;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .timer-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .timer-label {
+            font-size: 0.8rem;
+            color: #adb5bd;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar (نفس الشريط العلوي الموجود في الصفحة الرئيسية) -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('home') }}">Star Catcher</a>
+            <!-- ... باقي محتوى Navbar ... -->
+        </div>
+    </nav>
+
+    <!-- رأس صفحة العروض -->
+    <div class="promotion-header">
+        <div class="container">
+            <h1 class="promotion-title">العروض الخاصة 🎁</h1>
+            <p class="text-light">اغتنم الفرصة واحصل على أفضل العروض المتاحة!</p>
+        </div>
+    </div>
+
+    <!-- محتوى العروض -->
+    <div class="container">
+        <div class="row">
+            <!-- عرض البداية -->
+            <div class="col-md-6 col-lg-4">
+                <div class="promotion-card">
+                    <img src="{{ url_for('static', filename='image/starter-pack.jpg') }}" alt="حزمة البداية" class="promotion-image">
+                    <div class="promotion-content">
+                        <h3 class="promotion-name">حزمة البداية 🌟</h3>
+                        <p class="promotion-description">ابدأ رحلتك مع ستار كاتشر بأفضل طريقة ممكنة!</p>
+                        <div class="timer-container">
+                            <div class="timer">
+                                <div class="timer-unit">
+                                    <div class="timer-value" id="days1">02</div>
+                                    <div class="timer-label">يوم</div>
+                                </div>
+                                <div class="timer-unit">
+                                    <div class="timer-value" id="hours1">12</div>
+                                    <div class="timer-label">ساعة</div>
+                                </div>
+                                <div class="timer-unit">
+                                    <div class="timer-value" id="minutes1">45</div>
+                                    <div class="timer-label">دقيقة</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="promotion-price">
+                            <span class="current-price">1000</span>
+                            <small>عملة</small>
+                            <span class="discount-badge">خصم 50%</span>
+                        </div>
+                        <ul class="promotion-features">
+                            <li>1000 عملة مجانية للبداية</li>
+                            <li>5 باكجات نخبة مجانية</li>
+                            <li>لاعب أسطوري مضمون</li>
+                            <li>شارة VIP لمدة شهر</li>
+                        </ul>
+                        <a href="#" class="buy-btn">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            اشترِ الآن
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- العرض الذهبي -->
+            <div class="col-md-6 col-lg-4">
+                <div class="promotion-card">
+                    <img src="{{ url_for('static', filename='image/golden-pack.jpg') }}" alt="الحزمة الذهبية" class="promotion-image">
+                    <div class="promotion-content">
+                        <h3 class="promotion-name">الحزمة الذهبية 👑</h3>
+                        <p class="promotion-description">احصل على أفضل اللاعبين مع مميزات حصرية!</p>
+                        <div class="timer-container">
+                            <div class="timer">
+                                <div class="timer-unit">
+                                    <div class="timer-value" id="days2">01</div>
+                                    <div class="timer-label">يوم</div>
+                                </div>
+                                <div class="timer-unit">
+                                    <div class="timer-value" id="hours2">18</div>
+                                    <div class="timer-label">ساعة</div>
+                                </div>
+                                <div class="timer-unit">
+                                    <div class="timer-value" id="minutes2">30</div>
+                                    <div class="timer-label">دقيقة</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="promotion-price">
+                            <span class="current-price">2500</span>
+                            <small>عملة</small>
+                            <span class="discount-badge">خصم 35%</span>
+                        </div>
+                        <ul class="promotion-features">
+                            <li>2500 عملة ذهبية</li>
+                            <li>10 باكجات نخبة</li>
+                            <li>3 لاعبين أسطوريين مضمونين</li>
+                            <li>شارة VIP لمدة 3 أشهر</li>
+                        </ul>
+                        <a href="#" class="buy-btn">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            اشترِ الآن
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- عرض محدود -->
+            <div class="col-md-6 col-lg-4">
+                <div class="promotion-card">
+                    <img src="{{ url_for('static', filename='image/limited-offer.jpg') }}" alt="عرض محدود" class="promotion-image">
+                    <div class="promotion-content">
+                        <h3 class="promotion-name">عرض محدود ⚡</h3>
+                        <p class="promotion-description">عرض لفترة محدودة! اغتنم الفرصة الآن</p>
+                        <div class="timer-container">
+                            <div class="timer">
+                                <div class="timer-unit">
+                                    <div class="timer-value" id="days3">00</div>
+                                    <div class="timer-label">يوم</div>
+                                </div>
+                                <div class="timer-unit">
+                                    <div class="timer-value" id="hours3">06</div>
+                                    <div class="timer-label">ساعة</div>
+                                </div>
+                                <div class="timer-unit">
+                                    <div class="timer-value" id="minutes3">15</div>
+                                    <div class="timer-label">دقيقة</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="promotion-price">
+                            <span class="current-price">500</span>
+                            <small>عملة</small>
+                            <span class="discount-badge">خصم 70%</span>
+                        </div>
+                        <ul class="promotion-features">
+                            <li>500 عملة فورية</li>
+                            <li>3 باكجات مميزة</li>
+                            <li>لاعب نادر مضمون</li>
+                            <li>شارة مميزة حصرية</li>
+                        </ul>
+                        <a href="#" class="buy-btn">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            اشترِ الآن
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // تحديث العدادات
+        function updateTimers() {
+            const timers = [
+                { days: 'days1', hours: 'hours1', minutes: 'minutes1', totalHours: 60 },
+                { days: 'days2', hours: 'hours2', minutes: 'minutes2', totalHours: 42 },
+                { days: 'days3', hours: 'hours3', minutes: 'minutes3', totalHours: 6 }
+            ];
+
+            setInterval(() => {
+                timers.forEach(timer => {
+                    timer.totalHours--;
+                    const days = Math.floor(timer.totalHours / 24);
+                    const hours = Math.floor(timer.totalHours % 24);
+                    const minutes = Math.floor(Math.random() * 60); // للتبسيط نستخدم رقم عشوائي للدقائق
+
+                    document.getElementById(timer.days).textContent = String(days).padStart(2, '0');
+                    document.getElementById(timer.hours).textContent = String(hours).padStart(2, '0');
+                    document.getElementById(timer.minutes).textContent = String(minutes).padStart(2, '0');
+                });
+            }, 60000); // تحديث كل دقيقة
+        }
+
+        // تشغيل العدادات عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', updateTimers);
+    </script>
+</body>
+</html>

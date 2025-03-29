@@ -670,9 +670,9 @@
                     <i class="fas fa-users"></i>
                     <span>المستخدمين</span>
                 </a>
-                <a href="/add_subscription" class="nav-item">
+                <a href="/subscription_purchases" class="nav-item">
                     <i class="fas fa-star"></i>
-                    <span>الاشتراكات</span>
+                    <span>مبيعات الاشتراكات</span>
                 </a>
                 <a href="/settings" class="nav-item">
                     <i class="fas fa-cog"></i>
@@ -740,7 +740,17 @@
                     <th>عدد اللاعبين</th>
                     <th>تاريخ التسجيل</th>
                     <th>آخر دخول</th>
+                    {% if current_user.is_admin%}
                     <th>صلاحيات الأدمن</th>
+                    <th>إدارة الرئيسيه</th>
+                    <th>إدارة المستخدمين</th>
+                    <th>إدارة اللاعبين</th>
+                    <th>إدارة الأندية</th>
+                    <th>إدارة الباكجات</th>
+                    <th>إدارة السوق</th>
+                    <th>إدارة الاشتراكات</th>
+                    <th>إدارة العروض</th>
+                    {% endif%}
                 </tr>
             </thead>
             <tbody>
@@ -750,7 +760,19 @@
                     <td>{{ user_data.user.username }}</td>
                     <td>{{ user_data.user.email }}</td>
                     <td>{{ user_data.user.phone or 'غير متوفر' }}</td>
-                    <td>{{ user_data.user.country or 'غير متوفر' }}</td>
+                    <td>
+                        {% if user_data.user.country == 'eg' %}
+                            مصر
+                        {% elif user_data.user.country == 'sa' %}
+                            السعودية
+                        {% elif user_data.user.country == 'ae' %}
+                            الإمارات
+                        {% elif user_data.user.country == 'jo' %}
+                            الأردن
+                        {% else %}
+                            {{ user_data.user.country or 'غير متوفر' }}
+                        {% endif %}
+                    </td>
                     <td>{{ user_data.user.state or 'غير متوفر' }}</td>
                     <td>{{ user_data.user.city or 'غير متوفر' }}</td>
                     <td>
@@ -789,6 +811,7 @@
                     <td>{{ user_data.player_count }}</td>
                     <td>{{ user_data.user.created_at.strftime('%Y-%m-%d') }}</td>
                     <td>{{ user_data.user.last_login.strftime('%Y-%m-%d %H:%M') if user_data.user.last_login else 'لم يسجل دخول' }}</td>
+                    {% if current_user.is_admin%}
                     <td class="admin-toggle-cell">
                         <label class="toggle-switch">
                             <input type="checkbox" 
@@ -798,6 +821,79 @@
                             <span class="toggle-slider"></span>
                         </label>
                     </td>
+                    <td class="permission-toggle-cell">
+                        <label class="toggle-switch">
+                            <input type="checkbox" 
+                                   {% if user_data.user.can_manage_dashboard %}checked{% endif %}
+                                   onchange="togglePermission('{{ user_data.user.id }}', 'can_manage_dashboard', this)"
+                                   {% if user_data.user.id == current_user.id %}disabled{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </td>
+                    <td class="permission-toggle-cell">
+                        <label class="toggle-switch">
+                            <input type="checkbox" 
+                                   {% if user_data.user.can_manage_users %}checked{% endif %}
+                                   onchange="togglePermission('{{ user_data.user.id }}', 'can_manage_users', this)"
+                                   {% if user_data.user.id == current_user.id %}disabled{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </td>
+                    <td class="permission-toggle-cell">
+                        <label class="toggle-switch">
+                            <input type="checkbox" 
+                                   {% if user_data.user.can_manage_players %}checked{% endif %}
+                                   onchange="togglePermission('{{ user_data.user.id }}', 'can_manage_players', this)"
+                                   {% if user_data.user.id == current_user.id %}disabled{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </td>
+                    <td class="permission-toggle-cell">
+                        <label class="toggle-switch">
+                            <input type="checkbox" 
+                                   {% if user_data.user.can_manage_clubs %}checked{% endif %}
+                                   onchange="togglePermission('{{ user_data.user.id }}', 'can_manage_clubs', this)"
+                                   {% if user_data.user.id == current_user.id %}disabled{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </td>
+                    <td class="permission-toggle-cell">
+                        <label class="toggle-switch">
+                            <input type="checkbox" 
+                                   {% if user_data.user.can_manage_packs %}checked{% endif %}
+                                   onchange="togglePermission('{{ user_data.user.id }}', 'can_manage_packs', this)"
+                                   {% if user_data.user.id == current_user.id %}disabled{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </td>
+                    <td class="permission-toggle-cell">
+                        <label class="toggle-switch">
+                            <input type="checkbox" 
+                                   {% if user_data.user.can_manage_market %}checked{% endif %}
+                                   onchange="togglePermission('{{ user_data.user.id }}', 'can_manage_market', this)"
+                                   {% if user_data.user.id == current_user.id %}disabled{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </td>
+                    <td class="permission-toggle-cell">
+                        <label class="toggle-switch">
+                            <input type="checkbox" 
+                                   {% if user_data.user.can_manage_subscriptions %}checked{% endif %}
+                                   onchange="togglePermission('{{ user_data.user.id }}', 'can_manage_subscriptions', this)"
+                                   {% if user_data.user.id == current_user.id %}disabled{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </td>
+                    <td class="permission-toggle-cell">
+                        <label class="toggle-switch">
+                            <input type="checkbox" 
+                                   {% if user_data.user.can_manage_promotions %}checked{% endif %}
+                                   onchange="togglePermission('{{ user_data.user.id }}', 'can_manage_promotions', this)"
+                                   {% if user_data.user.id == current_user.id %}disabled{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </td>
+                    {% endif%}
                 </tr>
                 {% endfor %}
             </tbody>
@@ -1039,6 +1135,34 @@
                 console.error('Error:', error);
                 showNotification(error.message || 'حدث خطأ أثناء تحديث العملات', 'error');
                 throw error;
+            }
+        }
+
+        async function togglePermission(userId, permission, checkbox) {
+            try {
+                const response = await fetch(`/toggle_permission/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        permission: permission,
+                        value: checkbox.checked
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'حدث خطأ أثناء تحديث الصلاحيات');
+                }
+
+                showNotification(data.message, 'success');
+            } catch (error) {
+                console.error('Error:', error);
+                checkbox.checked = !checkbox.checked; // عكس حالة الـ checkbox
+                showNotification(error.message || 'حدث خطأ أثناء تحديث الصلاحيات', 'error');
             }
         }
     </script>

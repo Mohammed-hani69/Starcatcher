@@ -527,6 +527,18 @@
                 transform: translateY(100vh) rotate(720deg);
             }
         }
+
+        .form-select {
+            background: transparent;
+            color: white;
+            border: none;
+            outline: none;
+        }
+
+        .form-select option {
+            background: var(--dark-gray);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -1103,48 +1115,88 @@
                     const displayElement = document.getElementById(`${field}-display`);
                     const currentValue = displayElement.textContent;
                     
-                    // Create edit interface
-                    const editContainer = document.createElement('div');
-                    editContainer.className = 'editing d-flex align-items-center';
-                    editContainer.innerHTML = `
-                        <input type="text" value="${currentValue}" class="me-2">
-                        <button class="save-btn"><i class="fas fa-check"></i></button>
-                        <button class="cancel-btn"><i class="fas fa-times"></i></button>
-                    `;
-                    
-                    displayElement.parentElement.replaceChild(editContainer, displayElement);
-                    
-                    // Focus input
-                    const input = editContainer.querySelector('input');
-                    input.focus();
-                    
-                    // Handle save
-                    editContainer.querySelector('.save-btn').addEventListener('click', function() {
-                        updateField(field, input.value, editContainer, currentValue);
-                    });
-                    
-                    // Handle cancel
-                    editContainer.querySelector('.cancel-btn').addEventListener('click', function() {
-                        restoreDisplay(field, currentValue, editContainer);
-                    });
+                    if (field === 'country') {
+                        // إنشاء واجهة تحرير خاصة بالدول
+                        const editContainer = document.createElement('div');
+                        editContainer.className = 'editing d-flex align-items-center';
+                        editContainer.innerHTML = `
+                            <select class="form-select form-select-sm bg-dark text-white me-2">
+                                <option value="">اختر دولة</option>
+                                <option value="eg">مصر</option>
+                                <option value="sa">السعودية</option>
+                                <option value="ae">الإمارات</option>
+                                <option value="jo">الأردن</option>
+                            </select>
+                            <button class="save-btn"><i class="fas fa-check"></i></button>
+                            <button class="cancel-btn"><i class="fas fa-times"></i></button>
+                        `;
+                        
+                        displayElement.replaceWith(editContainer);
+                        
+                        // تحديد القيمة الحالية في القائمة المنسدلة
+                        const select = editContainer.querySelector('select');
+                        const countryMap = {
+                            'مصر': 'eg',
+                            'السعودية': 'sa',
+                            'الإمارات': 'ae',
+                            'الأردن': 'jo'
+                        };
+                        select.value = countryMap[currentValue] || '';
+                        
+                        // معالجة الحفظ
+                        editContainer.querySelector('.save-btn').addEventListener('click', function() {
+                            updateField(field, select.value, editContainer, currentValue);
+                        });
+                        
+                        // معالجة الإلغاء
+                        editContainer.querySelector('.cancel-btn').addEventListener('click', function() {
+                            restoreDisplay(field, currentValue, editContainer);
+                        });
+                    } else {
+                        // الكود الخاص بباقي الحقول
+                        const editContainer = document.createElement('div');
+                        editContainer.className = 'editing d-flex align-items-center';
+                        editContainer.innerHTML = `
+                            <input type="text" value="${currentValue}" class="form-control form-control-sm bg-dark text-white me-2">
+                            <button class="save-btn"><i class="fas fa-check"></i></button>
+                            <button class="cancel-btn"><i class="fas fa-times"></i></button>
+                        `;
+                        
+                        displayElement.replaceWith(editContainer);
+                        
+                        const input = editContainer.querySelector('input');
+                        input.focus();
+                        
+                        editContainer.querySelector('.save-btn').addEventListener('click', function() {
+                            updateField(field, input.value, editContainer, currentValue);
+                        });
+                        
+                        editContainer.querySelector('.cancel-btn').addEventListener('click', function() {
+                            restoreDisplay(field, currentValue, editContainer);
+                        });
+                    }
                 });
             });
         });
 
+        // دالة تحديث الحقل
         function updateField(field, value, editContainer, oldValue) {
+            // تحديد قيمة الدولة للعرض
+            const displayValue = field === 'country' ? getCountryName(value) : value;
+            
             fetch('/update_profile', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ field, value })
+                body: JSON.stringify({ field, value }) // نرسل رمز الدولة للتخزين
             })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    restoreDisplay(field, value, editContainer);
+                    restoreDisplay(field, value, editContainer); // نمرر رمز الدولة
                 } else {
-                    alert(data.message);
+                    alert(data.message || 'حدث خطأ في التحديث');
                     restoreDisplay(field, oldValue, editContainer);
                 }
             })
@@ -1155,11 +1207,32 @@
             });
         }
 
+        // دالة استعادة العرض
         function restoreDisplay(field, value, editContainer) {
             const displayElement = document.createElement('span');
             displayElement.id = `${field}-display`;
-            displayElement.textContent = value;
-            editContainer.parentElement.replaceChild(displayElement, editContainer);
+            
+            if (field === 'country') {
+                displayElement.textContent = getCountryName(value); // تحويل رمز الدولة إلى اسمها
+                displayElement.dataset.value = value; // نحتفظ برمز الدولة
+            } else {
+                displayElement.textContent = value;
+            }
+            
+            const parentContainer = editContainer.closest('.editable-field');
+            const existingButton = parentContainer.querySelector('.edit-btn');
+            parentContainer.replaceChild(displayElement, editContainer);
+        }
+
+        // دالة مساعدة للحصول على اسم الدولة من رمزها
+        function getCountryName(code) {
+            const countries = {
+                'eg': 'مصر',
+                'sa': 'السعودية',
+                'ae': 'الإمارات',
+                'jo': 'الأردن'
+            };
+            return countries[code] || code;
         }
 
         // إضافة كود التعامل مع تغيير الصورة
@@ -1220,7 +1293,6 @@
                 confetti.style.top = startRect.top + 'px';
                 confetti.style.background = ['#ffc107', '#28a745', '#dc3545', '#007bff'][Math.floor(Math.random() * 4)];
                 confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
-                
                 document.body.appendChild(confetti);
                 
                 // حركة القصاصات
@@ -1260,7 +1332,7 @@
 
                     // حركة العملة في مسار منحني
                     coin.animate([
-                        { 
+                        {
                             left: coin.style.left,
                             top: coin.style.top,
                             offset: 0
@@ -1307,7 +1379,7 @@
             const startValue = parseInt(coinsDisplay.textContent);
             const endValue = startValue + amount;
             let current = startValue;
-            
+
             // تحديث تدريجي للعداد
             const updateCounter = () => {
                 if (current < endValue) {
@@ -1337,7 +1409,6 @@
                 if(data.status === 'success') {
                     const coinsDisplay = document.querySelector('.coins-display');
                     const rewardStatus = button.closest('.reward-status');
-                    
                     createFloatingCoins(button, coinsDisplay, 50);
                     
                     // إنشاء أيقونة النجاح
@@ -1374,7 +1445,6 @@
                 if(data.status === 'success') {
                     const coinsDisplay = document.querySelector('.coins-display');
                     const rewardStatus = button.closest('.reward-status');
-                    
                     createFloatingCoins(button, coinsDisplay, 60);
                     
                     // إنشاء أيقونة النجاح
@@ -1411,7 +1481,6 @@
                 if(data.status === 'success') {
                     const coinsDisplay = document.querySelector('.coins-display');
                     const rewardStatus = button.closest('.reward-status');
-                    
                     createFloatingCoins(button, coinsDisplay, 100);
                     
                     // إنشاء أيقونة النجاح
@@ -1448,12 +1517,13 @@
                 if(data.status === 'success') {
                     const coinsDisplay = document.querySelector('.coins-display');
                     const rewardStatus = button.closest('.reward-status');
-                    
                     createFloatingCoins(button, coinsDisplay, 150);
                     
+                    // إنشاء أيقونة النجاح
                     const successIcon = document.createElement('i');
                     successIcon.className = 'fas fa-check-circle text-success fs-4';
                     
+                    // تبديل الزر بأيقونة النجاح
                     rewardStatus.innerHTML = '';
                     rewardStatus.appendChild(successIcon);
                 } else {
@@ -1483,12 +1553,13 @@
                 if(data.status === 'success') {
                     const coinsDisplay = document.querySelector('.coins-display');
                     const rewardStatus = button.closest('.reward-status');
-                    
                     createFloatingCoins(button, coinsDisplay, 200);
                     
+                    // إنشاء أيقونة النجاح
                     const successIcon = document.createElement('i');
                     successIcon.className = 'fas fa-check-circle text-success fs-4';
                     
+                    // تبديل الزر بأيقونة النجاح
                     rewardStatus.innerHTML = '';
                     rewardStatus.appendChild(successIcon);
                 } else {
@@ -1502,135 +1573,60 @@
                 button.disabled = false;
             });
         });
+
+        // تعديل في الكود الخاص بعرض الدولة
+        document.addEventListener('DOMContentLoaded', function() {
+            // تحويل رموز الدول عند تحميل الصفحة
+            const countryDisplay = document.getElementById('country-display');
+            if (countryDisplay) {
+                const countryCode = countryDisplay.textContent.trim();
+                const countries = {
+                    'eg': 'مصر',
+                    'sa': 'السعودية',
+                    'ae': 'الإمارات',
+                    'jo': 'الأردن'
+                };
+                countryDisplay.textContent = countries[countryCode] || countryCode;
+            }
+        });
+
+        function updateField(field, value, editContainer, oldValue) {
+            fetch('/update_profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ field, value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    if (field === 'country') {
+                        const countries = {
+                            'eg': 'مصر',
+                            'sa': 'السعودية',
+                            'ae': 'الإمارات',
+                            'jo': 'الأردن'
+                        };
+                        restoreDisplay(field, countries[value] || value, editContainer);
+                    } else {
+                        restoreDisplay(field, value, editContainer);
+                    }
+                } else {
+                    alert(data.message || 'حدث خطأ في التحديث');
+                    restoreDisplay(field, oldValue, editContainer);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء التحديث');
+                restoreDisplay(field, oldValue, editContainer);
+            });
+        }
     </script>
     <!-- Add before closing body tag -->
     <audio id="coinSound" preload="auto">
         <source src="{{ url_for('static', filename='sounds/coin-collect.mp3') }}" type="audio/mp3">
     </audio>
 </body>
-
-<script>
-// ...existing code...
-
-function createFloatingCoins(startElement, endElement, amount) {
-    // Play coin sound
-    const coinSound = document.getElementById('coinSound');
-    coinSound.currentTime = 0;
-    coinSound.play();
-    
-    const startRect = startElement.getBoundingClientRect();
-    const endRect = endElement.getBoundingClientRect();
-    const coinsCount = amount > 10 ? 10 : amount; // تحديد عدد العملات المتحركة
-    
-    // إنشاء قصاصات ورقية متطايرة
-    for(let i = 0; i < 30; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        confetti.style.left = startRect.left + Math.random() * startRect.width + 'px';
-        confetti.style.top = startRect.top + 'px';
-        confetti.style.background = ['#ffc107', '#28a745', '#dc3545', '#007bff'][Math.floor(Math.random() * 4)];
-        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
-        
-        document.body.appendChild(confetti);
-        
-        // حركة القصاصات
-        confetti.animate([
-            { 
-                top: startRect.top + 'px',
-                opacity: 1
-            },
-            { 
-                top: startRect.top + Math.random() * 200 + 'px',
-                opacity: 0
-            }
-        ], {
-            duration: 1000 + Math.random() * 1000,
-            easing: 'ease-out',
-            fill: 'forwards'
-        }).onfinish = () => confetti.remove();
-    }
-
-    // إنشاء وتحريك العملات
-    for(let i = 0; i < coinsCount; i++) {
-        setTimeout(() => {
-            const coin = document.createElement('div');
-            coin.className = 'coin';
-            coin.innerHTML = '<i class="fas fa-coins"></i>';
-            
-            coin.style.left = startRect.left + Math.random() * startRect.width + 'px';
-            coin.style.top = startRect.top + 'px';
-            
-            document.body.appendChild(coin);
-
-            // مسار العملة
-            const controlPoint1X = startRect.left + (endRect.left - startRect.left) * 0.5;
-            const controlPoint1Y = startRect.top - 100;
-            const controlPoint2X = startRect.left + (endRect.left - startRect.left) * 0.8;
-            const controlPoint2Y = startRect.top - 50;
-
-            // حركة العملة في مسار منحني
-            coin.animate([
-                { 
-                    left: coin.style.left,
-                    top: coin.style.top,
-                    offset: 0
-                },
-                {
-                    left: controlPoint1X + 'px',
-                    top: controlPoint1Y + 'px',
-                    offset: 0.3
-                },
-                {
-                    left: controlPoint2X + 'px',
-                    top: controlPoint2Y + 'px',
-                    offset: 0.6
-                },
-                {
-                    left: endRect.left + 'px',
-                    top: endRect.top + 'px',
-                    transform: 'scale(0.5)',
-                    offset: 1
-                }
-            ], {
-                duration: 1000,
-                easing: 'ease-in-out',
-                fill: 'forwards'
-            }).onfinish = () => {
-                coin.remove();
-                // تشغيل صوت عند وصول كل عملة
-                if (i < coinsCount - 1) {
-                    coinSound.currentTime = 0;
-                    coinSound.play();
-                }
-                // تحديث العداد بعد آخر عملة
-                if (i === coinsCount - 1) {
-                    updateCoinsCounter(amount);
-                }
-            };
-        }, i * 200); // تأخير بين كل عملة
-    }
-}
-
-// دالة تحديث عداد العملات
-function updateCoinsCounter(amount) {
-    const coinsDisplay = document.getElementById('userCoins');
-    const startValue = parseInt(coinsDisplay.textContent);
-    const endValue = startValue + amount;
-    let current = startValue;
-    
-    // تحديث تدريجي للعداد
-    const updateCounter = () => {
-        if (current < endValue) {
-            const increment = Math.ceil((endValue - current) / 10);
-            current = Math.min(current + increment, endValue);
-            coinsDisplay.textContent = current;
-            requestAnimationFrame(updateCounter);
-        }
-    };
-    
-    updateCounter();
-}
-
-// ...existing code...
-</script>
 </html>

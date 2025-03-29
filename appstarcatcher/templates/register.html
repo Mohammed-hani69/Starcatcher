@@ -422,6 +422,30 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* إضافة أنماط جديدة لرسائل الخطأ */
+        .invalid-field {
+            border-color: var(--neon-red) !important;
+            box-shadow: 0 0 10px rgba(255, 23, 68, 0.2) !important;
+        }
+
+        .error-message {
+            color: var(--neon-red);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: block;
+            text-align: right;
+            animation: fadeIn 0.3s ease;
+            padding: 5px 10px;
+            border-right: 3px solid var(--neon-red);
+            background: rgba(255, 23, 68, 0.1);
+            border-radius: 4px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -447,16 +471,24 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-user"></i> اسم المستخدم</label>
-                            {{ form.username(class="form-control", placeholder="أدخل اسم المستخدم") }}
-                            <span class="error-message d-none" id="username-error">يرجى إدخال اسم مستخدم صالح</span>
+                            <label class="form-label"><i class="fas fa-user"></i> {{ form.username.label }}</label>
+                            {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""), placeholder="أدخل اسمك كامل") }}
+                            {% if form.username.errors %}
+                                {% for error in form.username.errors %}
+                                    <div class="error-message">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-envelope"></i> البريد الإلكتروني</label>
-                            {{ form.email(class="form-control", placeholder="أدخل بريدك الإلكتروني") }}
-                            <span class="error-message d-none" id="email-error">يرجى إدخال بريد إلكتروني صالح</span>
+                            <label class="form-label"><i class="fas fa-envelope"></i> {{ form.email.label }}</label>
+                            {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), placeholder="أدخل بريدك الإلكتروني") }}
+                            {% if form.email.errors %}
+                                {% for error in form.email.errors %}
+                                    <div class="error-message">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -464,18 +496,24 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-lock"></i> كلمة المرور</label>
-                            {{ form.password(class="form-control", placeholder="أدخل كلمة المرور", id="password") }}
-                            <i class="fas fa-eye password-toggle" id="password-toggle"></i>
-                            <span class="error-message d-none" id="password-error">يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل</span>
+                            <label class="form-label"><i class="fas fa-lock"></i> {{ form.password.label }}</label>
+                            {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), placeholder="أدخل كلمة المرور") }}
+                            {% if form.password.errors %}
+                                {% for error in form.password.errors %}
+                                    <div class="error-message">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-lock"></i> تأكيد كلمة المرور</label>
-                            {{ form.confirm_password(class="form-control", placeholder="أعد إدخال كلمة المرور", id="confirm-password") }}
-                            <i class="fas fa-eye password-toggle" id="confirm-password-toggle"></i>
-                            <span class="error-message d-none" id="confirm-password-error">كلمات المرور غير متطابقة</span>
+                            <label class="form-label"><i class="fas fa-lock"></i> {{ form.confirm_password.label }}</label>
+                            {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""), placeholder="أعد إدخال كلمة المرور") }}
+                            {% if form.confirm_password.errors %}
+                                {% for error in form.confirm_password.errors %}
+                                    <div class="error-message">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -483,17 +521,26 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-phone"></i> رقم الهاتف</label>
-                            {{ form.phone(class="form-control", placeholder="أدخل رقم الهاتف") }}
-                            <span class="error-message d-none" id="phone-error">يرجى إدخال رقم هاتف صالح</span>
+                            <label class="form-label"><i class="fas fa-phone"></i> {{ form.phone.label }}</label>
+                            {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else ""), placeholder="أدخل رقم الهاتف") }}
+                            {% if form.phone.errors %}
+                                {% for error in form.phone.errors %}
+                                    <div class="error-message">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-globe"></i> الدولة</label>
-                            {{ form.country(class="form-control") }}
+                            <label class="form-label"><i class="fas fa-globe"></i> {{ form.country.label }}</label>
+                            {{ form.country(class="form-control" + (" is-invalid" if form.country.errors else "")) }}
+                            {% if form.country.errors %}
+                                {% for error in form.country.errors %}
+                                    <div class="error-message">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
                         </div>
-                    </div>
+                    </div>                    
                 </div>
 
                 <div class="row">
@@ -589,6 +636,94 @@
             setTimeout(function() {
                 loadingOverlay.classList.remove('show');
             }, 2000);
+        });
+
+        // دالة للتحقق من صحة الحقول وإظهار رسائل الخطأ
+        function validateField(field, errorElement, validationRules) {
+            const value = field.value;
+            let isValid = true;
+            let errorMessage = '';
+
+            field.classList.remove('invalid-field');
+            errorElement.style.display = 'none';
+
+            // التحقق من القواعد
+            if (validationRules.required && !value) {
+                isValid = false;
+                errorMessage = 'هذا الحقل مطلوب';
+            } else if (validationRules.email && !isValidEmail(value)) {
+                isValid = false;
+                errorMessage = 'البريد الإلكتروني غير صحيح';
+            } else if (validationRules.minLength && value.length < validationRules.minLength) {
+                isValid = false;
+                errorMessage = `يجب أن يكون الحقل ${validationRules.minLength} أحرف على الأقل`;
+            }
+
+            if (!isValid) {
+                field.classList.add('invalid-field');
+                errorElement.textContent = errorMessage;
+                errorElement.style.display = 'block';
+            }
+
+            return isValid;
+        }
+
+        // التحقق من صحة البريد الإلكتروني
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        // إضافة مستمعي الأحداث للحقول
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('registrationForm');
+            const fields = {
+                username: {
+                    element: document.getElementById('username'),
+                    error: document.getElementById('username-error'),
+                    rules: { required: true, minLength: 3 }
+                },
+                email: {
+                    element: document.getElementById('email'),
+                    error: document.getElementById('email-error'),
+                    rules: { required: true, email: true }
+                },
+                password: {
+                    element: document.getElementById('password'),
+                    error: document.getElementById('password-error'),
+                    rules: { required: true, minLength: 8 }
+                },
+                // يمكن إضافة المزيد من الحقول هنا
+            };
+
+            // التحقق عند تقديم النموذج
+            form.addEventListener('submit', function(e) {
+                let isValid = true;
+                
+                for (let fieldName in fields) {
+                    if (!validateField(
+                        fields[fieldName].element,
+                        fields[fieldName].error,
+                        fields[fieldName].rules
+                    )) {
+                        isValid = false;
+                    }
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                }
+            });
+
+            // التحقق المباشر عند الكتابة
+            for (let fieldName in fields) {
+                fields[fieldName].element.addEventListener('input', function() {
+                    validateField(
+                        fields[fieldName].element,
+                        fields[fieldName].error,
+                        fields[fieldName].rules
+                    );
+                });
+            }
         });
     </script>
 </body>

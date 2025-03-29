@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة عرض جديد</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>إضافة عرض جديد</h2>
+        <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+            {{ form.hidden_tag() }}
+            
+            <div class="mb-3">
+                {{ form.name.label(class="form-label") }}
+                {{ form.name(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.description.label(class="form-label") }}
+                {{ form.description(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.image.label(class="form-label") }}
+                {{ form.image(class="form-control") }}
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form.original_price.label(class="form-label") }}
+                        {{ form.original_price(class="form-control") }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form.discount_percentage.label(class="form-label") }}
+                        {{ form.discount_percentage(class="form-control", oninput="calculateFinalPrice()") }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form.final_price.label(class="form-label") }}
+                        {{ form.final_price(class="form-control") }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                {{ form.promotion_type.label(class="form-label") }}
+                {{ form.promotion_type(class="form-select") }}
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form.coins_reward.label(class="form-label") }}
+                        {{ form.coins_reward(class="form-control") }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form.free_packs.label(class="form-label") }}
+                        {{ form.free_packs(class="form-control") }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form.vip_duration_days.label(class="form-label") }}
+                        {{ form.vip_duration_days(class="form-control") }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                {{ form.end_date.label(class="form-label") }}
+                {{ form.end_date(class="form-control", type="datetime-local") }}
+            </div>
+
+            <button type="submit" class="btn btn-primary">إضافة العرض</button>
+        </form>
+    </div>
+
+    <script>
+        function calculateFinalPrice() {
+            const originalPrice = document.getElementById('original_price').value;
+            const discountPercentage = document.getElementById('discount_percentage').value;
+            if (originalPrice && discountPercentage) {
+                const finalPrice = originalPrice - (originalPrice * discountPercentage / 100);
+                document.getElementById('final_price').value = Math.round(finalPrice);
+            }
+        }
+    </script>
+</body>
+</html>

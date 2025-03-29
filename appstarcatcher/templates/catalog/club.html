@@ -740,6 +740,199 @@
         .fade-effect {
             animation: fadeIn 0.5s ease-out;
         }
+
+        /* تصميم زر التجميع */
+        .collect-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #ff0019, #990000);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            animation: glowPulse 2s infinite;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5),
+                       0 0 30px rgba(255, 0, 0, 0.3),
+                       0 0 45px rgba(255, 0, 0, 0.1);
+        }
+
+        .collect-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 65%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            transform: rotate(45deg);
+        }
+
+        .collect-btn:hover::before {
+            opacity: 0.3;
+            animation: rotateGlow 1s infinite linear;
+        }
+
+        .collect-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.7),
+                       0 0 40px rgba(255, 0, 0, 0.4),
+                       0 0 60px rgba(255, 0, 0, 0.2);
+        }
+
+        .collect-btn:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes glowPulse {
+            0% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.5),
+                            0 0 30px rgba(255, 0, 0, 0.3),
+                            0 0 45px rgba(255, 0, 0, 0.1); }
+            50% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.7),
+                             0 0 40px rgba(255, 0, 0, 0.5),
+                             0 0 60px rgba(255, 0, 0, 0.3); }
+            100% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.5),
+                              0 0 30px rgba(255, 0, 0, 0.3),
+                              0 0 45px rgba(255, 0, 0, 0.1); }
+        }
+
+        @keyframes rotateGlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-spot-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .collect-btn-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%);
+        }
+
+        /* تصميم مؤشر الصفحة القابلة للتجميع */
+        .collectible-indicator {
+            position: fixed;
+            display: none;
+            align-items: center;
+            background: linear-gradient(135deg, #ff0019, #990000);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            box-shadow: 0 3px 15px rgba(255, 0, 0, 0.3);
+            animation: bounce 1s infinite;
+        }
+
+        .collectible-indicator.right {
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .collectible-indicator.left {
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .collectible-indicator .arrow {
+            display: inline-block;
+            margin: 0 5px;
+            font-size: 1.2rem;
+            animation: arrowPulse 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(-50%) translateX(0); }
+            50% { transform: translateY(-50%) translateX(5px); }
+        }
+
+        @keyframes arrowPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* تعديل للشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .collectible-indicator {
+                font-size: 0.8rem;
+                padding: 8px 12px;
+            }
+        }
+
+        /* تحديث أنماط المؤشرات */
+        .collectible-indicators {
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+        }
+
+        .collectible-indicator {
+            pointer-events: auto;
+            cursor: pointer;
+            position: fixed;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ff0019, #990000);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            box-shadow: 0 3px 15px rgba(255, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .collectible-indicator:hover {
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .collectible-indicator.right {
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .collectible-indicator.left {
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .collectible-indicator .arrow {
+            display: inline-block;
+            margin: 0 5px;
+            font-size: 1.2rem;
+            animation: arrowPulse 1s infinite;
+        }
+
+        @keyframes arrowPulse {
+            0%, 100% { opacity: 1; transform: translateX(0); }
+            50% { opacity: 0.7; transform: translateX(3px); }
+        }
     </style>
 </head>
 <body>
@@ -790,6 +983,28 @@
                 <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </button>
+    </div>
+
+    <!-- إضافة مؤشرات الصفحات القابلة للتجميع -->
+    <div class="collectible-indicator right">
+        <span class="text">لاعب قابل للتجميع</span>
+        <span class="arrow">⟶</span>
+    </div>
+    <div class="collectible-indicator left">
+        <span class="arrow">⟵</span>
+        <span class="text">لاعب قابل للتجميع</span>
+    </div>
+
+    <!-- تحديث موضع المؤشرات في الصفحة قبل نهاية body -->
+    <div class="collectible-indicators">
+        <div class="collectible-indicator right">
+            <span class="text">لاعب قابل للتجميع</span>
+            <span class="arrow">⟶</span>
+        </div>
+        <div class="collectible-indicator left">
+            <span class="arrow">⟵</span>
+            <span class="text">لاعب قابل للتجميع</span>
+        </div>
     </div>
     
     <script>
@@ -850,13 +1065,20 @@
                 
                 pagePlayers.forEach(player => {
                     html += `
-                        <div class="player-spot ${!player.is_collected ? 'not-collected' : ''}">
+                        <div class="player-spot ${!player.is_collected ? 'not-collected' : ''}" data-player-id="${player.id}">
                             <div class="player-image-container">
                                 ${player.is_collected && player.image_url 
                                     ? `<img src="{{ url_for('static', filename='uploads/image_player/') }}${player.image_url}" alt="${player.name}" class="zoom-effect">`
                                     : `<div class="empty-spot-info fade-effect">
-                                         <span class="locked-icon">🔒</span>
-                                         <span class="locked-text">اجمع اللاعب لرؤية صورته</span>
+                                         ${player.is_collectible 
+                                            ? `<div class="collect-btn-container">
+                                                 <button class="collect-btn" data-player-id="${player.id}" data-user-player-id="${player.user_player_id}">
+                                                   +
+                                                 </button>
+                                               </div>`
+                                            : `<span class="locked-icon">🔒</span>
+                                               <span class="locked-text">اجمع اللاعب لرؤية صورته</span>`
+                                         }
                                        </div>`
                                 }
                             </div>
@@ -909,6 +1131,9 @@
                         
                         $(view).find('.player-spot').addClass('animate__animated animate__fadeOut');
                         $(page).find('.player-spot').addClass('animate__animated animate__fadeIn');
+
+                        // تحديث مؤشرات الصفحات القابلة للتجميع
+                        updateCollectibleIndicators(page);
                     },
                     turned: function(e, page) {
                         updateNavigationButtons(page);
@@ -917,6 +1142,9 @@
                         $(this).find('.player-spot').each(function(index) {
                             $(this).css('animation-delay', `${index * 0.1}s`);
                         });
+
+                        // تحديث المؤشرات بعد اكتمال التقليب
+                        updateCollectibleIndicators(page);
                     },
                     start: function(e, pageObj) {
                         // تحسين الأداء على الجوال
@@ -1022,6 +1250,242 @@
                     $(this).css('animation-delay', `${index * 0.1}s`);
                 });
             }, 500);
+
+            // تحديث معالج النقر على زر التجميع
+            $(document).on('click', '.collect-btn', function() {
+                const btn = $(this);
+                const playerSpot = btn.closest('.player-spot');
+                const playerId = btn.data('player-id');
+                const userPlayerId = btn.data('user-player-id');
+            
+                $.ajax({
+                    url: '{{ url_for("collect_player") }}',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        playerData: {
+                            id: playerId,
+                            user_player_id: userPlayerId
+                        }
+                    }),
+                    success: function(response) {
+                        if (response.success) {
+                            // Create image element
+                            const imageContainer = playerSpot.find('.player-image-container');
+                            imageContainer.html(`
+                                <img src="{{ url_for('static', filename='uploads/image_player/') }}${response.image_url}" 
+                                     alt="${response.player_name}" 
+                                     class="zoom-effect">
+                            `);
+                            
+                            // Remove not-collected class and update counters
+                            playerSpot.removeClass('not-collected');
+                            updateCollectionCounter();
+            
+                            // Update completion percentage in cover
+                            const newCount = parseInt($('.collected-count').text()) + 1;
+                            $('.collected-count').text(newCount);
+                            const total = {{ total_players }};
+                            const newPercentage = Math.round((newCount / total) * 100);
+                            $('.completion-percentage').text(newPercentage);
+                        }
+                    },
+                    error: function(xhr) {
+                        alert(xhr.responseJSON?.message || 'حدث خطأ أثناء تجميع اللاعب');
+                    }
+                });
+            });
+            
+            function updateCollectionCounter() {
+                // تحديث عداد اللاعبين المجمعين
+                let collected = $('.player-spot:not(.not-collected)').length;
+                let total = $('.player-spot').length;
+                let percentage = Math.round((collected / total) * 100);
+                
+                // تحديث العناصر في الصفحة
+                $('.collected-count').text(collected);
+                $('.completion-percentage').text(percentage);
+            }
+
+            // إضافة دالة للتحقق من وجود لاعبين قابلين للتجميع في الصفحة الحالية
+            function checkCollectiblePlayers(page) {
+                const currentPage = $(`.page:eq(${page - 1})`);
+                const hasCollectiblePlayers = currentPage.find('.collect-btn').length > 0;
+                
+                // التحقق من اتجاه الصفحات القابلة للتجميع
+                const pages = $('#catalog-container').turn('pages');
+                const remainingPages = [];
+                
+                for (let i = 1; i <= pages; i++) {
+                    if (i !== page) {
+                        const pageElement = $(`.page:eq(${i - 1})`);
+                        if (pageElement.find('.collect-btn').length > 0) {
+                            remainingPages.push(i);
+                        }
+                    }
+                }
+                
+                // إخفاء جميع المؤشرات أولاً
+                $('.collectible-indicator').hide();
+                
+                if (remainingPages.length > 0) {
+                    // تحديد أقرب صفحة قابلة للتجميع
+                    const nextCollectible = remainingPages.find(p => p > page);
+                    const prevCollectible = remainingPages.reverse().find(p => p < page);
+                    
+                    if (nextCollectible) {
+                        $('.collectible-indicator.right').fadeIn();
+                    }
+                    
+                    if (prevCollectible) {
+                        $('.collectible-indicator.left').fadeIn();
+                    }
+                }
+            }
+
+            // تحديث دالة turning لتشمل فحص اللاعبين القابلين للتجميع
+            $('#catalog-container').turn({
+                // ...existing code...
+                when: {
+                    turning: function(e, page, view) {
+                        // ...existing code...
+                        checkCollectiblePlayers(page);
+                    },
+                    turned: function(e, page) {
+                        // ...existing code...
+                        checkCollectiblePlayers(page);
+                    }
+                }
+            });
+
+            // فحص أولي عند تحميل الصفحة
+            checkCollectiblePlayers(1);
+
+            // تحديث تهيئة turn.js
+            $('#catalog-container').turn({
+                width: $('#catalog-container').width(),
+                height: $('#catalog-container').height(),
+                autoCenter: true,
+                gradients: true,
+                acceleration: true,
+                elevation: 30,
+                duration: 800,
+                display: 'single',
+                pages: totalPages,
+                when: {
+                    turning: function(e, page, view) {
+                        const direction = page > view ? 'next' : 'previous';
+                        const effect = direction === 'next' ? 'flip-effect' : 'zoom-effect';
+                        
+                        $(view).find('.player-spot').addClass('animate__animated animate__fadeOut');
+                        $(page).find('.player-spot').addClass('animate__animated animate__fadeIn');
+                        
+                        // تحديث مؤشرات الصفحات القابلة للتجميع
+                        updateCollectibleIndicators(page);
+                    },
+                    turned: function(e, page) {
+                        updateNavigationButtons(page);
+                        $(this).find('.player-spot').each(function(index) {
+                            $(this).css('animation-delay', `${index * 0.1}s`);
+                        });
+                        // تحديث المؤشرات بعد اكتمال التقليب
+                        updateCollectibleIndicators(page);
+                    }
+                }
+            });
+
+            // دالة تحديث مؤشرات الصفحات القابلة للتجميع
+            function updateCollectibleIndicators(currentPage) {
+                const pages = $('#catalog-container').turn('pages');
+                let nextCollectiblePage = null;
+                let prevCollectiblePage = null;
+
+                // البحث عن أقرب صفحات قابلة للتجميع
+                for (let i = currentPage + 0; i <= pages; i++) {
+                    if ($(`.page:eq(${i - 1})`).find('.collect-btn').length > 0) {
+                        nextCollectiblePage = i;
+                        break;
+                    }
+                }
+
+                for (let i = currentPage - 1; i >= 1; i--) {
+                    if ($(`.page:eq(${i - 1})`).find('.collect-btn').length > 0) {
+                        prevCollectiblePage = i;
+                        break;
+                    }
+                }
+
+                // تحديث ظهور المؤشرات
+                if (nextCollectiblePage) {
+                    $('.collectible-indicator.right').fadeIn().css('display', 'flex');
+                } else {
+                    $('.collectible-indicator.right').fadeOut();
+                }
+
+                if (prevCollectiblePage) {
+                    $('.collectible-indicator.left').fadeIn().css('display', 'flex');
+                } else {
+                    $('.collectible-indicator.left').fadeOut();
+                }
+            }
+
+            // إضافة النقر على المؤشرات للانتقال إلى الصفحات القابلة للتجميع
+            $('.collectible-indicator.right').click(function() {
+                $('#catalog-container').turn('next');
+            });
+
+            $('.collectible-indicator.left').click(function() {
+                $('#catalog-container').turn('previous');
+            });
+
+            // تحديث المؤشرات عند تحميل الصفحة
+            setTimeout(() => {
+                updateCollectibleIndicators(1);
+            }, 500);
+        });
+
+        $(document).on('click', '.collect-btn', function() {
+            const btn = $(this);
+            const playerSpot = btn.closest('.player-spot');
+            const playerId = btn.data('player-id');
+            const userPlayerId = btn.data('user-player-id');
+        
+            $.ajax({
+                url: '{{ url_for("add_to_collection") }}',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    player_id: playerId,
+                    user_player_id: userPlayerId
+                }),
+                success: function(response) {
+                    if (response.success) {
+                        // Create image element
+                        const imageContainer = playerSpot.find('.player-image-container');
+                        imageContainer.html(`
+                            <img src="{{ url_for('static', filename='uploads/image_player/') }}${response.image_url}" 
+                                 alt="${response.player_name}" 
+                                 class="zoom-effect">
+                        `);
+                        
+                        // Remove not-collected class
+                        playerSpot.removeClass('not-collected');
+        
+                        // Update collected count in cover
+                        const collectedCount = parseInt($('.cover-details p:contains("تم جمع")').text().split(':')[1]);
+                        $('.cover-details p:contains("تم جمع")').text(`تم جمع: ${collectedCount + 1}/{{ total_players }}`);
+        
+                        // Update completion percentage
+                        const newPercentage = Math.round(((collectedCount + 1) / {{ total_players }}) * 100);
+                        $('.cover-details p:contains("نسبة")').text(`نسبة الإكتمال: ${newPercentage}%`);
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    alert(xhr.responseJSON?.message || 'حدث خطأ أثناء تجميع اللاعب');
+                }
+            });
         });
     </script>
     

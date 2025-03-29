@@ -30,8 +30,6 @@ class User(UserMixin, db.Model):
     # الحقول الإضافية
     coins = db.Column(db.Integer, default=200)
     is_admin = db.Column(db.Boolean, default=False)
-    premuim = db.Column(db.Boolean, default=False)
-    gold = db.Column(db.Boolean, default=False)
     subscription = db.Column(db.Boolean, default=False)
     type_subscription = db.Column(db.String(80), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -41,6 +39,20 @@ class User(UserMixin, db.Model):
     team_collector_reward_collected = db.Column(db.Boolean, default=False)  # Add this new column
     rare_expert_reward_collected = db.Column(db.Boolean, default=False)
     catalog_king_reward_collected = db.Column(db.Boolean, default=False)
+
+    # Page permissions
+    can_manage_users = db.Column(db.Boolean, default=False)
+    can_manage_dashboard = db.Column(db.Boolean, default=False)
+    can_manage_players = db.Column(db.Boolean, default=False)
+    can_manage_clubs = db.Column(db.Boolean, default=False)
+    can_manage_packs = db.Column(db.Boolean, default=False)
+    can_manage_market = db.Column(db.Boolean, default=False)
+    can_manage_subscriptions = db.Column(db.Boolean, default=False)
+    can_manage_promotions = db.Column(db.Boolean, default=False)
+
+    has_vip_badge = db.Column(db.Boolean, default=False)  # هل يحصل على شارة VIP في ملفه الشخصي
+    has_vip_badge_plus = db.Column(db.Boolean, default=False)  # هل يحصل على شارة VIP plus في ملفه الشخصي
+    has_vip_badge_elite = db.Column(db.Boolean, default=False)  # هل يحصل على شارة VIP plus في ملفه الشخصي
     
     # العلاقات
     owned_players = db.relationship('UserPlayer', backref='owner', lazy=True, foreign_keys='UserPlayer.user_id')
@@ -67,7 +79,7 @@ class User(UserMixin, db.Model):
             total_players = Player.query.filter_by(club_id=club.club_id).count()
             
             # Skip if club has no players
-            if total_players == 0:
+            if (total_players == 0):
                 continue
                 
             # Get collected players from this club
@@ -135,6 +147,7 @@ class Player(db.Model):
     nationality = db.Column(db.String(100))
     club_id = db.Column(db.Integer, db.ForeignKey('club_details.club_id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
     # العلاقات
     club = db.relationship('ClubDetail', backref=db.backref('club_players', lazy=True))
@@ -205,7 +218,7 @@ class ClubDetail(db.Model):
         return f"ClubDetail('{self.club_id}', '{self.club_name}', '{self.coach_name}')"
 
 
-class Subscription(db.Model):  # تغيير اسم الجدول إلى "subscriptions"
+class Subscription(db.Model):
     __tablename__ = 'subscriptions'  # تغيير اسم الجدول
     
     id = db.Column(db.Integer, primary_key=True)
@@ -214,20 +227,40 @@ class Subscription(db.Model):  # تغيير اسم الجدول إلى "subscrip
     price = db.Column(db.Float, nullable=False)  # السعر
     is_outside_egypt = db.Column(db.Boolean, default=False)  # تحديد إذا كان الاشتراك خارج مصر
     created_at = db.Column(db.DateTime, default=datetime.utcnow)  # تاريخ الإنشاء
-    def __repr__(self):
-        return f"Subscription('{self.id}', '{self.package_type}', '{self.price}', '{self.is_outside_egypt}')"
+    
+    # الجوائز والمميزات الجديدة
+    coins_reward = db.Column(db.Integer, default=0)  # عدد الكوينز التي يكسبها المشترك
+    daily_free_packs = db.Column(db.Integer, default=0)  # عدد الباكو المجانية في اليوم
+    joker_players = db.Column(db.Integer, default=0)  # عدد لاعبي الجوكر الذين يكسبهم
+    has_vip_badge = db.Column(db.Boolean, default=False)  # هل يحصل على شارة VIP في ملفه الشخصي
+    has_vip_badge_plus = db.Column(db.Boolean, default=False)  # هل يحصل على شارة VIP plus في ملفه الشخصي
+    subscription_achievement_coins = db.Column(db.Integer, default=0)  # كوينز إنجاز الاشتراك
+    allow_old_ahly_catalog = db.Column(db.Boolean, default=False)  # السماح بجمع كتالوج النادي الأهلي القديم
 
+    def __repr__(self):
+        return (f"Subscription(id={self.id}, package_type='{self.package_type}', "
+                f"price={self.price}, is_outside_egypt={self.is_outside_egypt}, "
+                f"coins_reward={self.coins_reward}, daily_free_packs={self.daily_free_packs}, "
+                f"joker_players={self.joker_players}, has_vip_badge={self.has_vip_badge})")
+
+
+                
 # جدول لحفظ طلبات شراء الاشتراكات بدون روابط بين الجداول
 class UserSubscriptionPurchase(db.Model):
     __tablename__ = 'user_subscription_purchases'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False)  # معرف المستخدم الذي اشترى الاشتراك
-    subscription_id = db.Column(db.Integer, nullable=False)  # معرف الاشتراك الذي تم شراؤه
-    purchase_date = db.Column(db.DateTime, default=datetime.utcnow)  # تاريخ شراء الاشتراك
-    status = db.Column(db.String(50), default='active')  # حالة الاشتراك مثل 'active', 'expired', 'cancelled'
-    expiry_date = db.Column(db.DateTime, nullable=False)
-
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    subscription_id = db.Column(db.Integer, db.ForeignKey('subscriptions.id'), nullable=False)
+    payment_method = db.Column(db.String(50), nullable=False)
+    price = db.Column(db.Integer, default=0)  # السعر المدفوع
+    username = db.Column(db.String(100), nullable=False)  # ✅ إضافة اسم المستخدم
+    email = db.Column(db.String(120), nullable=False)  # ✅ إضافة البريد الإلكتروني
+    country = db.Column(db.String(100), nullable=False)  # ✅ إضافة البلد
+    status = db.Column(db.String(20), default='pending')
+    purchase_date = db.Column(db.DateTime, default=datetime.utcnow)
+    expiry_date = db.Column(db.DateTime)
+    
     def __repr__(self):
         return f"UserSubscriptionPurchase('{self.id}', '{self.user_id}', '{self.subscription_id}', '{self.status}', '{self.purchase_date}')"
 
@@ -317,6 +350,54 @@ class PackPurchase(db.Model):
     # دالة __repr__
     def __repr__(self):
         return f"PackPurchase('{self.id}', '{self.price_paid}', '{self.purchase_date}')"
+
+class Promotion(db.Model):
+    __tablename__ = 'promotions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    image_url = db.Column(db.String(255))
+    original_price = db.Column(db.Integer, nullable=False)
+    discount_percentage = db.Column(db.Integer)  # نسبة الخصم
+    final_price = db.Column(db.Integer, nullable=False)
+    features = db.Column(db.JSON)  # قائمة المميزات ['feature1', 'feature2', ...]
+    start_date = db.Column(db.DateTime, default=datetime.utcnow)
+    end_date = db.Column(db.DateTime)
+    is_active = db.Column(db.Boolean, default=True)
+    promotion_type = db.Column(db.String(50))  # مثل: 'starter', 'golden', 'limited'
+    coins_reward = db.Column(db.Integer, default=0)  # عدد العملات المجانية
+    free_packs = db.Column(db.Integer, default=0)  # عدد الباكجات المجانية
+    vip_duration_days = db.Column(db.Integer, default=0)  # مدة VIP بالأيام
+    
+    def __repr__(self):
+        return f"Promotion('{self.name}', '{self.promotion_type}', '{self.final_price}')"
+
+    @property
+    def is_expired(self):
+        if self.end_date:
+            return datetime.utcnow() > self.end_date
+        return False
+
+    @property
+    def remaining_time(self):
+        if self.end_date:
+            now = datetime.utcnow()
+            if now < self.end_date:
+                delta = self.end_date - now
+                days = delta.days
+                hours = delta.seconds // 3600
+                minutes = (delta.seconds % 3600) // 60
+                return {
+                    'days': days,
+                    'hours': hours,
+                    'minutes': minutes
+                }
+        return None
+
+# إضافة index للبحث السريع
+db.Index('idx_promotions_active', Promotion.is_active)
+db.Index('idx_promotions_type', Promotion.promotion_type)
 
 # Indexes for better query performance
 db.Index('idx_user_players_user_id', UserPlayer.user_id)

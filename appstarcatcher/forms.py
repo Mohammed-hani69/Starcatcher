@@ -60,12 +60,32 @@ class PackForm(FlaskForm):
     image = FileField('صورة الباكج')
     is_active = BooleanField('تفعيل الباكج', default=True)
 
+countries = [
+        ('', 'اختر دولة'),  # هذا الخيار يستخدم كخيار افتراضي (اختياري)
+        ('eg', 'مصر'),
+        ('sa', 'السعودية'),
+        ('ae', 'الإمارات'),
+        ('jo', 'الأردن'),
+        # يمكنك إضافة المزيد من الدول هنا
+    ]
 
+def password_check(form, field):
+    password = field.data
+    if len(password) < 8:
+        raise ValidationError('يجب أن تكون كلمة المرور 8 أحرف على الأقل')
+  #  if not any(char.isdigit() for char in password):
+   #     raise ValidationError('يجب أن تحتوي كلمة المرور على رقم واحد على الأقل')
+    #if not any(char.isupper() for char in password):
+     #   raise ValidationError('يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل')
+    #if not any(char.islower() for char in password):
+     #   raise ValidationError('يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل')
+    #if not any(char in '!@#$%^&*()_+-={}[]|:;<>,.?' for char in password):
+     #   raise ValidationError('يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل')
 
 class RegistrationForm(FlaskForm):
-    username = StringField('اسم المستخدم', validators=[
+    username = StringField('اسمك كامل', validators=[
         DataRequired(message='هذا الحقل مطلوب'),
-        Length(min=3, max=80, message='يجب أن يكون اسم المستخدم بين 3 و 80 حرفاً')
+        Length(min=3, max=80, message='يجب أن يكون اسمك بين 3 و 80 حرفاً')
     ])
     email = StringField('البريد الإلكتروني', validators=[
         DataRequired(message='هذا الحقل مطلوب'),
@@ -75,12 +95,13 @@ class RegistrationForm(FlaskForm):
         Optional(),
         Length(min=11, max=20, message='رقم الهاتف غير صحيح')
     ])
-    country = StringField('الدولة', validators=[Optional()])
+    country = SelectField('الدولة', choices=countries, validators=[Optional()])
     state = StringField('المحافظة', validators=[Optional()])
     city = StringField('المدينة', validators=[Optional()])
     password = PasswordField('كلمة المرور', validators=[
         DataRequired(message='هذا الحقل مطلوب'),
-        Length(min=6, message='يجب أن تكون كلمة المرور 6 أحرف على الأقل')
+        Length(min=8, message='يجب أن تكون كلمة المرور 8 أحرف على الأقل'),
+        password_check
     ])
     confirm_password = PasswordField('تأكيد كلمة المرور', validators=[
         DataRequired(message='هذا الحقل مطلوب'),
@@ -152,8 +173,20 @@ class SubscriptionForm(FlaskForm):
     package_details = TextAreaField('تفاصيل الاشتراك', validators=[DataRequired()])
     price = FloatField('السعر', validators=[DataRequired()])
     is_outside_egypt = BooleanField('هل الاشتراك خارج مصر؟', default=False)
+    
+    # الجوائز والمميزات الجديدة
+    coins_reward = IntegerField('عدد الكوينز المكتسبة', default=0, validators=[DataRequired()])
+    daily_free_packs = IntegerField('عدد الباكو المجانية يوميًا', default=0, validators=[DataRequired()])
+    joker_players = IntegerField('عدد لاعبي الجوكر', default=0, validators=[DataRequired()])
+    has_vip_badge = BooleanField('شارة VIP', default=False)
+    has_vip_badge_plus = BooleanField('شارة VIP Plus', default=False)
+    subscription_achievement_coins = IntegerField('كوينز إنجاز الاشتراك', default=0, validators=[DataRequired()])
+    allow_old_ahly_catalog = BooleanField('السماح بكتالوج الأهلي القديم', default=False)
+
+    submit = SubmitField('إضافة الاشتراك') 
 
 
+    
 class ClubForm(FlaskForm):
     club_name = StringField('اسم النادي', validators=[DataRequired()])
     founded_year = IntegerField('سنة التأسيس', validators=[
@@ -167,4 +200,21 @@ class ClubForm(FlaskForm):
     num_players = IntegerField('عدد اللاعبين', validators=[DataRequired(), NumberRange(min=0)])
 
     submit = SubmitField('إضافة النادي')
+
+class PromotionForm(FlaskForm):
+    name = StringField('اسم العرض', validators=[DataRequired()])
+    description = TextAreaField('وصف العرض', validators=[DataRequired()])
+    image = FileField('صورة العرض', validators=[FileAllowed(['jpg', 'png', 'jpeg'])])
+    original_price = IntegerField('السعر الأصلي', validators=[DataRequired(), NumberRange(min=0)])
+    discount_percentage = IntegerField('نسبة الخصم (%)', validators=[NumberRange(min=0, max=100)])
+    final_price = IntegerField('السعر النهائي', validators=[DataRequired(), NumberRange(min=0)])
+    promotion_type = SelectField('نوع العرض', choices=[
+        ('starter', 'عرض البداية'),
+        ('golden', 'العرض الذهبي'),
+        ('limited', 'عرض محدود')
+    ])
+    coins_reward = IntegerField('العملات المجانية', validators=[NumberRange(min=0)])
+    free_packs = IntegerField('عدد الباكجات المجانية', validators=[NumberRange(min=0)])
+    vip_duration_days = IntegerField('مدة VIP (بالأيام)', validators=[NumberRange(min=0)])
+    end_date = DateTimeField('تاريخ انتهاء العرض', format='%Y-%m-%dT%H:%M')
 
