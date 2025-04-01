@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./appstarcatcher/static/uploads:/app/appstarcatcher/static/uploads
+    depends_on:
+      - db
+    environment:
+      - MYSQL_DATABASE=starcatcher
+      - MYSQL_USER=starcatcher
+      - MYSQL_PASSWORD=starcatcher123
+      - MYSQL_HOST=db
+    networks:
+      - starcatcher-net
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - MYSQL_DATABASE=starcatcher
+      - MYSQL_USER=starcatcher
+      - MYSQL_PASSWORD=starcatcher123
+      - MYSQL_ROOT_PASSWORD=rootpass123
+    networks:
+      - starcatcher-net
+    restart: unless-stopped
+
+networks:
+  starcatcher-net:
+    driver: bridge
+
+volumes:
+  mysql-data:
