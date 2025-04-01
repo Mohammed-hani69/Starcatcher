@@ -380,7 +380,7 @@
         }
 
         .premium-price {
-            color: var(--accent-gold);
+            color: var (--accent-gold);
         }
         
         .pack-btn {
@@ -2004,6 +2004,191 @@
         }
     </style>
 
+    <!-- Add this after your existing modals -->
+    <div class="modal fade" id="subscriptionRewardsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">مكافآت الاشتراك</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="rewards-container">
+                        <!-- Coins Reward -->
+                        <div class="reward-item" id="coinsReward">
+                            <div class="reward-icon">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="reward-details">
+                                <h6>العملات المعدنية</h6>
+                                <span class="coins-amount">0</span>
+                            </div>
+                            <button class="collect-btn" onclick="collectCoins()">
+                                تحصيل
+                            </button>
+                        </div>
+
+                        <!-- Joker Players -->
+                        <div class="reward-item" id="jokersReward">
+                            <div class="reward-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="reward-details">
+                                <h6>لاعبين جوكر</h6>
+                                <div class="jokers-container"></div>
+                            </div>
+                            <button class="collect-btn" onclick="collectJokers()">
+                                تحصيل
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add these audio elements -->
+    <audio id="coinCollectSound" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/coin-collect.mp3') }}" type="audio/mpeg">
+    </audio>
+    <audio id="rewardUnlockSound" preload="auto">
+        <source src="{{ url_for('static', filename='sounds/reward-unlock.mp3') }}" type="audio/mpeg">
+    </audio>
+
+    <!-- Add these styles -->
+    <style>
+        .rewards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .reward-item {
+            background: linear-gradient(145deg, var(--dark-gray), var(--black));
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .reward-item.collected {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .reward-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 193, 7, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+        }
+
+        .reward-details {
+            flex-grow: 1;
+        }
+
+        .reward-details h6 {
+            margin: 0;
+            color: var(--text-light);
+        }
+
+        .coins-amount {
+            font-size: 1.2rem;
+            color: var(--accent-gold);
+            font-weight: bold;
+        }
+
+        .collect-btn {
+            background: var(--primary-red);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .collect-btn:hover {
+            transform: scale(1.05);
+            background: var(--dark-red);
+        }
+
+        .collect-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .jokers-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .joker-player {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .joker-player img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Flying coin animation */
+        .flying-coin {
+            position: fixed;
+            width: 30px;
+            height: 30px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--black);
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 9999;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+    </style>
+
+    <!-- إضافة نافذة عرض لاعبي الاشتراك -->
+    <div class="modal fade" id="subscriptionPlayersModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">لاعبي الاشتراك الجدد</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-5">
+                    <div id="subscription-players-reveal" class="position-relative">
+                        <!-- سيتم إضافة اللاعبين هنا -->
+                    </div>
+                    <div class="subscription-coins mt-4">
+                        <i class="fas fa-coins text-warning"></i>
+                        <span id="subscription-coins-amount">0</span>
+                        <button class="collect-coins-btn" onclick="collectSubscriptionCoins()">
+                            تحصيل العملات
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti/dist/confetti.browser.min.js"></script>
@@ -2073,7 +2258,7 @@
                     const playerCard = document.createElement('div');
                     playerCard.className = 'player-card animate__animated animate__flipInY';
                     playerCard.innerHTML = `
-                        <img src="/static/uploads/image_player/${player.image_url}" alt="${player.name}">
+                        <img src="${player.image_url}" alt="${player.name}" onerror="this.src='/static/images/default-player.png'">
                         <h4 class="player-name">${player.name}</h4>
                         <span class="player-rating">${player.rating}</span>
                         <div class="player-details mt-2">
@@ -2420,24 +2605,38 @@
         let currentSubscriptionId = null;
 
         function openPaymentModal(button) {
+            // تأكد من أن النافذة المنبثقة موجودة في DOM
+            const modalElement = document.getElementById('paymentModal');
+            if (!modalElement) {
+                console.error('Payment modal element not found');
+                return;
+            }
+
             const subscriptionId = button.dataset.subscriptionId;
             const price = button.dataset.price;
             const currency = button.dataset.currency;
             currentSubscriptionId = subscriptionId;
 
-            // Update modal content
-            const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
-            document.querySelector('.package-price').textContent = `${price} ${currency}`;
-            
-            // Reset payment selection
+            // تحديث محتوى النافذة المنبثقة
+            const packageName = button.closest('.subscription-card').querySelector('.card-title').textContent;
+            modalElement.querySelector('.package-name').textContent = packageName;
+            modalElement.querySelector('.package-price').textContent = `${price} ${currency}`;
+
+            // إعادة تعيين حالة اختيار وسيلة الدفع
             selectedPaymentMethod = null;
-            document.querySelectorAll('.payment-method-item').forEach(item => {
+            modalElement.querySelectorAll('.payment-method-item').forEach(item => {
                 item.classList.remove('selected');
             });
-            document.getElementById('confirmPaymentBtn').disabled = true;
-            document.querySelector('.payment-instructions').style.display = 'none';
-            
+            modalElement.querySelector('#confirmPaymentBtn').disabled = true;
+            modalElement.querySelector('.payment-instructions').style.display = 'none';
+
+            // إظهار النافذة المنبثقة باستخدام Bootstrap Modal
+            const modal = new bootstrap.Modal(modalElement);
             modal.show();
+
+            // التأكد من أن النافذة مرئية
+            modalElement.style.display = 'block';
+            modalElement.style.background = 'rgba(0, 0, 0, 0.5)';
         }
 
         function selectPaymentMethod(method) {
@@ -2500,10 +2699,8 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        user_id: {{ current_user.id }},
                         subscription_id: currentSubscriptionId,
-                        payment_method: selectedPaymentMethod,
-                        status: 'active'
+                        payment_method: selectedPaymentMethod
                     })
                 });
 
@@ -2513,13 +2710,18 @@
                     // Close payment modal
                     bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
                     
-                    // Show success message
-                    alert('Subscription purchased successfully!');
+                    // Show success toast with subscription details
+                    showToast('success', 'Subscription Success! 🎉', 'Your subscription has been activated successfully', {
+                        'Package Type': data.data.type_subscription,
+                        'Expiry Date': new Date(data.data.expiry_date).toLocaleDateString()
+                    });
                     
-                    // Reload page to update subscription status
-                    window.location.reload();
+                    // Reload page after 5 seconds
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 5000);
                 } else {
-                    alert(data.message);
+                    showToast('error', 'Subscription Failed ❌', data.message);
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -2578,6 +2780,10 @@
         // Update the confirm payment button event listener
         document.getElementById('confirmPaymentBtn').addEventListener('click', async function() {
             try {
+                // إضافة مؤشر التحميل
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+
                 const response = await fetch('/api/purchase_subscription', {
                     method: 'POST',
                     headers: {
@@ -2585,33 +2791,367 @@
                     },
                     body: JSON.stringify({
                         subscription_id: currentSubscriptionId,
-                        payment_method: selectedPaymentMethod,
-                        status: 'active'
+                        payment_method: selectedPaymentMethod
                     })
                 });
 
                 const data = await response.json();
                 
                 if (data.success) {
-                    // Close payment modal
+                    // إغلاق نافذة الدفع
                     bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
                     
-                    // Show success toast with details
-                    showToast('success', 'تم الاشتراك بنجاح! 🎉', 'تم تفعيل اشتراكك بنجاح', {
-                        'نوع الباقة': data.data.type_subscription,
-                        'تاريخ الانتهاء': new Date(data.data.expiry_date).toLocaleDateString('ar-EG'),
+                    // عرض رسالة النجاح مع التفاصيل
+                    showToast('success', 'Subscription Success! 🎉', 'Your subscription has been activated successfully', {
+                        'Package Type': data.data.type_subscription,
+                        'Expiry Date': new Date(data.data.expiry_date).toLocaleDateString()
                     });
+
+                    // عرض مكافآت الاشتراك إذا كانت متوفرة
+                    if (data.data.rewards) {
+                        showSubscriptionRewards(data.data.rewards);
+                    }
                     
-                    // تحديث الصفحة بعد 5 ثواني
+                    // إعادة تحميل الصفحة بعد 5 ثوانٍ
                     setTimeout(() => {
                         window.location.reload();
                     }, 5000);
                 } else {
-                    showToast('error', 'فشل الاشتراك ❌', data.message);
+                    showToast('error', 'Subscription Failed', data.message);
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showToast('error', 'خطأ في العملية ❌', 'حدث خطأ أثناء معالجة عملية الدفع. يرجى المحاولة مرة أخرى.');
+                alert('An error occurred while processing your payment. Please try again.');
+            } finally {
+                // إعادة تفعيل الزر وإزالة مؤشر التحميل
+                this.disabled = false;
+                this.innerHTML = 'Confirm Payment';
+            }
+        });
+
+        // ...existing code...
+
+        function showSubscriptionRewards(rewards) {
+            const modal = new bootstrap.Modal(document.getElementById('subscriptionRewardsModal'));
+            
+            // Update rewards display
+            document.querySelector('.coins-amount').textContent = rewards.coins_reward;
+            
+            const jokersContainer = document.querySelector('.jokers-container');
+            jokersContainer.innerHTML = '';
+            
+            // Add joker players if any
+            rewards.joker_players.forEach(player => {
+                const jokerElement = document.createElement('div');
+                jokerElement.className = 'joker-player';
+                jokerElement.innerHTML = `
+                    <img src="${player.image_url}" alt="${player.name}">
+                `;
+                jokersContainer.appendChild(jokerElement);
+            });
+
+            // Reset collect buttons
+            document.querySelectorAll('.collect-btn').forEach(btn => {
+                btn.disabled = false;
+            });
+            document.querySelectorAll('.reward-item').forEach(item => {
+                item.classList.remove('collected');
+            });
+
+            modal.show();
+            playSound('rewardUnlockSound');
+        }
+
+        function collectCoins() {
+            const coinsAmount = parseInt(document.querySelector('.coins-amount').textContent);
+            const currentCoins = parseInt(document.querySelector('.user-coins').textContent);
+            const targetElement = document.querySelector('.user-coins');
+            
+            // Disable collect button
+            document.querySelector('#coinsReward .collect-btn').disabled = true;
+            document.querySelector('#coinsReward').classList.add('collected');
+
+            // Create and animate multiple coins
+            let collectedCount = 0;
+            const totalCoins = Math.min(10, coinsAmount); // Max 10 visual coins
+
+            for(let i = 0; i < totalCoins; i++) {
+                setTimeout(() => {
+                    createFlyingCoin(coinsAmount/totalCoins, targetElement, () => {
+                        collectedCount++;
+                        if(collectedCount === totalCoins) {
+                            // Update final coins amount
+                            targetElement.textContent = currentCoins + coinsAmount;
+                            playSound('coinCollectSound');
+                            createConfetti();
+                        }
+                    });
+                }, i * 200);
+            }
+        }
+
+        function createFlyingCoin(value, targetElement, onComplete) {
+            const coin = document.createElement('div');
+            coin.className = 'flying-coin';
+            coin.innerHTML = '<i class="fas fa-coins"></i>';
+            
+            // Random starting position
+            const startX = Math.random() * (window.innerWidth - 100) + 50;
+            const startY = window.innerHeight - 100;
+            
+            coin.style.left = startX + 'px';
+            coin.style.top = startY + 'px';
+            document.body.appendChild(coin);
+
+            // Get target position
+            const targetRect = targetElement.getBoundingClientRect();
+            const targetX = targetRect.left + targetRect.width/2;
+            const targetY = targetRect.top + targetRect.height/2;
+
+            // Animate to target
+            requestAnimationFrame(() => {
+                coin.style.left = targetX + 'px';
+                coin.style.top = targetY + 'px';
+                coin.style.opacity = '0';
+                coin.style.transform = 'scale(0.5)';
+            });
+
+            // Cleanup
+            setTimeout(() => {
+                coin.remove();
+                onComplete();
+            }, 500);
+        }
+
+        function collectJokers() {
+            document.querySelector('#jokersReward .collect-btn').disabled = true;
+            document.querySelector('#jokersReward').classList.add('collected');
+            
+            // Animate joker cards collection
+            const jokers = document.querySelectorAll('.joker-player');
+            jokers.forEach((joker, index) => {
+                setTimeout(() => {
+                    joker.style.transform = 'scale(0)';
+                    playSound('rewardUnlockSound');
+                    createConfetti();
+                }, index * 300);
+            });
+        }
+
+        function playSound(soundId) {
+            const sound = document.getElementById(soundId);
+            sound.currentTime = 0;
+            sound.play().catch(err => console.log('Audio playback failed:', err));
+        }
+
+        function createConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+        // Update your purchase subscription handler to show rewards
+        function handleSubscriptionPurchase(response) {
+            if(response.success) {
+                showSubscriptionRewards(response.data);
+            }
+        }
+
+        // تحديث معالج زر تأكيد الاشتراك
+        document.getElementById('confirmPaymentBtn').addEventListener('click', async function() {
+            try {
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+
+                const response = await fetch('/api/purchase_subscription', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        subscription_id: currentSubscriptionId,
+                        payment_method: selectedPaymentMethod
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    // إغلاق نافذة الدفع
+                    bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
+                    
+                    // عرض نافذة اللاعبين
+                    const playersModal = new bootstrap.Modal(document.getElementById('subscriptionPlayersModal'));
+                    
+                    // تحديث قيمة العملات
+                    document.getElementById('subscription-coins-amount').textContent = data.data.coins_reward;
+                    
+                    // عرض اللاعبين باستخدام نفس دالة عرض الباكج
+                    const playersContainer = document.getElementById('subscription-players-reveal');
+                    displayPlayers(data.data.players, playersContainer, () => {
+                        playersModal.show();
+                        playSound('rewardUnlockSound');
+                        celebrateWithConfetti('legendary', 'high');
+                    });
+                    
+                    // تحديث النص في شريط العملات
+                    document.querySelector('.coins-display').textContent = 
+                        `${data.data.current_coins} Coins`;
+                } else {
+                    showToast('error', 'Subscription Failed', data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('error', 'Error', 'An error occurred');
+            } finally {
+                this.disabled = false;
+                this.innerHTML = 'Confirm Payment';
+            }
+        });
+
+        // دالة تحصيل عملات الاشتراك
+        function collectSubscriptionCoins() {
+            const coinsAmount = parseInt(document.getElementById('subscription-coins-amount').textContent);
+            const coinsDisplay = document.querySelector('.coins-display');
+            const currentCoins = parseInt(coinsDisplay.textContent.match(/\d+/)[0]);
+            
+            // تعطيل زر التحصيل
+            const collectBtn = document.querySelector('.collect-coins-btn');
+            collectBtn.disabled = true;
+            
+            // إنشاء وتحريك العملات
+            let collectedCount = 0;
+            const coinsToAnimate = Math.min(20, coinsAmount);
+            
+            for (let i = 0; i < coinsToAnimate; i++) {
+                setTimeout(() => {
+                    const coin = document.createElement('div');
+                    coin.className = 'flying-coin';
+                    coin.innerHTML = '<i class="fas fa-coins"></i>';
+                    document.body.appendChild(coin);
+                    
+                    // موقع البداية العشوائي
+                    const startX = Math.random() * window.innerWidth;
+                    const startY = window.innerHeight - 100;
+                    
+                    // الموقع المستهدف (عداد العملات)
+                    const targetRect = coinsDisplay.getBoundingClientRect();
+                    const targetX = targetRect.left + targetRect.width / 2;
+                    const targetY = targetRect.top + targetRect.height / 2;
+                    
+                    coin.style.left = `${startX}px`;
+                    coin.style.top = `${startY}px`;
+                    
+                    requestAnimationFrame(() => {
+                        coin.style.left = `${targetX}px`;
+                        coin.style.top = `${targetY}px`;
+                        coin.style.opacity = '0';
+                        
+                        playSound('coinCollectSound');
+                        confetti({
+                            particleCount: 5,
+                            spread: 30,
+                            origin: { x: targetX / window.innerWidth, y: targetY / window.innerHeight }
+                        });
+                    });
+                    
+                    setTimeout(() => {
+                        coin.remove();
+                        collectedCount++;
+                        
+                        if (collectedCount === coinsToAnimate) {
+                            coinsDisplay.innerHTML = `<i class="fas fa-coins me-2"></i>${currentCoins + coinsAmount} Coins`;
+                            collectBtn.style.display = 'none';
+                        }
+                    }, 500);
+                }, i * 100);
+            }
+        }
+
+        // تحديث معالج زر تأكيد الاشتراك بطريقة آمنة
+        document.addEventListener('DOMContentLoaded', function() {
+            const confirmBtn = document.getElementById('confirmPaymentBtn');
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', async function() {
+                    try {
+                        this.disabled = true;
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+
+                        const response = await fetch('/api/purchase_subscription', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                subscription_id: currentSubscriptionId,
+                                payment_method: selectedPaymentMethod
+                            })
+                        });
+
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            // إغلاق نافذة الدفع
+                            const paymentModal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
+                            if (paymentModal) paymentModal.hide();
+                            
+                            // عرض نافذة اللاعبين
+                            const playersModal = new bootstrap.Modal(document.getElementById('subscriptionPlayersModal'));
+                            
+                            // تحديث قيمة العملات
+                            const coinsElement = document.getElementById('subscription-coins-amount');
+                            if (coinsElement) coinsElement.textContent = data.data.coins_reward;
+                            
+                            // عرض اللاعبين
+                            const playersContainer = document.getElementById('subscription-players-reveal');
+                            if (playersContainer) {
+                                displayPlayers(data.data.players, playersContainer, () => {
+                                    if (playersModal) playersModal.show();
+                                    playSound('rewardUnlockSound');
+                                    celebrateWithConfetti('legendary', 'high');
+                                });
+                            }
+                            
+                            // تحديث عداد العملات
+                            const coinsDisplay = document.querySelector('.coins-display');
+                            if (coinsDisplay) {
+                                coinsDisplay.textContent = `${data.data.current_coins} Coins`;
+                            }
+                        } else {
+                            showToast('error', 'Subscription Failed', data.message);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        showToast('error', 'Error', 'An error occurred');
+                    } finally {
+                        this.disabled = false;
+                        this.innerHTML = 'Confirm Payment';
+                    }
+                });
+            }
+
+            // تحديث باقي معالجات الأحداث
+            const addToCollectionBtn = document.getElementById('addToCollection');
+            if (addToCollectionBtn) {
+                addToCollectionBtn.addEventListener('click', function() {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('packModal'));
+                    if (modal) modal.hide();
+                });
+            }
+
+            const addDailyToCollectionBtn = document.getElementById('addDailyToCollection');
+            if (addDailyToCollectionBtn) {
+                addDailyToCollectionBtn.addEventListener('click', function() {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('dailyPackModal'));
+                    if (modal) modal.hide();
+                });
+            }
+
+            const openDailyPackBtn = document.getElementById('openDailyPack');
+            if (openDailyPackBtn) {
+                openDailyPackBtn.addEventListener('click', handleDailyPackClick);
             }
         });
     </script>

@@ -539,6 +539,207 @@
             background: var(--dark-gray);
             color: white;
         }
+
+        /* VIP Themes */
+        .vip-theme {
+            --primary-color: #ff003c;      /* أحمر غامق نيون */
+            --secondary-color: #cc0033;    /* أحمر غامق */
+            --accent-color: #00ffea;       /* سيان نيون */
+            --bg-dark: #0a0014;           /* بنفسجي شبه أسود */
+            --bg-light: #1a0033;         /* بنفسجي غامق */
+            --text-glow: 0 0 10px rgba(255, 0, 60, 0.7);
+        }
+
+        .vip-plus-theme {
+            --primary-color: #00d4ff;      /* أزرق نيون غامق */
+            --secondary-color: #0066ff;    /* أزرق كهربائي */
+            --accent-color: #ff00ff;       /* وردي نيون */
+            --bg-dark: #000024;           /* كحلي غامق */
+            --bg-light: #000047;          /* كحلي متوسط */
+            --text-glow: 0 0 10px rgba(0, 212, 255, 0.7);
+        }
+
+        .vip-elite-theme {
+            --primary-color: #00ff66;      /* أخضر نيون */
+            --secondary-color: #00cc33;    /* أخضر غامق */
+            --accent-color: #ffff00;       /* أصفر نيون */
+            --bg-dark: #001a00;           /* أخضر شبه أسود */
+            --bg-light: #003300;          /* أخضر غامق */
+            --text-glow: 0 0 10px rgba(0, 255, 102, 0.7);
+        }
+
+        /* تحديث خلفيات VIP */
+        .vip-theme .vip-background {
+            background: radial-gradient(circle at 50% 50%, 
+                var(--bg-light) 0%, 
+                var(--bg-dark) 70%,
+                #000000 100%);
+            animation: pulseVip 8s infinite;
+        }
+
+        .vip-plus-theme .vip-background {
+            background: linear-gradient(45deg,
+                #000024 0%,
+                var(--bg-light) 35%,
+                var(--primary-color) 50%,
+                var(--bg-light) 65%,
+                #000024 100%);
+            background-size: 400% 400%;
+            animation: gradientVipPlus 15s ease infinite;
+        }
+
+        .vip-elite-theme .vip-background {
+            background: linear-gradient(135deg,
+                #000000 0%,
+                var(--bg-dark) 25%,
+                var(--bg-light) 50%,
+                var(--bg-dark) 75%,
+                #000000 100%);
+            background-size: 400% 400%;
+            animation: gradientElite 20s ease infinite;
+        }
+
+        /* VIP Background Effects */
+        .vip-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes pulseVip {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes gradientVipPlus {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes gradientElite {
+            0% { background-position: 0% 50%; }
+            25% { background-position: 50% 100%; }
+            50% { background-position: 100% 50%; }
+            75% { background-position: 50% 0%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* VIP Profile Styles */
+        .vip-theme .profile-header,
+        .vip-plus-theme .profile-header,
+        .vip-elite-theme .profile-header {
+            background: transparent;
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+
+        .vip-theme .profile-avatar,
+        .vip-plus-theme .profile-avatar,
+        .vip-elite-theme .profile-avatar {
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+
+        /* VIP Badge Styles */
+        .vip-badge {
+            position: absolute;
+            top: -10px;
+            left: -10px; /* تغيير من right إلى left */
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            z-index: 100; /* زيادة z-index لضمان الظهور فوق كل العناصر */
+            transform: rotate(-15deg); /* إضافة دوران للشارة */
+        }
+
+        .vip-theme .vip-badge {
+            background: linear-gradient(45deg, #ff003c, #cc0033);
+            box-shadow: 0 0 20px #ff003c, 0 0 40px rgba(255, 0, 60, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .vip-plus-theme .vip-badge {
+            background: linear-gradient(45deg, #00d4ff, #0066ff);
+            box-shadow: 0 0 20px #00d4ff, 0 0 40px rgba(0, 212, 255, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .vip-elite-theme .vip-badge {
+            background: linear-gradient(45deg, #00ff66, #00cc33);
+            box-shadow: 0 0 20px #00ff66, 0 0 40px rgba(0, 255, 102, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* تحسين حركة توهج الشارة */
+        @keyframes glowBadge {
+            0%, 100% { 
+                transform: rotate(-15deg) scale(1);
+                box-shadow: 0 0 15px var(--primary-color), 0 0 30px rgba(255, 255, 255, 0.2);
+            }
+            50% { 
+                transform: rotate(-15deg) scale(1.05);
+                box-shadow: 0 0 25px var(--primary-color), 0 0 40px rgba(255, 255, 255, 0.4);
+            }
+        }
+
+        /* Card Styling for VIP */
+        .vip-theme .custom-card,
+        .vip-plus-theme .custom-card,
+        .vip-elite-theme .custom-card {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--primary-color);
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+
+        /* Text Effects */
+        .vip-theme h1,
+        .vip-plus-theme h1,
+        .vip-elite-theme h1 {
+            color: var(--primary-color);
+            text-shadow: var(--text-glow);
+        }
+
+        /* Animated Background Stars */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 1s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* تأثيرات النجوم */
+        .star {
+            box-shadow: 0 0 4px var(--primary-color);
+        }
+
+        .vip-theme .star { background: rgba(255, 0, 60, 0.8); }
+        .vip-plus-theme .star { background: rgba(0, 212, 255, 0.8); }
+        .vip-elite-theme .star { background: rgba(0, 255, 102, 0.8); }
     </style>
 </head>
 <body>
@@ -597,7 +798,20 @@
     <!-- Header -->
     <div class="profile-header">
         <div class="container">
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center position-relative">
+                {% if user.has_vip_badge_elite %}
+                    <div class="vip-badge">
+                        <i class="fas fa-crown me-1"></i> VIP Elite
+                    </div>
+                {% elif user.has_vip_badge_plus %}
+                    <div class="vip-badge">
+                        <i class="fas fa-star me-1"></i> VIP Plus
+                    </div>
+                {% elif user.has_vip_badge %}
+                    <div class="vip-badge">
+                        <i class="fas fa-gem me-1"></i> VIP
+                    </div>
+                {% endif %}
                 <div class="profile-avatar position-relative">
                     <img src="{{ url_for('static', filename='../static/uploads/profile_images/' ~ user.image_url) }}" alt="صورة البروفايل" id="profileImage">
                     <button class="btn btn-sm btn-danger position-absolute bottom-0 start-50 translate-middle-x mb-2" id="changePhotoBtn">
@@ -1623,6 +1837,43 @@
                 restoreDisplay(field, oldValue, editContainer);
             });
         }
+
+        // Create stars background
+        function createStars() {
+            const starsContainer = document.createElement('div');
+            starsContainer.className = 'stars-container';
+            
+            for(let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + 'vw';
+                star.style.top = Math.random() * 100 + 'vh';
+                star.style.animationDelay = Math.random() * 1 + 's';
+                starsContainer.appendChild(star);
+            }
+            
+            document.body.appendChild(starsContainer);
+        }
+
+        // Add VIP background
+        function addVipBackground() {
+            const vipBg = document.createElement('div');
+            vipBg.className = 'vip-background';
+            document.body.insertBefore(vipBg, document.body.firstChild);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            {% if user.has_vip_badge_elite %}
+                document.body.classList.add('vip-elite-theme');
+            {% elif user.has_vip_badge_plus %}
+                document.body.classList.add('vip-plus-theme');
+            {% elif user.has_vip_badge %}
+                document.body.classList.add('vip-theme');
+            {% endif %}
+
+            createStars();
+            addVipBackground();
+        });
     </script>
     <!-- Add before closing body tag -->
     <audio id="coinSound" preload="auto">

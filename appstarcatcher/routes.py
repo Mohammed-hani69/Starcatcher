@@ -4,6 +4,7 @@ from flask_jwt_extended import create_access_token, create_refresh_token, decode
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 from numpy import identity
 from sqlalchemy import desc, func, text
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from appstarcatcher import db , app ,limiter,csrf
 from flask import jsonify, logging, render_template, request, redirect, session, url_for, flash
 from werkzeug.utils import secure_filename
@@ -297,54 +298,36 @@ def purchase_subscription():
     try:
         data = request.get_json()
         if not data:
-            return jsonify({'success': False, 'message': 'بيانات الطلب غير صالحة'}), 400
-
-        # Check if subscription_id exists
+            return jsonify({'success': False, 'message': 'No data provided'}), 400
+            
         subscription_id = data.get('subscription_id')
         if not subscription_id:
-            return jsonify({'success': False, 'message': 'معرف الاشتراك مطلوب'}), 400
-            
-        # Get subscription details
-        subscription = Subscription.query.get(subscription_id)
-        if not subscription:
-            return jsonify({'success': False, 'message': 'الاشتراك غير موجود'}), 404
+            return jsonify({'success': False, 'message': 'Subscription ID is required'}), 400
 
-        # Check for existing active subscription
+        # 🔹 قفل السجل لمنع التكرار
         existing_subscription = UserSubscriptionPurchase.query.filter_by(
             user_id=current_user.id,
             status='active'
-        ).first()
-        
-        if existing_subscription:
-            return jsonify({'success': False, 'message': 'لديك بالفعل اشتراك نشط'}), 400
+        ).with_for_update().first()
 
-        # Check payment method
+        if existing_subscription:
+            return jsonify({
+                'success': False, 
+                'message': 'You already have an active subscription'
+            }), 400
+
+        subscription = Subscription.query.get(subscription_id)
+        if not subscription:
+            return jsonify({'success': False, 'message': 'Invalid subscription'}), 404
+
         payment_method = data.get('payment_method')
         if not payment_method:
-            return jsonify({'success': False, 'message': 'طريقة الدفع مطلوبة'}), 400
+            return jsonify({'success': False, 'message': 'Payment method is required'}), 400
 
-        package_type = subscription.package_type.lower() if subscription.package_type else "unknown"
-        
-        # Update user subscription status
-        current_user.subscription = True
-        current_user.type_subscription = package_type
-        
-        # Check if subscription has VIP and VIP Plus badges
-        if subscription.has_vip_badge and subscription.has_vip_badge_plus:
-            # If both badges exist, assign VIP Elite instead
-            current_user.has_vip_badge = False
-            current_user.has_vip_badge_plus = False
-            current_user.has_vip_badge_elite = True
-        else:
-            # Normal badge assignment
-            current_user.has_vip_badge = subscription.has_vip_badge
-            current_user.has_vip_badge_plus = subscription.has_vip_badge_plus
-            current_user.has_vip_badge_elite = package_type == "vip elite"
-        
         purchase_date = datetime.utcnow()
         expiry_date = purchase_date + timedelta(days=30)
-        
-        # Create subscription purchase record
+
+        # 🔹 إنشاء الاشتراك
         purchase = UserSubscriptionPurchase(
             user_id=current_user.id,
             subscription_id=subscription.id,
@@ -353,41 +336,56 @@ def purchase_subscription():
             username=current_user.username,
             email=current_user.email,
             country=current_user.country,
-            status='active',  # Set initial status as active
+            status='active',
             purchase_date=purchase_date,
             expiry_date=expiry_date
         )
         
         db.session.add(purchase)
-        db.session.commit()
         
+        # 🔹 تحديث حالة المستخدم
+        current_user.subscription = True
+        current_user.type_subscription = subscription.package_type.lower()
+
+        # 🔹 تطبيق مزايا الاشتراك (بما فيها إضافة العملات)
+        success = apply_subscription_benefits(current_user.id, subscription.id)
+        if not success:
+            db.session.rollback()
+            return jsonify({
+                'success': False, 
+                'message': 'حدث خطأ أثناء تطبيق مزايا الاشتراك، الرجاء المحاولة مرة أخرى'
+            }), 500
+
+        # 🔹 تعيين الشارات - تم نقلها إلى apply_subscription_benefits
+        db.session.commit()
+
         return jsonify({
             'success': True,
             'message': 'تم شراء الاشتراك بنجاح',
             'data': {
-                'id': purchase.id,
-                'user_id': purchase.user_id,
-                'username': purchase.username, 
-                'email': purchase.email,
-                'country': purchase.country,
-                'subscription_id': purchase.subscription_id,
-                'price': purchase.price,
-                'payment_method': purchase.payment_method,
-                'purchase_date': purchase.purchase_date.isoformat(),
-                'expiry_date': purchase.expiry_date.isoformat(),
-                'status': purchase.status,
-                'subscription': current_user.subscription,
-                'type_subscription': current_user.type_subscription,
-                'has_vip_badge': current_user.has_vip_badge,
-                'has_vip_badge_plus': current_user.has_vip_badge_plus,
-                'has_vip_badge_elite': current_user.has_vip_badge_elite
+                'type_subscription': subscription.package_type,
+                'expiry_date': expiry_date.isoformat(),
+                'coins_reward': subscription.coins_reward,
+                'new_balance': current_user.coins
             }
-        }), 201
+        })
+
+    except IntegrityError as e:
+        db.session.rollback()
+        app.logger.error(f"Integrity error in purchase_subscription: {str(e)}")
+        return jsonify({
+            'success': False, 
+            'message': 'هذا الاشتراك موجود مسبقاً'
+        }), 400
 
     except Exception as e:
         db.session.rollback()
         app.logger.error(f"Error in purchase_subscription: {str(e)}")
-        return jsonify({'success': False, 'message': f'حدث خطأ: {str(e)}'}), 500
+        return jsonify({
+            'success': False, 
+            'message': 'حدث خطأ أثناء عملية الشراء، الرجاء المحاولة مرة أخرى'
+        }), 500
+
 
 
 
@@ -412,7 +410,13 @@ def subscription_purchases():
         # Calculate analytics data
         total_sales = len(purchases)
         active_subscriptions = sum(1 for p in purchases if p[0].status == 'active')
-        total_revenue = sum(p[0].price for p in purchases)
+
+        # Calculate revenues separately for Egypt and outside Egypt
+        revenue_egypt = sum(p[0].price for p in purchases 
+                          if p[0].country == 'eg')
+        revenue_outside = sum(p[0].price for p in purchases 
+                            if p[0].country != 'eg')
+        total_revenue = revenue_egypt + revenue_outside
         
         # Calculate growth percentages (comparing to previous month)
         previous_month = datetime.utcnow() - timedelta(days=30)
@@ -524,6 +528,8 @@ def subscription_purchases():
             total_sales=total_sales,
             active_subscriptions=active_subscriptions,
             total_revenue=total_revenue,
+            revenue_egypt=revenue_egypt,
+            revenue_outside=revenue_outside,
             sales_growth=sales_growth,
             active_percentage=active_percentage,
             revenue_growth=sales_growth, # Using same growth for revenue for simplicity
@@ -918,7 +924,76 @@ def error_page():
     error_code = session.get('error_code', 500)
     return render_template('error.html', error_message=error_msg, error_code=error_code)
 
-# Route for adding a new club
+
+@app.route('/api/toggle-subscription-status', methods=['POST'])
+@login_required
+@permission_required('can_manage_subscriptions')
+@csrf.exempt
+def toggle_subscription_status():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'success': False,
+                'message': 'بيانات غير صالحة'
+            }), 400
+
+        user_id = data.get('user_id')
+        if not user_id:
+            return jsonify({
+                'success': False,
+                'message': 'معرف المستخدم مطلوب'
+            }), 400
+
+        is_active = int(data.get('is_active', 0))
+
+        # التحقق من وجود المستخدم
+        user = User.query.get(int(user_id))
+        if not user:
+            return jsonify({
+                'success': False,
+                'message': 'المستخدم غير موجود'
+            }), 404
+
+        # البحث عن آخر اشتراك للمستخدم
+        subscription_purchase = UserSubscriptionPurchase.query.filter_by(
+            user_id=int(user_id)
+        ).order_by(UserSubscriptionPurchase.purchase_date.desc()).first()
+
+        if subscription_purchase:
+            # تحديث حالة الاشتراك في كلا الجدولين
+            old_status = subscription_purchase.status
+            new_status = 'active' if is_active else 'expired'
+            
+            subscription_purchase.status = new_status
+            user.subscription = bool(is_active)
+            
+            db.session.commit()
+
+            status_text = "تم تفعيل الاشتراك" if is_active else "تم إلغاء تفعيل الاشتراك"
+            return jsonify({
+                'success': True,
+                'message': status_text,
+                'old_status': old_status,
+                'new_status': new_status,
+                'subscription_status': subscription_purchase.status
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'لا يوجد اشتراك لهذا المستخدم'
+            }), 404
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error in toggle_subscription_status: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'حدث خطأ: {str(e)}'
+        }), 500
+
+
+
 @app.route('/add_club', methods=['GET', 'POST'])
 @login_required
 @permission_required('can_manage_clubs')
@@ -1110,7 +1185,73 @@ def hash_password(password):
     # استخدام خوارزمية pbkdf2:sha256 مع 600000 تكرار وملح عشوائي
     return generate_password_hash(password, method='pbkdf2:sha256:600000', salt_length=16)
 
-# رووت API للتسجيل
+
+@app.route('/api/preview_subscription_rewards', methods=['POST'])
+@login_required
+@csrf.exempt
+def preview_subscription_rewards():
+    try:
+        data = request.get_json()
+        subscription_id = data.get('subscription_id')
+        
+        if not subscription_id:
+            return jsonify({
+                'success': False,
+                'message': 'Subscription ID is required'
+            }), 400
+            
+        subscription = Subscription.query.get(subscription_id)
+        if not subscription:
+            return jsonify({
+                'success': False,
+                'message': 'Invalid subscription'
+            }), 404
+
+        # Generate preview players based on subscription
+        preview_players = []
+        if subscription.joker_players > 0:
+            # Get random legendary players for preview
+            legendary_players = Player.query.filter_by(rarity='legendary').all()
+            if legendary_players:
+                selected_players = random.sample(
+                    legendary_players, 
+                    min(len(legendary_players), subscription.joker_players)
+                )
+                
+                for player in selected_players:
+                    preview_players.append({
+                        'id': player.id,
+                        'name': player.name,
+                        'rating': player.rating,
+                        'position': player.position,
+                        'image_url': url_for('static', 
+                            filename=f'uploads/image_player/{player.image_url}'
+                        ) if player.image_url else None,
+                        'rarity': player.rarity,
+                        'nationality': player.nationality
+                    })
+
+        return jsonify({
+            'success': True,
+            'rewards': {
+                'coins_reward': subscription.coins_reward,
+                'players': preview_players,
+                'duration_days': 30,
+                'daily_packs': subscription.daily_free_packs,
+                'has_vip': subscription.has_vip_badge,
+                'has_vip_plus': subscription.has_vip_badge_plus
+            }
+        })
+
+    except Exception as e:
+        app.logger.error(f"Error in preview_subscription_rewards: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while generating preview'
+        }), 500
+
+# Update the purchase_subscription route
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     # If user is already logged in, redirect
@@ -1529,6 +1670,68 @@ def get_admin_market_listings():
     except Exception as e:
         return jsonify({"status": "error", "message": f"حدث خطأ أثناء جلب البيانات: {str(e)}"}), 500
 
+
+
+@app.route('/delete_subscription_pruchases', methods=['POST'])
+@login_required
+@permission_required('can_manage_subscriptions')
+@csrf.exempt
+def delete_subscription_pruchases():
+    try:
+        data = request.get_json()
+        subscription_id = data.get('subscription_id')
+        user_id = data.get('user_id')
+
+        if not subscription_id or not user_id:
+            return jsonify({
+                'success': False,
+                'message': 'معرف الاشتراك والمستخدم مطلوبان'
+            }), 400
+
+        # Get the subscription purchase
+        subscription = UserSubscriptionPurchase.query.get(subscription_id)
+        if not subscription:
+            return jsonify({
+                'success': False,
+                'message': 'الاشتراك غير موجود'
+            }), 404
+
+        # Get the user
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({
+                'success': False,
+                'message': 'المستخدم غير موجود'
+            }), 404
+
+        # Reset user's subscription status and badges
+        user.type_subscription = ''
+        user.subscription = False
+        user.has_vip_badge = False
+        user.has_vip_badge_plus = False
+        user.has_vip_badge_elite = False
+
+        # Delete the subscription
+        db.session.delete(subscription)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'تم حذف الاشتراك بنجاح'
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error in delete_subscription: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'حدث خطأ: {str(e)}'
+        }), 500
+
+
+
+
+
 # إعداد API Endpoint لإرجاع بيانات جميع الاشتراكات
 @app.route('/api/subscriptions', methods=['GET'])
 def get_subscriptions():
@@ -1793,38 +1996,140 @@ def open_package(pack_id):
         app.logger.error(f"Error opening package: {str(e)}")
         return jsonify({'status': 'error', 'message': f'حدث خطأ أثناء فتح الباكج: {str(e)}'}), 500
 
-# 🎯 API لتوليد اللاعبين من فئة معينة مرة واحدة يوميًا
+
+
+
 @app.route('/generate_daily_pack', methods=['POST'])
 @login_required
 @csrf.exempt
 def generate_daily_pack():
     try:
-        # Check if user already generated today
-        last_generated = GeneratedPlayer.query.filter_by(user_id=current_user.id).order_by(GeneratedPlayer.generated_at.desc()).first()
-        if (last_generated and (last_generated.generated_at.date() == datetime.utcnow().date())):
-            return jsonify({'status': 'error', 'message': 'لقد حصلت بالفعل على اللاعبين اليوم، حاول مرة أخرى غدًا'}), 400
-        # Get random common players
-        rarity = "common"
-        num_players = 3
-        available_players = Player.query.filter_by(rarity=rarity).all()
-        if (not available_players):
-            return jsonify({'status': 'error', 'message': 'لا يوجد لاعبين متاحين من هذه الفئة'}), 404
-        selected_players = random.sample(available_players, min(num_players, len(available_players)))
-        # Record generation time
-        new_entry = GeneratedPlayer(user_id=current_user.id, rarity=rarity, generated_at=datetime.utcnow())
-        db.session.add(new_entry)
-        # Add players to user's collection
+        # Get user's subscription status for daily pack count
+        subscription = UserSubscriptionPurchase.query.filter(
+            UserSubscriptionPurchase.user_id == current_user.id,
+            UserSubscriptionPurchase.status == 'active'
+        ).first()
+
+        # Debugging: Log subscription details
+        if subscription:
+            app.logger.info(f"Subscription Found: {subscription}")
+            if hasattr(subscription, 'subscription') and subscription.subscription:
+                app.logger.info(f"Subscription Plan: {subscription.subscription}")
+                app.logger.info(f"Daily Free Packs from DB: {subscription.subscription.daily_free_packs}")
+            else:
+                app.logger.warning(f"Subscription exists but has no valid subscription plan!")
+        else:
+            app.logger.warning(f"No active subscription found for user {current_user.id}")
+
+        # Calculate daily packs based on subscription
+        daily_packs = 1  # Default for free users
+        if subscription and hasattr(subscription, 'subscription') and subscription.subscription:
+            daily_packs = max(1, subscription.subscription.daily_free_packs or 1)
+        
+        # Debugging: Log calculated daily packs
+        app.logger.info(f"Daily Packs (After Fix): {daily_packs}")
+
+        # Calculate time between packs correctly
+        hours_between_packs = max(1, 24 / daily_packs)
+        
+        # Debugging: Log calculated time interval
+        app.logger.info(f"Hours Between Packs: {hours_between_packs}")
+
+        # Check last generation time
+        last_generated = GeneratedPlayer.query.filter_by(
+            user_id=current_user.id
+        ).order_by(GeneratedPlayer.generated_at.desc()).first()
+
+        if last_generated:
+            next_available = last_generated.generated_at + timedelta(hours=hours_between_packs)
+            if datetime.utcnow() < next_available:
+                time_remaining = next_available - datetime.utcnow()
+                return jsonify({
+                    'status': 'error',
+                    'message': f'الباكج متاح بعد {time_remaining.seconds // 3600} ساعة و {(time_remaining.seconds % 3600) // 60} دقيقة'
+                }), 400
+
+        # Select random common players
+        available_players = Player.query.filter_by(rarity='common').all()
+        if not available_players:
+            return jsonify({
+                'status': 'error',
+                'message': 'لا يوجد لاعبين متاحين'
+            }), 404
+
+        # Select players and create records atomically
         players_data = []
-        for player in selected_players:
-            user_player = UserPlayer(user_id=current_user.id, player_id=player.id, position=player.position, is_listed=False, price=0, sale_code=generate_random_code())
-            db.session.add(user_player)
-            players_data.append({"id": player.id, "name": player.name, "rating": player.rating, "position": player.position, "image_url": player.image_url, "rarity": player.rarity, "nationality": player.nationality, "club_name": (player.club.club_name if player.club else "Unknown Club")})
-        db.session.commit()
-        return jsonify({'status': 'success', 'players': players_data}), 200
+        try:
+            # Create generation record
+            new_generation = GeneratedPlayer(
+                user_id=current_user.id,
+                rarity='common',
+                generated_at=datetime.utcnow()
+            )
+            db.session.add(new_generation)
+
+            # Select and add players
+            selected_players = random.sample(available_players, min(3, len(available_players)))
+            for player in selected_players:
+                # Create user player record
+                user_player = UserPlayer(
+                    user_id=current_user.id,
+                    player_id=player.id,
+                    position=player.position,
+                    is_listed=False,
+                    price=0,
+                    sale_code=generate_random_code(),
+                    acquired_at=datetime.utcnow()
+                )
+                db.session.add(user_player)
+                
+                # Get club info
+                club = ClubDetail.query.get(player.club_id) if player.club_id else None
+                
+                # Add to response data with proper image URL
+                image_url = None
+                if player.image_url:
+                    image_url = url_for('static', 
+                                      filename=f'uploads/image_player/{player.image_url}',
+                                      _external=True)
+                
+                players_data.append({
+                    "id": player.id,
+                    "name": player.name,
+                    "rating": player.rating,
+                    "position": player.position,
+                    "image_url": image_url,
+                    "rarity": player.rarity,
+                    "nationality": player.nationality,
+                    "club_name": club.club_name if club else "Unknown Club",
+                    "sale_code": user_player.sale_code
+                })
+
+            db.session.commit()
+            
+            return jsonify({
+                'status': 'success',
+                'message': 'تم فتح الباكج اليومي بنجاح',
+                'players': players_data,
+                'next_available': (datetime.utcnow() + timedelta(hours=hours_between_packs)).isoformat()
+            })
+
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            app.logger.error(f"Database error in generate_daily_pack: {str(e)}")
+            return jsonify({
+                'status': 'error',
+                'message': 'حدث خطأ في قاعدة البيانات'
+            }), 500
+
     except Exception as e:
-        db.session.rollback()
-        print(f"❌ Error in generate_daily_pack: {str(e)}")
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        app.logger.error(f"Error in generate_daily_pack: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+
 
 @app.route('/market')
 @login_required
@@ -2054,3 +2359,50 @@ def toggle_permission(user_id):
         db.session.rollback()
         app.logger.error(f"Error in toggle_permission: {str(e)}")
         return jsonify({'success': False, 'message': 'حدث خطأ أثناء تحديث الصلاحيات'}), 500
+
+
+def apply_subscription_benefits(user_id, subscription_id):
+    """Apply all subscription benefits after successful purchase"""
+    try:
+        user = User.query.get(user_id)
+        subscription = Subscription.query.get(subscription_id)
+        
+        if not user or not subscription:
+            return False
+        
+        # Set VIP badges
+        user.has_vip_badge = subscription.has_vip_badge
+        user.has_vip_badge_plus = subscription.has_vip_badge_plus
+        
+        # If both VIP and VIP+ are enabled, set Elite instead
+        if subscription.has_vip_badge and subscription.has_vip_badge_plus:
+            user.has_vip_badge = False
+            user.has_vip_badge_plus = False
+            user.has_vip_badge_elite = True
+            
+        # Generate joker players safely
+        if subscription.joker_players > 0:
+            epic_players = Player.query.filter_by(rarity='legendary').all()
+            
+            if epic_players:
+                selected_players = random.choices(epic_players, k=min(len(epic_players), subscription.joker_players))
+                
+                for joker_player in selected_players:
+                    user_player = UserPlayer(
+                        user_id=user.id,
+                        player_id=joker_player.id,
+                        position=joker_player.position,
+                        sale_code=generate_random_code()
+                    )
+                    db.session.add(user_player)
+        
+        # Add coins reward here only
+        user.coins += subscription.coins_reward
+        
+        db.session.commit()
+        return True
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error in apply_subscription_benefits: {str(e)}")
+        return False

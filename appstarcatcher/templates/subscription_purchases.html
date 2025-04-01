@@ -854,6 +854,137 @@
             width: 100% !important;
             height: 300px !important;
         }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            margin: 0 auto;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #2a2a2a;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        /* تحسين مظهر الزر عند التحويم */
+        .toggle-switch:hover .toggle-slider {
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+        }
+
+        .toggle-switch:hover input:not(:checked) + .toggle-slider {
+            box-shadow: 0 0 8px rgba(255, 62, 62, 0.5);
+        }
+
+        /* إضافة أنماط جديدة للتأكيد */
+        .confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .confirm-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .confirm-dialog {
+            background: #1e1e1e;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+
+        .confirm-overlay.show .confirm-dialog {
+            transform: translateY(0);
+        }
+
+        .confirm-dialog h3 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .confirm-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .delete-btn {
+            background: #ff3e3e;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #ff5252;
+        }
+
+        .cancel-btn {
+            background: #2a2a2a;
+            color: #fff;
+        }
+
+        .cancel-btn:hover {
+            background: #333;
+        }
     </style>
     <!-- إضافة مكتبة Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -910,6 +1041,10 @@
         </div>
 
         <div class="logout-section">
+            <a href="/" class="nav-item logout-btn">
+                <i class="fas fa-globe"></i>
+                <span>الموقع</span>
+            </a>
             <a href="/logout" class="nav-item logout-btn">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>تسجيل الخروج</span>
@@ -965,8 +1100,8 @@
                 <div class="summary-card">
                     <i class="fas fa-coins"></i>
                     <div class="card-content">
-                        <h3>إجمالي الإيرادات</h3>
-                        <p class="number">{{ total_revenue }}</p>
+                        <h3>إجمالي الإيرادات داخل مصر</h3>
+                        <p class="number">{{ revenue_egypt }} جنيه</p>
                         <p class="percentage increase">
                             <i class="fas fa-arrow-up"></i>
                             {{ revenue_growth }}%
@@ -975,10 +1110,14 @@
                 </div>
 
                 <div class="summary-card">
-                    <i class="fas fa-exchange-alt"></i>
+                    <i class="fas fa-globe"></i>
                     <div class="card-content">
-                        <h3>معدل التحويل</h3>
-                        <p class="number">{{ conversion_rate }}%</p>
+                        <h3>إجمالي الإيرادات خارج مصر</h3>
+                        <p class="number">{{ revenue_outside }} دولار</p>
+                        <p class="percentage increase">
+                            <i class="fas fa-arrow-up"></i>
+                            {{ revenue_growth }}%
+                        </p>
                     </div>
                 </div>
             </div>
@@ -1034,47 +1173,54 @@
                     <th>السعر</th>
                     <th>طريقة الدفع</th>
                     <th>الحالة</th>
+                    <th>حالة الاشتراك</th>
                     <th>تاريخ الشراء</th>
                     <th>تاريخ الانتهاء</th>
+                    <th>حذف الاشتراك</th>
                 </tr>
             </thead>
             <tbody>
                 {% for purchase in purchases %}
-                <tr>
+                <tr data-subscription-id="{{ purchase.id }}">
                     <td>{{ purchase.id }}</td>
-                    <td>{{ purchase.username }}</td>
-                    <td>{{ purchase.email }}</td>
+                    <td>{{ purchase.user.username }}</td>
+                    <td>{{ purchase.user.email }}</td>
                     <td>
-                        {% if purchase.country == 'eg' %}
-                            مصر
-                        {% elif purchase.country == 'sa' %}
-                            السعودية
-                        {% elif purchase.country == 'ae' %}
-                            الإمارات
-                        {% elif purchase.country == 'jo' %}
-                            الأردن
-                        {% else %}
-                            {{ purchase.country or 'غير متوفر' }}
-                        {% endif %}
+                        {% set country_names = {
+                            'eg': 'مصر',
+                            'sa': 'السعودية',
+                            'ae': 'الإمارات',
+                            'jo': 'الأردن'
+                        } %}
+                        {{ country_names.get(purchase.country, purchase.country) }}
                     </td>
                     <td>{{ purchase.subscription.package_type }}</td>
                     <td>{{ purchase.price }}</td>
-                    <td>
-                        <span class="payment-method-badge">{{ purchase.payment_method }}</span>
-                    </td>
+                    <td>{{ purchase.payment_method }}</td>
                     <td>
                         <span class="status-badge status-{{ purchase.status }}">
-                            {% if purchase.status == 'pending' %}
-                                قيد الانتظار
-                            {% elif purchase.status == 'active' %}
-                                نشط
-                            {% elif purchase.status == 'expired' %}
-                                منتهي
-                            {% endif %}
+                            {{ purchase.status }}
                         </span>
                     </td>
-                    <td>{{ purchase.purchase_date.strftime('%Y-%m-%d %H:%M') }}</td>
-                    <td>{{ purchase.expiry_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <label class="toggle-switch">
+                            <input type="checkbox" 
+                                   {% if purchase.status == 'active' %}checked{% endif %}
+                                   onchange="toggleSubscriptionStatus('{{ purchase.user.id }}', this)"
+                                   data-user-id="{{ purchase.user.id }}">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </td>
+                    <td>{{ purchase.purchase_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ purchase.expiry_date.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        <button class="delete-subscription-btn" 
+                                onclick="deleteSubscription('{{ purchase.id }}', '{{ purchase.user.id }}')"
+                                style="background-color: #ff3e3e; color: white; border: none; 
+                                       padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                            حذف
+                        </button>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -1636,6 +1782,188 @@
     clearButton.addEventListener('click', clearFilters);
     filterSection.appendChild(clearButton);
 </script>
+
+<script>
+    function toggleSubscriptionStatus(userId, element) {
+        if (!userId) {
+            console.error('User ID is missing');
+            return;
+        }
+        
+        const isActive = element.checked ? 1 : 0;
+        element.disabled = true;
+        
+        const data = {
+            user_id: userId,
+            is_active: isActive
+        };
+
+        console.log('Sending request with data:', data); // للتأكد من البيانات المرسلة
+
+        fetch('/api/toggle-subscription-status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'حدث خطأ في الخادم');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const row = element.closest('tr');
+                const statusBadge = row.querySelector('.status-badge');
+                
+                statusBadge.classList.remove('status-active', 'status-expired');
+                statusBadge.classList.add(isActive ? 'status-active' : 'status-expired');
+                statusBadge.textContent = isActive ? 'نشط' : 'منتهي';
+
+                showToast(data.message, "success");
+            } else {
+                element.checked = !element.checked;
+                showToast(data.message || 'حدث خطأ أثناء تحديث الاشتراك', "error");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            element.checked = !element.checked;
+            showToast(error.message || 'حدث خطأ في الاتصال بالخادم', "error");
+        })
+        .finally(() => {
+            element.disabled = false;
+        });
+    }
+
+    // دالة إظهار الإشعارات
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // إضافة أنماط CSS للإشعارات
+    const style = document.createElement('style');
+    style.textContent = `
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 4px;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        .toast.success {
+            background-color: #4CAF50;
+        }
+        .toast.error {
+            background-color: #f44336;
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+
+<script>
+// Add this to your existing JavaScript code
+function deleteSubscription(subscriptionId, userId) {
+    const confirmDialog = document.getElementById('deleteConfirmDialog');
+    const confirmBtn = document.getElementById('confirmDelete');
+    const cancelBtn = document.getElementById('cancelDelete');
+
+    // إظهار مربع التأكيد
+    confirmDialog.classList.add('show');
+
+    // معالجة زر الحذف
+    const handleDelete = () => {
+        // إخفاء مربع التأكيد
+        confirmDialog.classList.remove('show');
+        
+        fetch('/delete_subscription_pruchases', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                subscription_id: subscriptionId,
+                user_id: userId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const row = document.querySelector(`tr[data-subscription-id="${subscriptionId}"]`);
+                if (row) {
+                    // إضافة تأثير حركي عند الحذف
+                    row.style.transition = 'all 0.3s ease';
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(20px)';
+                    setTimeout(() => row.remove(), 300);
+                }
+                showToast(data.message || 'تم حذف الاشتراك بنجاح', "success");
+            } else {
+                showToast(data.message || 'حدث خطأ أثناء حذف الاشتراك', "error");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('حدث خطأ أثناء حذف الاشتراك', "error");
+        });
+
+        // إزالة event listeners
+        cleanup();
+    };
+
+    // معالجة زر الإلغاء
+    const handleCancel = () => {
+        confirmDialog.classList.remove('show');
+        cleanup();
+    };
+
+    // تنظيف event listeners
+    const cleanup = () => {
+        confirmBtn.removeEventListener('click', handleDelete);
+        cancelBtn.removeEventListener('click', handleCancel);
+    };
+
+    // إضافة event listeners
+    confirmBtn.addEventListener('click', handleDelete);
+    cancelBtn.addEventListener('click', handleCancel);
+}
+</script>
+
+<!-- إضافة قالب التأكيد قبل نهاية body -->
+<div class="confirm-overlay" id="deleteConfirmDialog">
+    <div class="confirm-dialog">
+        <h3>هل أنت متأكد من حذف هذا الاشتراك؟</h3>
+        <div class="confirm-buttons">
+            <button class="confirm-btn delete-btn" id="confirmDelete">حذف</button>
+            <button class="confirm-btn cancel-btn" id="cancelDelete">إلغاء</button>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>

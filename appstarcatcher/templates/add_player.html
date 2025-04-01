@@ -26,49 +26,61 @@
                     <i>🏠</i>
                     <span>الرئيسية</span>
                 </a>
-                <a href="#" class="nav-item active">
+                {% if current_user.can_manage_players == True %}
+                <a href="/add_player" class="nav-item active">
                     <i>👥</i>
                     <span>اللاعبين</span>
                 </a>
+                {% endif %}
+                {% if current_user.can_manage_clubs == True %}
                 <a href="/add_club" class="nav-item">
                     <i>⚽</i>
                     <span>الأنديه</span>
                 </a>
+                {% endif %}
+                {% if current_user.can_manage_subscriptions == True %}
                 <a href="/add_subscription" class="nav-item">
                     <i>🏆</i>
                     <span>الباقات</span>
                 </a>
+                {% endif %}
             </nav>
         </div>
 
         <div class="nav-section">
+            {% if current_user.can_manage_users == True %}
             <div class="nav-section-title">الإدارة</div>
             <nav>
-                <a href="/users" class="nav-item">
-                    <i>👥</i>
-                    <span>المستخدمين</span>
-                </a>
-                <a href="/subscription_purchases" class="nav-item">
-                    <i>💳</i>
-                    <span>مشتريات الباقات</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i>⚙️</i>
-                    <span>الإعدادات</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i>📝</i>
-                    <span>التقارير</span>
-                </a>
-            </nav>
-        </div>
+                    <a href="/users" class="nav-item">
+                        <i>👥</i>
+                        <span>المستخدمين</span>
+                    </a>
+                    <a href="/subscription_purchases" class="nav-item">
+                        <i>💳</i>
+                        <span>مشتريات الباقات</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i>⚙️</i>
+                        <span>الإعدادات</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i>📝</i>
+                        <span>التقارير</span>
+                    </a>
+                </nav>
+            </div>
+            {% endif %}
         <!-- إضافة زر تسجيل الخروج أسفل الشريط الجانبي -->
-        <div class="logout-section">
-            <a href="/logout" class="nav-item logout-btn">
-                <i>🚪</i>
-                <span>تسجيل الخروج</span>
-            </a>
-        </div>
+    <div class="logout-section">
+        <a href="/" class="nav-item logout-btn">
+            <i class="fas fa-globe"></i>
+            <span>الموقع</span>
+        </a>
+        <a href="/logout" class="nav-item logout-btn">
+            <i>🚪</i>
+            <span>تسجيل الخروج</span>
+        </a>
+    </div>
     </aside>
 
     <!-- Header -->
