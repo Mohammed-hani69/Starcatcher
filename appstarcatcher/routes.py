@@ -769,13 +769,23 @@ def get_club_players(club_id):
 def users():
     try:
         # Get rankings for all users based on player count first
-        user_rankings = db.session.query(User, func.count(UserClub.id).label('player_count'), func.dense_rank().over(order_by=func.count(UserClub.id).desc()).label('rank'), UserSubscriptionPurchase).outerjoin(UserClub).outerjoin(UserSubscriptionPurchase, db.and_(User.id == UserSubscriptionPurchase.user_id, UserSubscriptionPurchase.status == 'active')).group_by(User.id).all()
+        user_rankings = db.session.query(
+            User, 
+            func.count(UserClub.id).label('player_count'),
+            func.dense_rank().over(order_by=func.count(UserClub.id).desc()).label('rank'),
+            UserSubscriptionPurchase
+        ).outerjoin(UserClub).outerjoin(UserSubscriptionPurchase, db.and_(
+            User.id == UserSubscriptionPurchase.user_id, 
+            UserSubscriptionPurchase.status == 'active'
+        )).group_by(User.id).all()
+
         # Get subscription details
         subscription_details = {}
         for (user, _, _, subscription) in user_rankings:
             if subscription:
                 subscription_info = Subscription.query.get(subscription.subscription_id)
                 subscription_details[user.id] = {'package_type': (subscription_info.package_type if subscription_info else None), 'expiry_date': subscription.expiry_date}
+
         # Separate admins and regular users while preserving their ranks
         admin_users = []
         regular_users = []
@@ -785,6 +795,7 @@ def users():
                 admin_users.append(user_data)
             else:
                 regular_users.append(user_data)
+
         # Combine the lists with admins at the top
         users_data = (admin_users + regular_users)
         return render_template('users.html', users=users_data, username=current_user.username)
@@ -793,7 +804,10 @@ def users():
         flash('حدث خطأ أثناء تحميل صفحة المستخدمين', 'error')
         return redirect(url_for('dashboard'))
 
-#اضافة لاعب للسوق
+
+
+
+
 
 @app.route('/add_listing', methods=['POST'])
 @login_required
