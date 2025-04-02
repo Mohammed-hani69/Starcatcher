@@ -770,10 +770,20 @@ def users():
     try:
         # Get rankings for all users based on player count first
         user_rankings = db.session.query(
-            User, 
+            User,
             func.count(UserClub.id).label('player_count'),
             func.dense_rank().over(order_by=func.count(UserClub.id).desc()).label('rank'),
-            UserSubscriptionPurchase
+            func.max(UserSubscriptionPurchase.id).label('user_subscription_purchases_id'),
+            func.max(UserSubscriptionPurchase.user_id).label('user_subscription_purchases_user_id'),
+            func.max(UserSubscriptionPurchase.subscription_id).label('user_subscription_purchases_subscription_id'),
+            func.max(UserSubscriptionPurchase.payment_method).label('user_subscription_purchases_payment_method'),
+            func.max(UserSubscriptionPurchase.price).label('user_subscription_purchases_price'),
+            func.max(UserSubscriptionPurchase.username).label('user_subscription_purchases_username'),
+            func.max(UserSubscriptionPurchase.email).label('user_subscription_purchases_email'),
+            func.max(UserSubscriptionPurchase.country).label('user_subscription_purchases_country'),
+            func.max(UserSubscriptionPurchase.status).label('user_subscription_purchases_status'),
+            func.max(UserSubscriptionPurchase.purchase_date).label('user_subscription_purchases_purchase_date'),
+            func.max(UserSubscriptionPurchase.expiry_date).label('user_subscription_purchases_expiry_date')
         ).outerjoin(UserClub).outerjoin(UserSubscriptionPurchase, db.and_(
             User.id == UserSubscriptionPurchase.user_id, 
             UserSubscriptionPurchase.status == 'active'
@@ -781,16 +791,33 @@ def users():
 
         # Get subscription details
         subscription_details = {}
-        for (user, _, _, subscription) in user_rankings:
-            if subscription:
-                subscription_info = Subscription.query.get(subscription.subscription_id)
-                subscription_details[user.id] = {'package_type': (subscription_info.package_type if subscription_info else None), 'expiry_date': subscription.expiry_date}
+        for record in user_rankings:
+            user = record[0]
+            subscription_id = record[5]  # user_subscription_purchases_subscription_id
+            expiry_date = record[13]     # user_subscription_purchases_expiry_date
+            
+            if subscription_id:
+                subscription_info = Subscription.query.get(subscription_id)
+                subscription_details[user.id] = {
+                    'package_type': (subscription_info.package_type if subscription_info else None),
+                    'expiry_date': expiry_date
+                }
 
         # Separate admins and regular users while preserving their ranks
         admin_users = []
         regular_users = []
-        for (user, player_count, rank, _) in user_rankings:
-            user_data = {'user': user, 'player_count': player_count, 'rank': rank, 'subscription_info': subscription_details.get(user.id, None)}
+        for record in user_rankings:
+            user = record[0]
+            player_count = record[1]
+            rank = record[2]
+            
+            user_data = {
+                'user': user, 
+                'player_count': player_count, 
+                'rank': rank, 
+                'subscription_info': subscription_details.get(user.id, None)
+            }
+            
             if user.is_admin:
                 admin_users.append(user_data)
             else:
@@ -799,14 +826,11 @@ def users():
         # Combine the lists with admins at the top
         users_data = (admin_users + regular_users)
         return render_template('users.html', users=users_data, username=current_user.username)
+
     except Exception as e:
         app.logger.error(f"Error in users route: {str(e)}")
         flash('حدث خطأ أثناء تحميل صفحة المستخدمين', 'error')
         return redirect(url_for('dashboard'))
-
-
-
-
 
 
 @app.route('/add_listing', methods=['POST'])
