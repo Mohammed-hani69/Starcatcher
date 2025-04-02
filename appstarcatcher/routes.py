@@ -56,11 +56,12 @@ def permission_required(permission):
                 flash("يجب عليك تسجيل الدخول أولاً.", "warning")
                 return redirect(url_for('login'))
 
-            if not getattr(current_user, permission, False):  # التحقق من الصلاحية المحددة
+            # التحقق من أن المستخدم مسؤول أو لديه الصلاحية المطلوبة
+            if not (current_user.is_admin or getattr(current_user, permission, False)):
                 if request.is_json or request.method in ['POST', 'DELETE', 'PUT']:
                     return jsonify({"message": "ليس لديك الصلاحيات الكافية."}), 403
                 flash("ليس لديك الصلاحية للوصول إلى هذه الصفحة.", "danger")
-                return redirect(url_for('dashboard'))  # إعادة التوجيه إلى الصفحة الرئيسية
+                return redirect(url_for('home'))
 
             return f(*args, **kwargs)
         return decorated_function
@@ -143,30 +144,52 @@ def logout():
 @login_required
 @permission_required('can_manage_dashboard')
 def dashboard():
-    if (not session.get('user_id')):
-        return redirect(url_for('login'))
-    login_time = session.get('login_time')
-    session_timeout = app.config['PERMANENT_SESSION_LIFETIME'].total_seconds()
-    if (login_time and ((datetime.utcnow().timestamp() - login_time) > session_timeout)):
-        session.clear()
-        logout_user()
-        flash('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى', 'warning')
-        return redirect(url_for('login'))
     try:
+        # تحقق إضافي من الجلسة
+        if not current_user.is_authenticated:
+            return redirect(url_for('login'))
+
+        if not (current_user.is_admin or current_user.can_manage_dashboard):
+            flash('ليس لديك صلاحية الوصول إلى لوحة التحكم', 'error')
+            return redirect(url_for('home'))
+
         form = PackForm()
         formmarket = AdminMarketListingForm()
         packs = Pack.query.filter_by(is_active=True).all()
-        listings = AdminMarketListing.query.filter((AdminMarketListing.expires_at > datetime.utcnow())).join(Player).all()
+        listings = AdminMarketListing.query.filter(
+            (AdminMarketListing.expires_at > datetime.utcnow())
+        ).join(Player).all()
+        
         listings_data = []
         for listing in listings:
-            listings_data.append({'id': listing.id, 'player_id': listing.player_id, 'player_name': listing.player.name, 'player_rating': listing.player.rating, 'rarity': listing.player.rarity, 'player_position': listing.player.position, 'price': listing.price, 'player_image_url': listing.player.image_url, 'expires_at': listing.expires_at.isoformat(), 'status': listing.status})
+            listings_data.append({
+                'id': listing.id,
+                'player_id': listing.player_id,
+                'player_name': listing.player.name,
+                'player_rating': listing.player.rating,
+                'rarity': listing.player.rarity,
+                'player_position': listing.player.position,
+                'price': listing.price,
+                'player_image_url': listing.player.image_url,
+                'expires_at': listing.expires_at.isoformat(),
+                'status': listing.status
+            })
+
         csrf_token_value = generate_csrf()
         count_player = Player.query.count()
-        return render_template('dashboard.html', form=form, formmarket=formmarket, packs=packs, username=current_user.username, csrf_token=csrf_token_value, listings=listings_data, count_player=count_player)
+        return render_template('dashboard.html', 
+                             form=form,
+                             formmarket=formmarket,
+                             packs=packs,
+                             username=current_user.username,
+                             csrf_token=csrf_token_value,
+                             listings=listings_data,
+                             count_player=count_player)
+
     except Exception as e:
         app.logger.error(f"Error in dashboard route: {str(e)}")
         flash('حدث خطأ أثناء تحميل الصفحة', 'error')
-        return redirect(url_for('error_page'))
+        return redirect(url_for('home'))
 
 # التعامل مع محاولات الوصول غير المصرح به
 @app.errorhandler(401)

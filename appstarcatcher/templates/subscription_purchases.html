@@ -731,14 +731,137 @@
             }
         }
 
-        /* Dark mode optimization */
-        @media (prefers-color-scheme: dark) {
-            .users-table th {
-                background-color: #1a1a1a;
+        /* Add media query for 375px devices */
+        @media (max-width: 375px) {
+            /* Header */
+            .header {
+                height: 55px;
+                padding: 0 8px;
             }
 
+            .header-title {
+                font-size: 15px;
+                margin-right: 35px;
+            }
+
+            /* Mobile menu toggle */
+            .mobile-menu-toggle {
+                padding: 6px;
+                top: 12px;
+                right: 8px;
+            }
+
+            /* Summary cards */
+            .summary-cards {
+                gap: 8px;
+                padding: 4px;
+            }
+
+            .summary-card {
+                padding: 8px;
+                min-width: 100%;
+            }
+
+            .summary-card i {
+                font-size: 1.1rem;
+                margin-right: 8px;
+            }
+
+            .card-content h3 {
+                font-size: 0.65rem;
+            }
+
+            .card-content .number {
+                font-size: 0.9rem;
+            }
+
+            .card-content .percentage {
+                font-size: 0.55rem;
+            }
+
+            /* Filter section */
             .filter-section {
-                background: #1a1a1a;
+                padding: 8px;
+                gap: 6px;
+            }
+
+            .filter-section input,
+            .filter-section select {
+                padding: 6px;
+                font-size: 11px;
+            }
+
+            .clear-filters-btn {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+
+            /* Table */
+            .users-table td {
+                padding: 6px;
+                font-size: 11px;
+            }
+
+            .users-table td::before {
+                font-size: 10px;
+                margin-bottom: 2px;
+            }
+
+            .status-badge {
+                padding: 2px 5px;
+                font-size: 9px;
+            }
+
+            .toggle-switch {
+                transform: scale(0.65);
+            }
+
+            .delete-subscription-btn {
+                padding: 3px 6px;
+                font-size: 10px;
+            }
+
+            /* Charts */
+            .chart-container {
+                padding: 8px;
+                min-height: 180px;
+            }
+
+            .chart-container h3 {
+                font-size: 0.75rem;
+                margin-bottom: 8px;
+            }
+
+            canvas {
+                height: 180px !important;
+            }
+
+            /* Sidebar */
+            .sidebar.active {
+                width: 220px;
+            }
+
+            .nav-item {
+                padding: 8px;
+                font-size: 11px;
+            }
+
+            .nav-item i {
+                font-size: 13px;
+                margin-left: 8px;
+            }
+
+            .nav-section-title {
+                font-size: 10px;
+                margin: 12px 0 6px;
+            }
+
+            /* Toast notifications */
+            .toast {
+                padding: 6px 12px;
+                font-size: 11px;
+                right: 8px;
+                top: 8px;
             }
         }
 
@@ -984,6 +1107,173 @@
 
         .cancel-btn:hover {
             background: #333;
+        }
+
+        /* Add new media queries for 320px */
+        @media (max-width: 320px) {
+            /* Header adjustments */
+            .header {
+                height: 60px;
+                padding: 0 10px;
+            }
+
+            .header-title {
+                font-size: 16px;
+                margin-right: 40px;
+            }
+
+            .user-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+
+            /* Mobile menu toggle */
+            .mobile-menu-toggle {
+                top: 10px;
+                right: 10px;
+                padding: 8px;
+            }
+
+            /* Summary cards */
+            .summary-cards {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                padding: 5px;
+            }
+
+            .summary-card {
+                padding: 10px;
+                min-width: 100%;
+            }
+
+            .summary-card i {
+                font-size: 1.2rem;
+                margin-right: 10px;
+            }
+
+            .card-content h3 {
+                font-size: 0.7rem;
+            }
+
+            .card-content .number {
+                font-size: 1rem;
+            }
+
+            .card-content .percentage {
+                font-size: 0.6rem;
+            }
+
+            /* Charts section */
+            .chart-container {
+                padding: 10px;
+                min-height: 200px;
+            }
+
+            .chart-container h3 {
+                font-size: 0.8rem;
+                margin-bottom: 10px;
+            }
+
+            canvas {
+                height: 200px !important;
+            }
+
+            /* Filter section */
+            .filter-section {
+                padding: 10px;
+                gap: 8px;
+            }
+
+            .filter-section input,
+            .filter-section select {
+                padding: 8px;
+                font-size: 12px;
+            }
+
+            .clear-filters-btn {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+
+            /* Table adjustments */
+            .users-table td {
+                padding: 8px;
+                font-size: 12px;
+            }
+
+            .users-table td::before {
+                font-size: 11px;
+                margin-bottom: 3px;
+            }
+
+            .status-badge {
+                padding: 3px 6px;
+                font-size: 10px;
+            }
+
+            .toggle-switch {
+                transform: scale(0.7);
+            }
+
+            .delete-subscription-btn {
+                padding: 4px 8px;
+                font-size: 11px;
+            }
+
+            /* Confirmation dialog */
+            .confirm-dialog {
+                padding: 15px;
+                width: 95%;
+            }
+
+            .confirm-dialog h3 {
+                font-size: 14px;
+                margin-bottom: 15px;
+            }
+
+            .confirm-btn {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+
+            /* Toast notifications */
+            .toast {
+                padding: 8px 16px;
+                font-size: 12px;
+                right: 10px;
+                top: 10px;
+            }
+
+            /* Sidebar when active */
+            .sidebar.active {
+                width: 240px;
+            }
+
+            .nav-item {
+                padding: 10px;
+                font-size: 12px;
+            }
+
+            .nav-item i {
+                font-size: 14px;
+                margin-left: 10px;
+            }
+
+            .nav-section-title {
+                font-size: 11px;
+                margin: 15px 0 8px;
+            }
+
+            /* Search box */
+            .search-box.active input {
+                padding: 8px 30px 8px 10px;
+                font-size: 12px;
+            }
+
+            .search-box i {
+                font-size: 14px;
+            }
         }
     </style>
     <!-- إضافة مكتبة Chart.js -->
