@@ -223,11 +223,20 @@
                 <div class="player-card {{ player.rarity.lower() }}" data-player-id="{{ player.id }}">
                     <div class="card-sheen"></div>
                     
-                    <!-- Delete Button -->
-                    <button class="delete-btn" onclick="deletePlayer('{{ player.id }}')">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <div class="left-actions">
+                            <button class="edit-button-left" onclick='openEditModal("{{ player.id }}", "{{ player.name }}", "{{ player.rating }}", "{{ player.position }}", "{{ player.nationality }}", "{{ player.club }}", "{{ player.rarity }}")'>
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                        </div>
+                        <div class="right-actions">
+                            <button class="delete-btn" onclick="deletePlayer('{{ player.id }}')">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
                     <!-- Rarity Badge -->
                     <div class="rarity-indicator">
                         {% if player.rarity.lower() == 'common' %}
@@ -274,6 +283,225 @@
             </div>
         </div>
 
+        <!-- Edit Player Modal -->
+        <div id="editPlayerModal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>تعديل بيانات اللاعب</h2>
+                <form id="editPlayerForm" onsubmit="handleEditSubmit(event)">
+                    <input type="hidden" id="edit_player_id" name="player_id">
+                    <div class="form-group">
+                        <label for="edit_name">اسم اللاعب:</label>
+                        <input type="text" id="edit_name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_rating">التقييم:</label>
+                        <input type="number" id="edit_rating" name="rating" min="1" max="99" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_position">المركز:</label>
+                        <input type="text" id="edit_position" name="position" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_nationality">الجنسية:</label>
+                        <input type="text" id="edit_nationality" name="nationality" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_club">النادي:</label>
+                        <input type="text" id="edit_club" name="club" required>
+                    </div>
+                    <div class="form-group">
+                        <label>صورة اللاعب</label>
+                        <div class="image-upload" id="editImageUpload">
+                            <label class="image-upload-label" for="editPlayerImage">
+                                <div class="image-upload-icon">+</div>
+                                <span>اضغط لتحديث الصورة أو اسحب الصورة هنا</span>
+                                <input type="file" id="editPlayerImage" name="image" accept="image/*" style="display: none">
+                            </label>
+                            <img id="editImagePreview" class="image-preview" alt="معاينة الصورة">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>النُدرة:</label>
+                        <div class="rarity-options">
+                            <div class="rarity-option" data-value="common">عادي</div>
+                            <div class="rarity-option" data-value="rare">نادر</div>
+                            <div class="rarity-option" data-value="epic">أسطوري</div>
+                            <div class="rarity-option" data-value="legendary">خرافي</div>
+                        </div>
+                        <input type="hidden" id="edit_rarity" name="rarity">
+                    </div>
+                    <button type="submit" class="submit-btn">حفظ التغييرات</button>
+                </form>
+            </div>
+        </div>
+
+        <style>
+            .action-buttons {
+                position: absolute;
+                top: 10px;
+                left: 0;
+                right: 0;
+                display: flex;
+                justify-content: space-between;
+                padding: 0 10px;
+                z-index: 10;
+            }
+
+            .left-actions {
+                order: 2;
+            }
+
+            .right-actions {
+                order: 1;
+            }
+
+            .edit-button-left, .delete-btn {
+                background: none;
+                border: none;
+                color: white;
+                cursor: pointer;
+                padding: 5px 10px;
+                border-radius: 4px;
+                transition: all 0.3s ease;
+                width: 35px;
+                height: 35px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .edit-button-left {
+                background-color: #4CAF50;
+            }
+
+            .delete-btn {
+                background-color: #f44336;
+            }
+
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.85);
+                z-index: 1000;
+                backdrop-filter: blur(5px);
+            }
+
+            .modal-content {
+                position: relative;
+                background-color: #1a1a1a;
+                color: #fff;
+                margin: 4% auto;
+                padding: 25px;
+                width: 90%;
+                max-width: 800px; /* زيادة العرض لاستيعاب الحقول المتجاورة */
+                border-radius: 12px;
+                direction: rtl;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+                max-height: 80vh; /* تحديد أقصى ارتفاع */
+                overflow-y: auto; /* إضافة شريط تمرير عند الحاجة */
+            }
+
+            /* تنسيق الشبكة للحقول */
+            #editPlayerForm {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            /* جعل بعض العناصر تمتد على عرض الصف كاملاً */
+            #editPlayerForm .form-group:nth-child(1), /* player_id */
+            #editPlayerForm .form-group:nth-last-child(2), /* صورة اللاعب */
+            #editPlayerForm .form-group:nth-last-child(1), /* النُدرة */
+            #editPlayerForm button[type="submit"] {
+                grid-column: 1 / -1;
+            }
+
+            .modal-content .form-group {
+                margin-bottom: 15px; /* تقليل الهامش السفلي */
+            }
+
+            .modal-content input[type="text"],
+            .modal-content input[type="number"] {
+                width: 100%;
+                padding: 8px; /* تقليل التباعد الداخلي */
+                border-radius: 6px;
+                border: 1px solid #333;
+                background-color: #2a2a2a;
+                color: #fff;
+            }
+
+            /* تعديل حجم زر الإغلاق */
+            .close-modal {
+                position: absolute;
+                left: 15px;
+                top: 10px;
+                font-size: 24px;
+                cursor: pointer;
+                color: #fff;
+                opacity: 0.7;
+                transition: opacity 0.3s ease;
+                z-index: 1;
+            }
+
+            /* تنسيق عنوان النافذة */
+            .modal-content h2 {
+                margin-bottom: 20px;
+                font-size: 1.5em;
+                grid-column: 1 / -1;
+            }
+
+            /* تحسين مظهر الأزرار */
+            .modal-content .submit-btn {
+                margin-top: 10px;
+                background-color: #ff0000;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 6px;
+                cursor: pointer;
+                width: 100%;
+                font-size: 16px;
+                transition: background-color 0.3s ease;
+            }
+
+            .modal-content .submit-btn:hover {
+                background-color: #cc0000;
+            }
+
+            .edit-button-left, .delete-btn {
+                background: rgba(255, 255, 255, 0.1);
+                border: none;
+                color: white;
+                cursor: pointer;
+                padding: 5px;
+                border-radius: 4px;
+                transition: all 0.3s ease;
+                width: 28px;
+                height: 28px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(5px);
+            }
+
+            .edit-button-left:hover {
+                background: rgba(76, 175, 80, 0.8);
+                transform: scale(1.1);
+            }
+
+            .delete-btn:hover {
+                background: rgba(244, 67, 54, 0.8);
+                transform: scale(1.1);
+            }
+
+            .edit-button-left i, .delete-btn i {
+                font-size: 14px;
+            }
+        </style>
 
     </main>
 
@@ -482,6 +710,165 @@
                     menuToggle.classList.remove('active');
                 }
             });
+        });
+
+        // Add this to your existing JavaScript
+        function openEditModal(playerId, name, rating, position, nationality, club, rarity) {
+            const modal = document.getElementById('editPlayerModal');
+            
+            // Set form values
+            document.getElementById('edit_player_id').value = playerId;
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_rating').value = rating;
+            document.getElementById('edit_position').value = position;
+            document.getElementById('edit_nationality').value = nationality;
+            document.getElementById('edit_club').value = club;
+            document.getElementById('edit_rarity').value = rarity;
+
+            // Set current image preview if exists
+            const playerCard = document.querySelector(`.player-card[data-player-id="${playerId}"]`);
+            const currentImage = playerCard.querySelector('.player-image');
+            if (currentImage) {
+                document.getElementById('editImagePreview').src = currentImage.src;
+                document.getElementById('editImagePreview').style.display = 'block';
+            }
+
+            // Select the appropriate rarity option
+            const rarityOptions = modal.querySelectorAll('.rarity-option');
+            rarityOptions.forEach(option => {
+                option.classList.remove('selected');
+                if(option.dataset.value === rarity.toLowerCase()) {
+                    option.classList.add('selected');
+                }
+            });
+
+            modal.style.display = 'block';
+        }
+
+        // Close modal when clicking the X or outside the modal
+        document.querySelector('.close-modal').onclick = function() {
+            document.getElementById('editPlayerModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('editPlayerModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('editPlayerForm').onsubmit = async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('player_id', document.getElementById('edit_player_id').value);
+            formData.append('name', document.getElementById('edit_name').value);
+            formData.append('rating', document.getElementById('edit_rating').value);
+            formData.append('position', document.getElementById('edit_position').value);
+            formData.append('nationality', document.getElementById('edit_nationality').value);
+            formData.append('club', document.getElementById('edit_club').value);
+            formData.append('rarity', document.getElementById('edit_rarity').value);
+
+            // Add image if selected
+            const imageFile = document.getElementById('editPlayerImage').files[0];
+            if (imageFile) {
+                formData.append('image', imageFile);
+            }
+
+            try {
+                const response = await fetch('/update_player', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if(response.ok) {
+                    showNotification('تم تحديث بيانات اللاعب بنجاح', 'success');
+                    document.getElementById('editPlayerModal').style.display = 'none';
+                    // Reload the page or update the player card
+                    location.reload();
+                } else {
+                    showNotification(data.message || 'حدث خطأ أثناء التحديث', 'error');
+                }
+            } catch (error) {
+                showNotification('حدث خطأ أثناء التحديث', 'error');
+            }
+        };
+
+        // Initialize rarity options in edit modal
+        document.querySelectorAll('#editPlayerModal .rarity-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('#editPlayerModal .rarity-option').forEach(opt => 
+                    opt.classList.remove('selected'));
+                option.classList.add('selected');
+                document.getElementById('edit_rarity').value = option.dataset.value;
+            });
+        });
+
+        async function handleEditSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const submitBtn = form.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'جاري التحديث...';
+
+            try {
+                const formData = new FormData();
+                formData.append('player_id', document.getElementById('edit_player_id').value);
+                formData.append('name', document.getElementById('edit_name').value);
+                formData.append('rating', parseInt(document.getElementById('edit_rating').value));
+                formData.append('position', document.getElementById('edit_position').value);
+                formData.append('nationality', document.getElementById('edit_nationality').value);
+                formData.append('club', document.getElementById('edit_club').value);
+                formData.append('rarity', document.getElementById('edit_rarity').value);
+
+                // Add image if selected
+                const imageFile = document.getElementById('editPlayerImage').files[0];
+                if (imageFile) {
+                    formData.append('image', imageFile);
+                }
+
+                const response = await fetch('/update_player', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showNotification(data.message, 'success');
+                    document.getElementById('editPlayerModal').style.display = 'none';
+                    location.reload(); // Reload to show updated image
+                } else {
+                    showNotification(data.message || 'حدث خطأ أثناء التحديث', 'error');
+                }
+            } catch (error) {
+                showNotification('حدث خطأ أثناء التحديث', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'حفظ التغييرات';
+            }
+        }
+
+        // Add image upload preview for edit form
+        document.getElementById('editPlayerImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('editImagePreview').src = e.target.result;
+                    document.getElementById('editImagePreview').style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
         });
     </script>
 </body>

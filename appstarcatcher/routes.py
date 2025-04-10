@@ -979,6 +979,100 @@ def delete_player():
         db.session.rollback()
         return jsonify({'error': 'حدث خطأ أثناء حذف اللاعب'}), 500
 
+
+@app.route('/update_player', methods=['POST'])
+@login_required
+def update_player():
+    try:
+        # التعامل مع البيانات من الـ FormData
+        player_id = request.form.get('player_id')
+        player = Player.query.get(player_id)
+        
+        if not player:
+            return jsonify({'success': False, 'message': 'لم يتم العثور على اللاعب'}), 404
+
+        # تحديث بيانات اللاعب
+        player.name = request.form.get('name')
+        player.rating = request.form.get('rating')
+        player.position = request.form.get('position')
+        player.nationality = request.form.get('nationality')
+        # تحديث النادي بشكل صحيح
+        club_name = request.form.get('club')
+        club = ClubDetail.query.filter_by(club_name=club_name).first()
+        if club:
+            player.club_id = club.club_id
+        player.rarity = request.form.get('rarity')
+
+        # معالجة الصورة إذا تم تحديثها
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                try:
+                    # حذف الصورة القديمة إذا وجدت
+                    if player.image_url:
+                        old_image_path = os.path.join(app.config['UPLOAD_FOLDER_IMAGE_PLAYER'], player.image_url)
+                        if os.path.exists(old_image_path):
+                            os.remove(old_image_path)
+
+                    # حفظ الصورة الجديدة
+                    filename = secure_filename(file.filename)
+                    unique_code = generate_random_code()
+                    new_filename = f"{os.path.splitext(filename)[0]}_{unique_code}_no_bg.png"
+                    
+                    # حفظ الصورة مؤقتاً
+                    temp_path = os.path.join(app.config['UPLOAD_FOLDER_IMAGE_PLAYER'], filename)
+                    file.save(temp_path)
+
+                    # إزالة الخلفية
+                    with open(temp_path, "rb") as img_file:
+                        input_image = img_file.read()
+                        output_image = remove(input_image)
+
+                    # حفظ الصورة النهائية بدون خلفية
+                    final_path = os.path.join(app.config['UPLOAD_FOLDER_IMAGE_PLAYER'], new_filename)
+                    with open(final_path, "wb") as img_file:
+                        img_file.write(output_image)
+
+                    # حذف الصورة المؤقتة
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
+                    
+                    # تحديث مسار الصورة في قاعدة البيانات
+                    player.image_url = new_filename
+
+                except Exception as img_error:
+                    app.logger.error(f"Error processing image: {str(img_error)}")
+                    return jsonify({
+                        'success': False,
+                        'message': 'حدث خطأ أثناء معالجة الصورة'
+                    }), 500
+
+        db.session.commit()
+        return jsonify({
+            'success': True, 
+            'message': 'تم تحديث بيانات اللاعب بنجاح',
+            'player': {
+                'id': player.id,
+                'name': player.name,
+                'rating': player.rating,
+                'position': player.position,
+                'nationality': player.nationality,
+                'club': club_name if club else '',
+                'rarity': player.rarity,
+                'image_url': player.image_url
+            }
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error updating player: {str(e)}")
+        return jsonify({
+            'success': False, 
+            'message': f'حدث خطأ أثناء التحديث: {str(e)}'
+        }), 500
+
+
+
 @app.route('/error')
 def error_page():
     error_msg = session.get('error_message', 'حدث خطأ غير متوقع')
@@ -1364,6 +1458,67 @@ def register():
             flash('حدث خطأ أثناء إنشاء الحساب. الرجاء المحاولة مرة أخرى.', 'danger')
             app.logger.error(f"Registration error: {str(e)}")
     return render_template('register.html', form=form)
+
+
+@app.route('/get_subscription/<int:id>')
+@login_required
+@permission_required('can_manage_subscriptions')
+def get_subscription(id):
+    try:
+        subscription = Subscription.query.get_or_404(id)
+        return jsonify({
+            'success': True,
+            'subscription': {
+                'id': subscription.id,
+                'package_type': subscription.package_type,
+                'package_details': subscription.package_details,
+                'price': subscription.price,
+                'coins_reward': subscription.coins_reward,
+                'daily_free_packs': subscription.daily_free_packs,
+                'joker_players': subscription.joker_players,
+                'subscription_achievement_coins': subscription.subscription_achievement_coins,
+                'has_vip_badge': subscription.has_vip_badge,
+                'has_vip_badge_plus': subscription.has_vip_badge_plus,
+                'allow_old_ahly_catalog': subscription.allow_old_ahly_catalog,
+                'is_outside_egypt': subscription.is_outside_egypt
+            }
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/update_subscription/<int:id>', methods=['POST'])
+@login_required
+@permission_required('can_manage_subscriptions')
+def update_subscription(id):
+    try:
+        subscription = Subscription.query.get_or_404(id)
+        data = request.get_json()
+
+        # تحديث البيانات
+        subscription.package_type = data['package_type']
+        subscription.price = data['price']
+        subscription.coins_reward = data['coins_reward']
+        subscription.daily_free_packs = data['daily_free_packs']
+        subscription.joker_players = data['joker_players']
+        subscription.subscription_achievement_coins = data['subscription_achievement_coins']
+        subscription.package_details = data['package_details']
+        subscription.has_vip_badge = data['has_vip_badge']
+        subscription.has_vip_badge_plus = data['has_vip_badge_plus']
+        subscription.allow_old_ahly_catalog = data['allow_old_ahly_catalog']
+        subscription.is_outside_egypt = data['is_outside_egypt']
+
+        db.session.commit()
+        return jsonify({
+            'success': True,
+            'message': 'تم تحديث الباقة بنجاح'
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'حدث خطأ: {str(e)}'
+        }), 500
+
 
 # رووت API لتسجيل الدخول
 @app.route('/api_login', methods=['POST'])
@@ -2467,3 +2622,101 @@ def apply_subscription_benefits(user_id, subscription_id):
         db.session.rollback()
         app.logger.error(f"Error in apply_subscription_benefits: {str(e)}")
         return False
+
+@app.route('/toggle_user_status/<int:user_id>', methods=['POST'])
+@login_required
+@permission_required('can_manage_users')
+def toggle_user_status(user_id):
+    try:
+        if not current_user.is_admin:
+            return jsonify({
+                'success': False,
+                'message': 'غير مصرح لك بهذا الإجراء'
+            }), 403
+
+        user = User.query.get_or_404(user_id)
+
+        if user.id == current_user.id:
+            return jsonify({
+                'success': False,
+                'message': 'لا يمكنك تغيير حالة حسابك الخاص'
+            }), 403
+
+        # تغيير حالة المستخدم
+        user.is_active = not user.is_active
+        
+        # إذا تم تعطيل المستخدم، قم بإلغاء جميع الصلاحيات
+        if not user.is_active:
+            user.is_admin = False
+            user.can_manage_dashboard = False
+            user.can_manage_users = False
+            user.can_manage_players = False
+            user.can_manage_clubs = False
+            user.can_manage_packs = False
+            user.can_manage_market = False
+            user.can_manage_subscriptions = False
+            user.can_manage_promotions = False
+
+        db.session.commit()
+
+        message = f"تم {'تفعيل' if user.is_active else 'تعطيل'} حساب {user.username}"
+        return jsonify({
+            'success': True,
+            'message': message,
+            'is_active': user.is_active
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'حدث خطأ: {str(e)}'
+        }), 500
+
+@app.route('/delete_user/<int:user_id>', methods=['DELETE'])
+@login_required
+@permission_required('can_manage_users')
+def delete_user(user_id):
+    try:
+        if not current_user.is_admin:
+            return jsonify({
+                'success': False,
+                'message': 'غير مصرح لك بهذا الإجراء'
+            }), 403
+
+        user = User.query.get_or_404(user_id)
+
+        if user.id == current_user.id:
+            return jsonify({
+                'success': False,
+                'message': 'لا يمكنك حذف حسابك الخاص'
+            }), 403
+
+        # حذف القوائم في السوق المرتبطة بالمستخدم
+        AdminMarketListing.query.filter_by(admin_id=user_id).delete()
+        
+        # حذف جميع البيانات المرتبطة بالمستخدم
+        UserPlayer.query.filter_by(user_id=user_id).delete()
+        UserClub.query.filter_by(user_id=user_id).delete()
+        PackPurchase.query.filter_by(user_id=user_id).delete()
+        UserSubscriptionPurchase.query.filter_by(user_id=user_id).delete()
+        Transaction.query.filter((Transaction.buyer_id == user_id) | 
+                               (Transaction.seller_id == user_id)).delete()
+        GeneratedPlayer.query.filter_by(user_id=user_id).delete()
+
+        # حذف المستخدم نفسه
+        db.session.delete(user)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': f'تم حذف المستخدم {user.username} وجميع بياناته بنجاح'
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error in delete_user: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'حدث خطأ أثناء حذف المستخدم: {str(e)}'
+        }), 500

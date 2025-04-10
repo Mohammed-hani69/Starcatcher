@@ -628,6 +628,50 @@
                 background: #1a1a1a;
             }
         }
+
+        .user-controls {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .status-btn, .delete-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .status-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .status-btn.inactive {
+            background-color: #f44336;
+        }
+
+        .delete-btn {
+            background-color: #ff3e3e;
+            color: white;
+        }
+
+        .status-btn:hover, .delete-btn:hover {
+            opacity: 0.8;
+            transform: translateY(-2px);
+        }
+
+        .status-btn:disabled, .delete-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .inactive-user {
+            opacity: 0.6;
+        }
     </style>
 </head>
 <body>
@@ -745,6 +789,7 @@
                     <th>تاريخ التسجيل</th>
                     <th>آخر دخول</th>
                     {% if current_user.is_admin%}
+                    <th>إدارة المستخدم</th>
                     <th>صلاحيات الأدمن</th>
                     <th>إدارة الرئيسيه</th>
                     <th>إدارة المستخدمين</th>
@@ -759,7 +804,7 @@
             </thead>
             <tbody>
                 {% for user_data in users %}
-                <tr data-user-id="{{ user_data.user.id }}">
+                <tr data-user-id="{{ user_data.user.id }}" class="{% if not user_data.user.is_active %}inactive-user{% endif %}">
                     <td>{{ user_data.user.id }}</td>
                     <td>{{ user_data.user.username }}</td>
                     <td>{{ user_data.user.email }}</td>
@@ -816,6 +861,20 @@
                     <td>{{ user_data.user.created_at.strftime('%Y-%m-%d') }}</td>
                     <td>{{ user_data.user.last_login.strftime('%Y-%m-%d %H:%M') if user_data.user.last_login else 'لم يسجل دخول' }}</td>
                     {% if current_user.is_admin%}
+                    <td>
+                        <div class="user-controls">
+                            <button onclick="toggleUserStatus('{{ user_data.user.id }}', {{ user_data.user.is_active|tojson }})"
+                                    class="status-btn {% if user_data.user.is_active %}active{% else %}inactive{% endif %}"
+                                    {% if user_data.user.id == current_user.id %}disabled{% endif %}>
+                                {{ 'تعطيل' if user_data.user.is_active else 'تفعيل' }}
+                            </button>
+                            <button onclick="deleteUser('{{ user_data.user.id }}')"
+                                    class="delete-btn"
+                                    {% if user_data.user.id == current_user.id %}disabled{% endif %}>
+                                حذف
+                            </button>
+                        </div>
+                    </td>
                     <td class="admin-toggle-cell">
                         <label class="toggle-switch">
                             <input type="checkbox" 
@@ -1167,6 +1226,80 @@
                 console.error('Error:', error);
                 checkbox.checked = !checkbox.checked; // عكس حالة الـ checkbox
                 showNotification(error.message || 'حدث خطأ أثناء تحديث الصلاحيات', 'error');
+            }
+        }
+
+        async function toggleUserStatus(userId, currentStatus) {
+            if (userId === '{{ current_user.id }}') {
+                showNotification('لا يمكنك تغيير حالة حسابك الخاص', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/toggle_user_status/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message);
+                }
+
+                // تحديث واجهة المستخدم
+                const row = document.querySelector(`tr[data-user-id="${userId}"]`);
+                const button = row.querySelector('.status-btn');
+                
+                if (data.is_active) {
+                    row.classList.remove('inactive-user');
+                    button.textContent = 'تعطيل';
+                    button.classList.remove('inactive');
+                } else {
+                    row.classList.add('inactive-user');
+                    button.textContent = 'تفعيل';
+                    button.classList.add('inactive');
+                }
+
+                showNotification(data.message, 'success');
+            } catch (error) {
+                showNotification(error.message || 'حدث خطأ أثناء تحديث حالة المستخدم', 'error');
+            }
+        }
+
+        async function deleteUser(userId) {
+            if (userId === '{{ current_user.id }}') {
+                showNotification('لا يمكنك حذف حسابك الخاص', 'error');
+                return;
+            }
+
+            if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/delete_user/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message);
+                }
+
+                // حذف الصف من الجدول
+                const row = document.querySelector(`tr[data-user-id="${userId}"]`);
+                row.remove();
+
+                showNotification(data.message, 'success');
+            } catch (error) {
+                showNotification(error.message || 'حدث خطأ أثناء حذف المستخدم', 'error');
             }
         }
     </script>

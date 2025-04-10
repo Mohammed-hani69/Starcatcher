@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سوق اللاعبين</title>
+    <title>Players Market</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
@@ -43,10 +43,20 @@
             text-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
             transition: all 0.3s ease;
             padding-left: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand img {
+            height: 80px;
+            width: auto;
+            transition: all 0.3s ease;
         }
         
-        .navbar-brand:hover {
-            transform: scale(1.05);
+        @media (max-width: 991px) {
+            .navbar-brand img {
+                height: 65px;
+            }
         }
         
         .nav-link {
@@ -616,13 +626,13 @@
             .card {
                 margin-bottom: 15px;
                 font-size: 0.85rem;
-                width: 160px; /* عرض ثابت للكارت */
+                width: 160px; /* Fixed card width */
                 margin-left: auto;
                 margin-right: auto;
             }
 
             .card-img-wrapper {
-                height: 180px; /* ارتفاع أكبر للصورة */
+                height: 180px; /* Larger image height */
             }
 
             .card-body {
@@ -630,12 +640,12 @@
             }
 
             .col-md-6 {
-                width: 50%; /* جعل عرض العمود نصف الشاشة */
+                width: 50%; /* Column width half screen */
                 display: flex;
                 justify-content: center;
             }
 
-            /* تحسين حجم العناصر الداخلية */
+            /* Improve internal element sizes */
             .player-stats-container {
                 padding: 6px 4px;
                 margin-bottom: 8px;
@@ -649,7 +659,7 @@
 
         @media (max-width: 576px) {
             .card {
-                width: 150px; /* عرض أصغر للشاشات الصغيرة جداً */
+                width: 150px; /* Smaller width for very small screens */
             }
 
             .card-img-wrapper {
@@ -670,7 +680,6 @@
             padding: 0 !important;
             opacity: 0;
             animation: fadeInOut 3s ease forwards;
-            direction: rtl !important;
             box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2) !important;
             overflow: hidden;
             position: relative;
@@ -684,7 +693,6 @@
             padding: 0 !important;
             opacity: 0;
             animation: fadeInOut 3s ease forwards;
-            direction: rtl !important;
             box-shadow: 0 4px 15px rgba(231, 76, 60, 0.2) !important;
             overflow: hidden;
             position: relative;
@@ -855,7 +863,7 @@
             font-size: 0.95rem;
             font-weight: 500;
             flex: 1;
-            text-align: right;
+            text-align: left;
         }
 
         @keyframes scaleUp {
@@ -1018,7 +1026,9 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('home') }}">Star Catcher</a>
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}" alt="Star Catcher">
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -1027,36 +1037,36 @@
                     {% if user.is_authenticated %}
                         <span class="coins-display">
                             <i class="fas fa-coins me-2"></i>
-                            {{ user.coins }} عملة
+                            {{ user.coins }} Coins
                         </span>
                         <a class="nav-link" href="{{ url_for('profile') }}">
                             <i class="fas fa-user me-2"></i>
-                            الملف الشخصي
+                            Profile
                         </a>
                         <a class="nav-link" href="{{ url_for('myplayers') }}">
                             <i class="fas fa-users me-2"></i>
-                            لاعبيني
+                            My Players
                         </a>
                         <a class="nav-link" href="{{ url_for('catalog') }}">
                             <i class="fas fa-book me-2"></i>
-                            الكتالوج
+                            Catalog
                         </a>
                         <a class="nav-link" href="{{ url_for('market') }}">
                             <i class="fas fa-store me-2"></i>
-                            السوق
+                            Market
                         </a>
                         <a class="nav-link text-danger" href="{{ url_for('logout') }}">
                             <i class="fas fa-sign-out-alt me-2"></i>
-                            تسجيل خروج
+                            Logout
                         </a>
                     {% else %}
                         <a class="nav-link" href="{{ url_for('login') }}">
                             <i class="fas fa-sign-in-alt me-2"></i>
-                            تسجيل الدخول
+                            Login
                         </a>
                         <a class="nav-link" href="{{ url_for('register') }}">
                             <i class="fas fa-user-plus me-2"></i>
-                            التسجيل
+                            Register
                         </a>
                     {% endif %}
                 </div>
@@ -1066,14 +1076,14 @@
 
     <!-- World Cup Badge -->
     <div class="world-cup-badge">
-        <i class="fas fa-trophy me-1"></i> كأس العالم 2026
+        <i class="fas fa-trophy me-1"></i> World Cup 2026
     </div>
 
      
     <!-- Header Section -->
     <header class="site-header">
         <div class="container">
-            <h2 class="mb-0"><i class="fas fa-store-alt ml-2 shimmer"></i> سوق اللاعبين</h2>
+            <h2 class="mb-0"><i class="fas fa-store-alt me-2 shimmer"></i> Players Market</h2>
         </div>
     </header>
     
@@ -1084,37 +1094,37 @@
                 <div class="col-lg-3 col-md-6 mb-2">
                     <div class="input-group">
                         <select class="form-control">
-                            <option>جميع المراكز</option>
-                            <option>حارس مرمى</option>
-                            <option>مدافع</option>
-                            <option>وسط</option>
-                            <option>مهاجم</option>
+                            <option>All Positions</option>
+                            <option>Goalkeeper</option>
+                            <option>Defender</option>
+                            <option>Midfielder</option>
+                            <option>Forward</option>
                         </select>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-2">
                     <div class="input-group">
                         <select class="form-control">
-                            <option>جميع الندرة</option>
-                            <option>ذهبي</option>
-                            <option>فضي</option>
-                            <option>برونزي</option>
+                            <option>All Rarities</option>
+                            <option>Gold</option>
+                            <option>Silver</option>
+                            <option>Bronze</option>
                         </select>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-2">
                     <div class="input-group">
                         <select class="form-control">
-                            <option>الأحدث</option>
-                            <option>الأقدم</option>
-                            <option>السعر: من الأعلى للأقل</option>
-                            <option>السعر: من الأقل للأعلى</option>
+                            <option>Newest</option>
+                            <option>Oldest</option>
+                            <option>Price: High to Low</option>
+                            <option>Price: Low to High</option>
                         </select>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-2">
                     <div class="input-group position-relative">
-                        <input type="text" class="form-control search-input" placeholder="ابحث عن لاعب...">
+                        <input type="text" class="form-control search-input" placeholder="Search player...">
                         <i class="fas fa-search search-icon"></i>
                     </div>
                 </div>
@@ -1123,15 +1133,15 @@
         
         <!-- Grid Switcher -->
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="section-title mb-0">اللاعبين المتوفرين</h5>
+            <h5 class="section-title mb-0">Available Players</h5>
             <div class="grid-switcher">
-                <button class="grid-btn active" title="عرض كبير">
+                <button class="grid-btn active" title="Large View">
                     <i class="fas fa-th-large"></i>
                 </button>
-                <button class="grid-btn" title="عرض متوسط">
+                <button class="grid-btn" title="Medium View">
                     <i class="fas fa-th"></i>
                 </button>
-                <button class="grid-btn" title="عرض قائمة">
+                <button class="grid-btn" title="List View">
                     <i class="fas fa-list"></i>
                 </button>
             </div>
@@ -1160,12 +1170,12 @@
                         
                         <div class="player-stats-container">
                             <div class="player-stat">
-                                <span class="player-stat-label">المركز</span>
+                                <span class="player-stat-label">Position</span>
                                 <span class="player-stat-value">{{ item.player.position }}</span>
                             </div>
                             
                             <div class="player-stat">
-                                <span class="player-stat-label">الجنسية</span>
+                                <span class="player-stat-label">Nationality</span>
                                 <span class="player-stat-value">{{ item.player.nationality }}</span>
                             </div>
                         </div>
@@ -1187,7 +1197,7 @@
                         </div>
                         
                         <button class="buy-button" onclick="buyPlayer({{ item.listing_id }}, {{ item.price }})">
-                            <i class="fas fa-shopping-cart ml-1"></i> شراء
+                            <i class="fas fa-shopping-cart ml-1"></i> Buy
                         </button>
                     </div>
                 </div>
@@ -1198,8 +1208,8 @@
                     <div class="empty-icon">
                         <i class="fas fa-store-slash"></i>
                     </div>
-                    <h4>لا توجد عروض حالياً</h4>
-                    <p>يبدو أن سوق اللاعبين فارغ الآن. تحقق مرة أخرى لاحقاً.</p>
+                    <h4>No Listings Available</h4>
+                    <p>The market seems empty right now. Check back later.</p>
                 </div>
             </div>
             {% endfor %}
@@ -1228,21 +1238,21 @@
     <!-- Confirmation Modal -->
     <div class="confirm-modal" id="confirmModal">
         <div class="confirm-dialog">
-            <h3 class="confirm-title">تأكيد الشراء</h3>
+            <h3 class="confirm-title">Confirm Purchase</h3>
             <div class="confirm-content">
-                هل أنت متأكد من شراء هذا اللاعب؟
+                Are you sure you want to buy this player?
                 <div class="price-display">
                     <i class="fas fa-coins"></i>
                     <span id="playerPrice">0</span>
-                    <span>عملة</span>
+                    <span>Coins</span>
                 </div>
             </div>
             <div class="confirm-buttons">
                 <button class="confirm-btn confirm-btn-yes" id="confirmYes">
-                    <i class="fas fa-check me-1"></i> نعم، اشتري
+                    <i class="fas fa-check me-1"></i> Yes, Buy
                 </button>
                 <button class="confirm-btn confirm-btn-no" id="confirmNo">
-                    <i class="fas fa-times me-1"></i> إلغاء
+                    <i class="fas fa-times me-1"></i> Cancel
                 </button>
             </div>
         </div>
@@ -1346,15 +1356,15 @@
                     
                     const coinsDisplay = document.querySelector('.coins-display');
                     if (coinsDisplay && data.data.remaining_coins !== undefined) {
-                        coinsDisplay.innerHTML = `<i class="fas fa-coins me-2"></i>${data.data.remaining_coins} عملة`;
+                        coinsDisplay.innerHTML = `<i class="fas fa-coins me-2"></i>${data.data.remaining_coins} Coins`;
                     }
                 } else {
-                    showNotification(data.message || 'حدث خطأ أثناء عملية الشراء', 'error');
+                    showNotification(data.message || 'An error occurred during the purchase', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showNotification('حدث خطأ أثناء الاتصال بالخادم', 'error');
+                showNotification('An error occurred while connecting to the server', 'error');
             });
         }
     </script>

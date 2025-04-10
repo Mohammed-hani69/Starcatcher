@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لاعبيني - Star Catcher</title>
+    <title>My Players - Star Catcher</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
@@ -42,15 +42,17 @@
         }
         
         .navbar-brand {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary-red) !important;
-            text-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
-            transition: all 0.3s ease;
-            padding-left: 20px;
+            padding: 0;
+            margin: 0;
         }
         
-        .navbar-brand:hover {
+        .navbar-brand img {
+            height: 65px;  /* زيادة من 50px إلى 65px */
+            width: auto;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand:hover img {
             transform: scale(1.05);
         }
         
@@ -102,7 +104,7 @@
 
         .players-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* تصغير حجم الكارت */
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 15px;
             padding: 15px;
         }
@@ -116,7 +118,7 @@
             position: relative;
             cursor: pointer;
             backdrop-filter: blur(10px);
-            min-height: 300px; /* تحديد ارتفاع ثابت */
+            min-height: 300px;
         }
 
         .player-card::before {
@@ -144,7 +146,7 @@
 
         .player-image-container {
             position: relative;
-            padding-top: 75%; /* تصغير نسبة الارتفاع للصورة */
+            padding-top: 75%;
             margin-bottom: 0.5rem;
             overflow: hidden;
         }
@@ -175,7 +177,7 @@
         }
 
         .player-name {
-            font-size: 1.1rem; /* تصغير حجم الخط */
+            font-size: 1.1rem;
             font-weight: bold;
             background: linear-gradient(45deg, #fff, #ccc);
             -webkit-background-clip: text;
@@ -333,7 +335,7 @@
             color: #adb5bd;
         }
 
-        /* تصميم نافذة تأكيد البيع */
+        /* Sell Confirmation Modal */
         .sell-confirm-modal {
             position: fixed;
             top: 50%;
@@ -419,7 +421,7 @@
             display: block;
         }
 
-        /* تصميم رسالة لا يوجد لاعبين */
+        /* No Players Message */
         .no-players-message {
             display: flex;
             flex-direction: column;
@@ -453,6 +455,14 @@
 
         /* Responsive Navbar Styling */
         @media (max-width: 991px) {
+            .navbar {
+                padding: 8px 0;
+            }
+            
+            .navbar-brand img {
+                height: 65px;  /* تم تغييرها من 55px إلى 65px */
+            }
+            
             .navbar-collapse {
                 background: linear-gradient(to bottom, var(--black), var(--dark-gray));
                 padding: 1rem;
@@ -495,6 +505,12 @@
             }
         }
 
+        @media (max-width: 576px) {
+            .navbar-brand img {
+                height: 65px;  /* تم تغييرها من 45px إلى 65px */
+            }
+        }
+
         /* World Cup Badge Responsive */
         @media (max-width: 768px) {
             .world-cup-badge {
@@ -507,7 +523,9 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('home') }}">Star Catcher</a>
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}" alt="Star Catcher">
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -516,36 +534,36 @@
                     {% if user.is_authenticated %}
                         <span class="coins-display">
                             <i class="fas fa-coins me-2"></i>
-                            {{ user.coins }} عملة
+                            {{ user.coins }} Coins
                         </span>
                         <a class="nav-link" href="{{ url_for('profile') }}">
                             <i class="fas fa-user me-2"></i>
-                            الملف الشخصي
+                            Profile
                         </a>
                         <a class="nav-link" href="{{ url_for('myplayers') }}">
                             <i class="fas fa-users me-2"></i>
-                            لاعبيني
+                            My Players
                         </a>
                         <a class="nav-link" href="{{ url_for('catalog') }}">
                             <i class="fas fa-book me-2"></i>
-                            الكتالوج
+                            Catalog
                         </a>
                         <a class="nav-link" href="{{ url_for('market') }}">
                             <i class="fas fa-store me-2"></i>
-                            السوق
+                            Market
                         </a>
                         <a class="nav-link text-danger" href="{{ url_for('logout') }}">
                             <i class="fas fa-sign-out-alt me-2"></i>
-                            تسجيل خروج
+                            Logout
                         </a>
                     {% else %}
                         <a class="nav-link" href="{{ url_for('login') }}">
                             <i class="fas fa-sign-in-alt me-2"></i>
-                            تسجيل الدخول
+                            Login
                         </a>
                         <a class="nav-link" href="{{ url_for('register') }}">
                             <i class="fas fa-user-plus me-2"></i>
-                            التسجيل
+                            Register
                         </a>
                     {% endif %}
                 </div>
@@ -554,7 +572,7 @@
     </nav>
     <!-- World Cup Badge -->
     <div class="world-cup-badge">
-        <i class="fas fa-trophy me-1"></i> كأس العالم 2026
+        <i class="fas fa-trophy me-1"></i> World Cup 2026
     </div>
     <!-- Include your navbar here -->
 
@@ -563,15 +581,15 @@
         <div class="search-section">
             <div class="row align-items-center">
                 <div class="col-md-6 mb-3 mb-md-0">
-                    <input type="text" class="search-input" placeholder="ابحث عن لاعب..." id="searchInput">
+                    <input type="text" class="search-input" placeholder="Search players..." id="searchInput">
                 </div>
                 <div class="col-md-6">
                     <div class="d-flex flex-wrap gap-2">
-                        <button class="filter-btn active" data-filter="all">الكل</button>
-                        <button class="filter-btn" data-filter="legendary">خارق</button>
-                        <button class="filter-btn" data-filter="epic">أسطوري</button>
-                        <button class="filter-btn" data-filter="rare">نادر</button>
-                        <button class="filter-btn" data-filter="common">عادي</button>
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="legendary">Legendary</button>
+                        <button class="filter-btn" data-filter="epic">Epic</button>
+                        <button class="filter-btn" data-filter="rare">Rare</button>
+                        <button class="filter-btn" data-filter="common">Common</button>
                     </div>
                 </div>
             </div>
@@ -593,7 +611,7 @@
                 </div>
                 <div class="player-rating">{{ player.rating }}</div>
                 <div class="rarity-badge rarity-{{ player.rarity }}">
-                    {{ {'common': 'عادي', 'rare': 'نادر', 'epic': 'أسطوري', 'legendary': 'خارق'}[player.rarity] }}
+                    {{ {'common': 'Common', 'rare': 'Rare', 'epic': 'Epic', 'legendary': 'Legendary'}[player.rarity] }}
                 </div>
                 <div class="player-info">
                     <div class="player-name">{{ player.name }}</div>
@@ -612,8 +630,8 @@
         {% else %}
         <div class="no-players-message">
             <i class="fas fa-user-slash"></i>
-            <h3>لا يوجد لاعبين</h3>
-            <p>لم تقم بإضافة أي لاعبين بعد</p>
+            <h3>No Players Found</h3>
+            <p>You haven't added any players yet</p>
         </div>
         {% endif %}
     </div>
@@ -630,10 +648,10 @@
                     <img id="modalPlayerImage" src="" alt="" class="modal-player-image">
                     <div class="d-grid gap-2">
                         <button class="action-btn collect-btn" onclick="collectPlayer()">
-                            <i class="fas fa-plus-circle me-2"></i>إضافة للكتالوج
+                            <i class="fas fa-plus-circle me-2"></i>Add to Catalog
                         </button>
                         <button class="action-btn sell-btn" onclick="sellPlayer()">
-                            <i class="fas fa-coins me-2"></i>بيع اللاعب
+                            <i class="fas fa-coins me-2"></i>Sell Player
                         </button>
                     </div>
                 </div>
@@ -641,21 +659,21 @@
         </div>
     </div>
 
-    <!-- إضافة نافذة تأكيد البيع -->
+    <!-- Sell Confirmation Modal -->
     <div class="modal-overlay" id="sellConfirmOverlay"></div>
     <div class="sell-confirm-modal" id="sellConfirmModal">
-        <h3>تأكيد البيع</h3>
-        <p>هل أنت متأكد من بيع اللاعب مقابل</p>
+        <h3>Confirm Sale</h3>
+        <p>Are you sure you want to sell this player for</p>
         <div class="price-tag">
             <i class="fas fa-coins"></i>
-            <span id="sellPrice">0</span> عملة
+            <span id="sellPrice">0</span> Coins
         </div>
         <div class="buttons">
             <button class="confirm-btn" id="confirmSell">
-                <i class="fas fa-check me-2"></i>تأكيد البيع
+                <i class="fas fa-check me-2"></i>Confirm
             </button>
             <button class="cancel-btn" id="cancelSell">
-                <i class="fas fa-times me-2"></i>إلغاء
+                <i class="fas fa-times me-2"></i>Cancel
             </button>
         </div>
     </div>
@@ -666,7 +684,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             const modal = new bootstrap.Modal(document.getElementById('playerActionsModal'));
             
-            // تحديث showPlayerModal لتخزين بيانات اللاعب بشكل صحيح
             window.showPlayerModal = function(cardElement) {
                 try {
                     const playerDataStr = cardElement.getAttribute('data-player');
@@ -678,7 +695,6 @@
                         return;
                     }
 
-                    // تحديث البيانات العالمية مع جميع المعلومات المطلوبة
                     window.selectedPlayer = {
                         id: playerData.player_id,
                         user_player_id: playerData.id,
@@ -691,7 +707,6 @@
                         club_name: playerData.club_name
                     };
 
-                    // تحديث النافذة المنبثقة
                     document.getElementById('modalPlayerImage').src = `/static/uploads/image_player/${playerData.image_url}`;
                     document.getElementById('modalPlayerName').textContent = playerData.name;
                     
@@ -702,16 +717,13 @@
                 }
             };
 
-            // دالة إزالة بطاقة اللاعب بتأثير متحرك
             function removePlayerCard(playerId) {
                 const playerCard = document.querySelector(`[data-player*='"player_id":${playerId}']`);
                 if (playerCard) {
-                    // إضافة تأثير حركي للإزالة
                     playerCard.style.transition = 'all 0.5s ease';
                     playerCard.style.opacity = '0';
                     playerCard.style.transform = 'scale(0.8)';
                     
-                    // إزالة العنصر بعد انتهاء التأثير
                     setTimeout(() => {
                         playerCard.remove();
                         checkEmptyGrid();
@@ -719,23 +731,20 @@
                 }
             }
 
-            // دالة التحقق من الشبكة الفارغة
             function checkEmptyGrid() {
                 const grid = document.querySelector('.players-grid');
                 const remainingCards = grid.querySelectorAll('.player-card');
 
                 if (remainingCards.length === 0) {
-                    // إذا لم يتبق أي لاعبين، أظهر رسالة "لا يوجد لاعبين"
                     grid.innerHTML = `
                         <div class="no-players-message">
                             <i class="fas fa-user-slash"></i>
-                            <h3>لا يوجد لاعبين</h3>
-                            <p>لم تقم بإضافة أي لاعبين بعد</p>
+                            <h3>No Players Found</h3>
+                            <p>You haven't added any players yet</p>
                         </div>`;
                 }
             }
 
-            // تحديث دالة التجميع
             window.collectPlayer = function() {
                 if (!window.selectedPlayer) {
                     console.error('No player selected');
@@ -757,25 +766,22 @@
                 })
                 .then(response => {
                     if (response.status === 409) {
-                        throw new Error('اللاعب موجود بالفعل في الكتالوج');
+                        throw new Error('Player already exists in the catalog');
                     }
                     return response.json();
                 })
                 .then(data => {
                     if (data.status === 'success') {
-                        // إزالة بطاقة اللاعب من العرض
                         removePlayerCard(window.selectedPlayer.id);
                         
-                        // إغلاق النافذة المنبثقة
                         const modal = bootstrap.Modal.getInstance(document.getElementById('playerActionsModal'));
                         if (modal) {
                             modal.hide();
                         }
 
-                        // عرض رسالة نجاح
                         showAlert('success', data.message);
                     } else {
-                        throw new Error(data.message || 'حدث خطأ أثناء إضافة اللاعب للكتالوج');
+                        throw new Error(data.message || 'An error occurred while adding the player to the catalog');
                     }
                 })
                 .catch(error => {
@@ -784,7 +790,6 @@
                 });
             };
 
-            // دالة مساعدة لعرض الإشعارات
             function showAlert(type, message) {
                 const alertDiv = document.createElement('div');
                 alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
@@ -800,7 +805,6 @@
                 }, 3000);
             }
 
-            // دالة حساب السعر المقترح
             function calculateSuggestedPrice(rating, rarity) {
                 const basePrice = {
                     'common': { min: 20, max: 50 },
@@ -813,48 +817,38 @@
                 return Math.floor(rating * (range.max - range.min) / 100 + range.min);
             }
 
-            // تحديث دالة البيع
             window.sellPlayer = function() {
                 if (!window.selectedPlayer) {
                     console.error('No player selected');
                     return;
                 }
 
-                // استخدام البيانات المخزنة مباشرة من window.selectedPlayer
                 const suggestedPrice = calculateSuggestedPrice(window.selectedPlayer.rating, window.selectedPlayer.rarity);
                 
-                // إغلاق النافذة الأولى
                 const mainModal = bootstrap.Modal.getInstance(document.getElementById('playerActionsModal'));
                 if (mainModal) {
                     mainModal.hide();
                 }
                 
-                // تحديث السعر في نافذة التأكيد
                 document.getElementById('sellPrice').textContent = suggestedPrice;
                 
-                // عرض نافذة التأكيد
                 document.getElementById('sellConfirmOverlay').classList.add('show');
                 document.getElementById('sellConfirmModal').classList.add('show');
 
-                // معالجة الضغط على زر التأكيد
                 document.getElementById('confirmSell').onclick = function() {
-                    // إغلاق نافذة التأكيد
                     document.getElementById('sellConfirmOverlay').classList.remove('show');
                     document.getElementById('sellConfirmModal').classList.remove('show');
                     
                     processSellPlayer(suggestedPrice);
                 };
 
-                // معالجة الضغط على زر الإلغاء
                 document.getElementById('cancelSell').onclick = function() {
-                    // إغلاق نافذة التأكيد وإعادة فتح النافذة الأولى
                     document.getElementById('sellConfirmOverlay').classList.remove('show');
                     document.getElementById('sellConfirmModal').classList.remove('show');
                     mainModal.show();
                 };
             };
 
-            // دالة معالجة عملية البيع
             function processSellPlayer(price) {
                 if (!window.selectedPlayer) {
                     console.error('No player selected');
@@ -881,24 +875,20 @@
                 })
                 .then(data => {
                     if (data.status === 'success') {
-                        // إزالة بطاقة اللاعب
                         removePlayerCard(window.selectedPlayer.id);
                         
-                        // إغلاق النافذة المنبثقة
                         document.getElementById('sellConfirmOverlay').classList.remove('show');
                         document.getElementById('sellConfirmModal').classList.remove('show');
 
-                        // تحديث عرض العملات في الناف بار
                         const coinsDisplay = document.querySelector('.coins-display');
                         if (coinsDisplay) {
                             const currentCoins = parseInt(coinsDisplay.textContent.match(/\d+/)[0]);
-                            coinsDisplay.innerHTML = `<i class="fas fa-coins me-2"></i>${currentCoins + price} عملة`;
+                            coinsDisplay.innerHTML = `<i class="fas fa-coins me-2"></i>${currentCoins + price} Coins`;
                         }
 
-                        // عرض رسالة نجاح
                         showAlert('success', data.message);
                     } else {
-                        throw new Error(data.message || 'حدث خطأ أثناء بيع اللاعب');
+                        throw new Error(data.message || 'An error occurred while selling the player');
                     }
                 })
                 .catch(error => {
@@ -909,7 +899,6 @@
                 });
             }
 
-            // Search and filter functionality
             const searchInput = document.getElementById('searchInput');
             const filterButtons = document.querySelectorAll('.filter-btn');
             const playerCards = document.querySelectorAll('.player-card');
@@ -927,7 +916,6 @@
                     const playerPosition = playerData.position.toLowerCase();
                     const playerClub = playerData.club_name.toLowerCase();
 
-                    // تحسين البحث ليشمل عدة معايير
                     const matchesSearch = searchQuery === '' || 
                         playerName.includes(searchQuery) ||
                         playerNationality.includes(searchQuery) ||
@@ -937,7 +925,6 @@
                     const matchesFilter = activeFilter === 'all' || playerRarity === activeFilter;
 
                     if (matchesSearch && matchesFilter) {
-                        // إظهار البطاقة مع تأثير حركي
                         card.style.display = 'block';
                         requestAnimationFrame(() => {
                             card.style.opacity = '1';
@@ -945,7 +932,6 @@
                         });
                         hasVisibleCards = true;
                     } else {
-                        // إخفاء البطاقة مع تأثير حركي
                         card.style.opacity = '0';
                         card.style.transform = 'scale(0.95)';
                         setTimeout(() => {
@@ -954,7 +940,6 @@
                     }
                 });
 
-                // عرض رسالة عندما لا توجد نتائج
                 const grid = document.querySelector('.players-grid');
                 const existingMessage = grid.querySelector('.no-players-message');
 
@@ -964,8 +949,8 @@
                         noResults.className = 'no-players-message';
                         noResults.innerHTML = `
                             <i class="fas fa-search"></i>
-                            <h3>لا توجد نتائج</h3>
-                            <p>لم يتم العثور على لاعبين مطابقين لـ "${searchQuery}"</p>
+                            <h3>No Results Found</h3>
+                            <p>No players match your search for "${searchQuery}"</p>
                         `;
                         grid.appendChild(noResults);
 
@@ -982,7 +967,6 @@
                 }
             }
 
-            // تحسين أداء البحث باستخدام debounce
             let searchTimeout;
             searchInput.addEventListener('input', (e) => {
                 clearTimeout(searchTimeout);
@@ -991,8 +975,7 @@
                 }, 300);
             });
 
-            // تحديث placeholder لتوضيح إمكانيات البحث
-            searchInput.placeholder = "ابحث عن لاعب (الاسم، الجنسية، المركز، النادي)";
+            searchInput.placeholder = "Search players (name, nationality, position, club)";
 
             filterButtons.forEach(btn => {
                 btn.addEventListener('click', function() {

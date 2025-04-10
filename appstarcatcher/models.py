@@ -30,6 +30,7 @@ class User(UserMixin, db.Model):
     # الحقول الإضافية
     coins = db.Column(db.Integer, default=200)
     is_admin = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True)
     subscription = db.Column(db.Boolean, default=False)
     type_subscription = db.Column(db.String(80), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

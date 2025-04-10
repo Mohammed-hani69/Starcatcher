@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الملف الشخصي - {{ user.username }}</title>
+    <title>Profile - {{ user.username }}</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -32,10 +32,13 @@
         }
         
         .navbar-brand {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary-red) !important;
-            text-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
+            padding: 0;
+            margin: 0;
+        }
+        
+        .navbar-brand img {
+            height: 65px;
+            width: auto;
             transition: all 0.3s ease;
         }
         
@@ -425,6 +428,16 @@
             .navbar-toggler-icon {
                 background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(229, 9, 20, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
             }
+
+            .navbar-brand img {
+                height: 65px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand img {
+                height: 65px;
+            }
         }
 
         /* World Cup Badge Responsive */
@@ -542,33 +555,33 @@
 
         /* VIP Themes */
         .vip-theme {
-            --primary-color: #ff003c;      /* أحمر غامق نيون */
-            --secondary-color: #cc0033;    /* أحمر غامق */
-            --accent-color: #00ffea;       /* سيان نيون */
-            --bg-dark: #0a0014;           /* بنفسجي شبه أسود */
-            --bg-light: #1a0033;         /* بنفسجي غامق */
+            --primary-color: #ff003c;      /* Neon Dark Red */
+            --secondary-color: #cc0033;    /* Dark Red */
+            --accent-color: #00ffea;       /* Neon Cyan */
+            --bg-dark: #0a0014;           /* Blackish Purple */
+            --bg-light: #1a0033;         /* Dark Purple */
             --text-glow: 0 0 10px rgba(255, 0, 60, 0.7);
         }
 
         .vip-plus-theme {
-            --primary-color: #00d4ff;      /* أزرق نيون غامق */
-            --secondary-color: #0066ff;    /* أزرق كهربائي */
-            --accent-color: #ff00ff;       /* وردي نيون */
-            --bg-dark: #000024;           /* كحلي غامق */
-            --bg-light: #000047;          /* كحلي متوسط */
+            --primary-color: #00d4ff;      /* Neon Dark Blue */
+            --secondary-color: #0066ff;    /* Electric Blue */
+            --accent-color: #ff00ff;       /* Neon Pink */
+            --bg-dark: #000024;           /* Dark Navy */
+            --bg-light: #000047;          /* Medium Navy */
             --text-glow: 0 0 10px rgba(0, 212, 255, 0.7);
         }
 
         .vip-elite-theme {
-            --primary-color: #00ff66;      /* أخضر نيون */
-            --secondary-color: #00cc33;    /* أخضر غامق */
-            --accent-color: #ffff00;       /* أصفر نيون */
-            --bg-dark: #001a00;           /* أخضر شبه أسود */
-            --bg-light: #003300;          /* أخضر غامق */
+            --primary-color: #00ff66;      /* Neon Green */
+            --secondary-color: #00cc33;    /* Dark Green */
+            --accent-color: #ffff00;       /* Neon Yellow */
+            --bg-dark: #001a00;           /* Blackish Green */
+            --bg-light: #003300;          /* Dark Green */
             --text-glow: 0 0 10px rgba(0, 255, 102, 0.7);
         }
 
-        /* تحديث خلفيات VIP */
+        /* VIP Background Updates */
         .vip-theme .vip-background {
             background: radial-gradient(circle at 50% 50%, 
                 var(--bg-light) 0%, 
@@ -650,12 +663,12 @@
         .vip-badge {
             position: absolute;
             top: -10px;
-            left: -10px; /* تغيير من right إلى left */
+            left: -10px; /* Change from right to left */
             padding: 8px 20px;
             border-radius: 20px;
             font-weight: bold;
-            z-index: 100; /* زيادة z-index لضمان الظهور فوق كل العناصر */
-            transform: rotate(-15deg); /* إضافة دوران للشارة */
+            z-index: 100; /* Increase z-index to ensure visibility above all elements */
+            transform: rotate(-15deg); /* Add rotation to the badge */
         }
 
         .vip-theme .vip-badge {
@@ -676,7 +689,7 @@
             border: 2px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* تحسين حركة توهج الشارة */
+        /* Improve Badge Glow Animation */
         @keyframes glowBadge {
             0%, 100% { 
                 transform: rotate(-15deg) scale(1);
@@ -732,7 +745,7 @@
             50% { opacity: 0.3; }
         }
 
-        /* تأثيرات النجوم */
+        /* Star Effects */
         .star {
             box-shadow: 0 0 4px var(--primary-color);
         }
@@ -745,7 +758,9 @@
 <body>
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('home') }}">Star Catcher</a>
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}" alt="Star Catcher">
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -754,36 +769,36 @@
                     {% if user.is_authenticated %}
                         <span class="coins-display">
                             <i class="fas fa-coins me-2"></i>
-                            {{ user.coins }} عملة
+                            {{ user.coins }} Coins
                         </span>
                         <a class="nav-link" href="{{ url_for('profile') }}">
                             <i class="fas fa-user me-2"></i>
-                            الملف الشخصي
+                            Profile
                         </a>
                         <a class="nav-link" href="{{ url_for('myplayers') }}">
                             <i class="fas fa-users me-2"></i>
-                            لاعبيني
+                            My Players
                         </a>
                         <a class="nav-link" href="{{ url_for('catalog') }}">
                             <i class="fas fa-book me-2"></i>
-                            الكتالوج
+                            Catalog
                         </a>
                         <a class="nav-link" href="{{ url_for('market') }}">
                             <i class="fas fa-store me-2"></i>
-                            السوق
+                            Market
                         </a>
                         <a class="nav-link text-danger" href="{{ url_for('logout') }}">
                             <i class="fas fa-sign-out-alt me-2"></i>
-                            تسجيل خروج
+                            Logout
                         </a>
                     {% else %}
                         <a class="nav-link" href="{{ url_for('login') }}">
                             <i class="fas fa-sign-in-alt me-2"></i>
-                            تسجيل الدخول
+                            Login
                         </a>
                         <a class="nav-link" href="{{ url_for('register') }}">
                             <i class="fas fa-user-plus me-2"></i>
-                            التسجيل
+                            Register
                         </a>
                     {% endif %}
                 </div>
@@ -792,7 +807,7 @@
     </nav>
     <!-- World Cup Badge -->
     <div class="world-cup-badge">
-        <i class="fas fa-trophy me-1"></i> كأس العالم 2026
+        <i class="fas fa-trophy me-1"></i> World Cup 2026
     </div>
 
     <!-- Header -->
@@ -813,7 +828,7 @@
                     </div>
                 {% endif %}
                 <div class="profile-avatar position-relative">
-                    <img src="{{ url_for('static', filename='../static/uploads/profile_images/' ~ user.image_url) }}" alt="صورة البروفايل" id="profileImage">
+                    <img src="{{ url_for('static', filename='../static/uploads/profile_images/' ~ user.image_url) }}" alt="Profile Image" id="profileImage">
                     <button class="btn btn-sm btn-danger position-absolute bottom-0 start-50 translate-middle-x mb-2" id="changePhotoBtn">
                         <i class="fas fa-camera"></i>
                     </button>
@@ -835,26 +850,26 @@
                             </button>
                         </div>
                         <div class="editable-field mb-2">
-                            <span id="phone-display">{{ user.phone or 'لم يتم إضافة رقم الهاتف' }}</span>
+                            <span id="phone-display">{{ user.phone or 'Phone number not added' }}</span>
                             <button class="edit-btn ms-2" data-field="phone">
                                 <i class="fas fa-pen"></i>
                             </button>
                         </div>
                         <div class="d-flex gap-3">
                             <div class="editable-field">
-                                <span id="country-display">{{ user.country or 'الدولة' }}</span>
+                                <span id="country-display">{{ user.country or 'Country' }}</span>
                                 <button class="edit-btn ms-2" data-field="country">
                                     <i class="fas fa-pen"></i>
                                 </button>
                             </div>
                             <div class="editable-field">
-                                <span id="state-display">{{ user.state or 'المحافظة' }}</span>
+                                <span id="state-display">{{ user.state or 'State' }}</span>
                                 <button class="edit-btn ms-2" data-field="state">
                                     <i class="fas fa-pen"></i>
                                 </button>
                             </div>
                             <div class="editable-field">
-                                <span id="city-display">{{ user.city or 'المدينة' }}</span>
+                                <span id="city-display">{{ user.city or 'City' }}</span>
                                 <button class="edit-btn ms-2" data-field="city">
                                     <i class="fas fa-pen"></i>
                                 </button>
@@ -864,12 +879,12 @@
                     <div>
                         {% if user.premuim %}
                             <span class="badge bg-warning text-dark me-1">
-                                <i class="fas fa-star me-1"></i> بريميوم
+                                <i class="fas fa-star me-1"></i> Premium
                             </span>
                         {% endif %}
                         {% if user.gold %}
                             <span class="badge bg-warning text-dark">
-                                <i class="fas fa-crown me-1"></i> ذهبي
+                                <i class="fas fa-crown me-1"></i> Gold
                             </span>
                         {% endif %}
                     </div>
@@ -885,36 +900,36 @@
                 <!-- Wallet Section -->
                 <div class="custom-card wallet-card">
                     <h3>
-                        <i class="fas fa-wallet me-2"></i> المحفظة
+                        <i class="fas fa-wallet me-2"></i> Wallet
                     </h3>
                     <div class="d-flex justify-content-between align-items-center my-4">
-                        <span>رصيدك الحالي:</span>
+                        <span>Current Balance:</span>
                         <span class="h3 mb-0 text-warning">
                             <i class="fas fa-coins me-2"></i>
                             <span id="userCoins">{{ user.coins }}</span>
                         </span>
                     </div>
                     <button class="custom-btn btn-red w-100" id="rechargeBtn">
-                        <i class="fas fa-plus-circle me-2"></i> شحن المحفظة
+                        <i class="fas fa-plus-circle me-2"></i> Recharge Wallet
                     </button>
                 </div>
 
                 <!-- Stats Section -->
                 <div class="custom-card stats-card">
                     <h3>
-                        <i class="fas fa-chart-line me-2"></i> إحصائياتك
+                        <i class="fas fa-chart-line me-2"></i> Your Stats
                     </h3>
                     <div class="row text-center g-3 mt-2">
                         <div class="col-6">
                             <div class="p-3 rounded" style="background: rgba(255,255,255,0.05);">
                                 <div class="stat-value">{{ owned_count }}</div>
-                                <div>اللاعبين</div>
+                                <div>Players</div>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="p-3 rounded" style="background: rgba(255,255,255,0.05);">
                                 <div class="stat-value text-warning">{{ catalog_count }}</div>
-                                <div>الكتالوج</div>
+                                <div>Catalog</div>
                             </div>
                         </div>
                     </div>
@@ -925,17 +940,17 @@
             <div class="col-lg-4">
                 <div class="custom-card ranking-card">
                     <h3>
-                        <i class="fas fa-trophy me-2"></i> الترتيب العام
+                        <i class="fas fa-trophy me-2"></i> Global Ranking
                     </h3>
                     <div class="user-rank">
                         <i class="fas fa-medal me-2"></i> #{{ user_rank }}
                     </div>
                     <div class="text-center mb-4">
-                        <div class="fw-bold mb-2">مجموع اللاعبين في الكتالوجات</div>
+                        <div class="fw-bold mb-2">Total Players in Catalogs</div>
                         <div class="progress" style="height: 10px;">
                             <div class="progress-bar bg-danger" role="progressbar" style="width: {{ (catalog_count/500)*100 }}%"></div>
                         </div>
-                        <div class="text-muted mt-2">{{ catalog_count }} من 500</div>
+                        <div class="text-muted mt-2">{{ catalog_count }} of 500</div>
                     </div>
                     <ul class="nearby-users">
                         {% for nearby_user in nearby_users %}
@@ -946,7 +961,7 @@
                                     <span>{{ nearby_user.username }}</span>
                                 </div>
                                 <div>
-                                    <span>{{ nearby_user.catalog_count }} لاعب</span>
+                                    <span>{{ nearby_user.catalog_count }} Players</span>
                                 </div>
                             </div>
                         </li>
@@ -959,7 +974,7 @@
             <div class="col-lg-4">
                 <div class="custom-card achievements-card">
                     <h3>
-                        <i class="fas fa-award me-2"></i> الإنجازات
+                        <i class="fas fa-award me-2"></i> Achievements
                     </h3>
                     <div class="achievements-list">
                         <div class="achievement">
@@ -967,11 +982,11 @@
                                 <i class="fas fa-user-plus"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0">عضو جديد</h5>
-                                <small>اكمل تسجيل حسابك</small>
+                                <h5 class="mb-0">New Member</h5>
+                                <small>Complete your account registration</small>
                                 <div class="mt-2">
                                     <span class="text-warning">
-                                        <i class="fas fa-coins"></i> 50 عملة
+                                        <i class="fas fa-coins"></i> 50 coins
                                     </span>
                                 </div>
                             </div>
@@ -980,7 +995,7 @@
                                     <i class="fas fa-check-circle text-success fs-4"></i>
                                 {% else %}
                                     <button class="btn btn-sm btn-warning collect-coins" id="newMemberReward">
-                                        <i class="fas fa-hand-holding-usd"></i> تحصيل
+                                        <i class="fas fa-hand-holding-usd"></i> Collect
                                     </button>
                                 {% endif %}
                             </div>
@@ -991,11 +1006,11 @@
                                 <i class="fas fa-shopping-cart"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0">المشتري الأول</h5>
-                                <small>اشتر أول لاعب من السوق</small>
+                                <h5 class="mb-0">First Buyer</h5>
+                                <small>Buy your first player from the market</small>
                                 <div class="mt-2">
                                     <span class="text-warning">
-                                        <i class="fas fa-coins"></i> 60 عملة
+                                        <i class="fas fa-coins"></i> 60 coins
                                     </span>
                                 </div>
                             </div>
@@ -1006,7 +1021,7 @@
                                     <i class="fas fa-check-circle text-success fs-4"></i>
                                 {% else %}
                                     <button class="btn btn-sm btn-warning collect-coins" id="firstPurchaseReward">
-                                        <i class="fas fa-hand-holding-usd"></i> تحصيل
+                                        <i class="fas fa-hand-holding-usd"></i> Collect
                                     </button>
                                 {% endif %}
                             </div>
@@ -1017,11 +1032,11 @@
                                 <i class="fas fa-users"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0">جامع الفريق</h5>
-                                <small>اجمع كل لاعبي فريق كامل</small>
+                                <h5 class="mb-0">Team Collector</h5>
+                                <small>Collect all players of a full team</small>
                                 <div class="mt-2">
                                     <span class="text-warning">
-                                        <i class="fas fa-coins"></i> 100 عملة
+                                        <i class="fas fa-coins"></i> 100 coins
                                     </span>
                                 </div>
                             </div>
@@ -1032,7 +1047,7 @@
                                     <i class="fas fa-check-circle text-success fs-4"></i>
                                 {% else %}
                                     <button class="btn btn-sm btn-warning collect-coins" id="teamCollectorReward">
-                                        <i class="fas fa-hand-holding-usd"></i> تحصيل
+                                        <i class="fas fa-hand-holding-usd"></i> Collect
                                     </button>
                                 {% endif %}
                             </div>
@@ -1043,11 +1058,11 @@
                                 <i class="fas fa-star"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0">خبير الخوارق</h5>
-                                <small>اجمع 10 لاعبين من فئة خارق </small>
+                                <h5 class="mb-0">Rare Expert</h5>
+                                <small>Collect 10 players from the rare category</small>
                                 <div class="mt-2">
                                     <span class="text-warning">
-                                        <i class="fas fa-coins"></i> 150 عملة
+                                        <i class="fas fa-coins"></i> 150 coins
                                     </span>
                                 </div>
                             </div>
@@ -1058,7 +1073,7 @@
                                     <i class="fas fa-check-circle text-success fs-4"></i>
                                 {% else %}
                                     <button class="btn btn-sm btn-warning collect-coins" id="rareExpertReward">
-                                        <i class="fas fa-hand-holding-usd"></i> تحصيل
+                                        <i class="fas fa-hand-holding-usd"></i> Collect
                                     </button>
                                 {% endif %}
                             </div>
@@ -1069,11 +1084,11 @@
                                 <i class="fas fa-crown"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0">ملك الكتالوج</h5>
-                                <small>اكمل تجميع 4 كتالوج</small>
+                                <h5 class="mb-0">Catalog King</h5>
+                                <small>Complete 4 catalogs</small>
                                 <div class="mt-2">
                                     <span class="text-warning">
-                                        <i class="fas fa-coins"></i> 200 عملة
+                                        <i class="fas fa-coins"></i> 200 coins
                                     </span>
                                 </div>
                             </div>
@@ -1084,7 +1099,7 @@
                                     <i class="fas fa-check-circle text-success fs-4"></i>
                                 {% else %}
                                     <button class="btn btn-sm btn-warning collect-coins" id="catalogKingReward">
-                                        <i class="fas fa-hand-holding-usd"></i> تحصيل
+                                        <i class="fas fa-hand-holding-usd"></i> Collect
                                     </button>
                                 {% endif %}
                             </div>
@@ -1092,7 +1107,7 @@
                     </div>
                     <div class="text-center mt-3">
                         <button class="custom-btn btn-red">
-                            <i class="fas fa-trophy me-2"></i> عرض جميع الإنجازات
+                            <i class="fas fa-trophy me-2"></i> View All Achievements
                         </button>
                     </div>
                 </div>
@@ -1106,38 +1121,38 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="fas fa-coins me-2 text-warning"></i> شحن المحفظة
+                        <i class="fas fa-coins me-2 text-warning"></i> Recharge Wallet
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div id="amountSelectionView">
-                        <h6 class="text-center mb-4">اختر كمية العملات التي ترغب بشحنها</h6>
+                        <h6 class="text-center mb-4">Select the amount of coins you want to recharge</h6>
                         <div class="row g-3 mb-3">
                             {% for option in wallet_options %}
                             <div class="col-6">
                                 <div class="payment-option" data-amount="{{ option.amount }}" data-price="{{ option.price }}">
                                     <div class="text-warning mb-2">
-                                        <i class="fas fa-coins"></i> {{ option.amount }} عملة
+                                        <i class="fas fa-coins"></i> {{ option.amount }} Coins
                                     </div>
-                                    <div class="fw-bold">{{ option.price }} جنيه</div>
+                                    <div class="fw-bold">{{ option.price }} EGP</div>
                                 </div>
                             </div>
                             {% endfor %}
                         </div>
                         <div class="text-center mt-4">
                             <button id="continueToPaymentBtn" class="custom-btn btn-red" disabled>
-                                استمرار للدفع
+                                Continue to Payment
                             </button>
                         </div>
                     </div>
 
                     <div id="paymentMethodView" style="display: none;">
-                        <h6 class="text-center mb-4">اختر طريقة الدفع</h6>
+                        <h6 class="text-center mb-4">Select Payment Method</h6>
                         
                         <div class="d-flex justify-content-between align-items-center p-3 mb-4 rounded" style="background: rgba(255,255,255,0.05);">
-                            <div>المبلغ المطلوب:</div>
-                            <div class="fw-bold"><span id="selectedPriceDisplay">0</span> جنيه</div>
+                            <div>Required Amount:</div>
+                            <div class="fw-bold"><span id="selectedPriceDisplay">0</span> EGP</div>
                         </div>
                         
                         <div class="row g-3 mb-4">
@@ -1153,10 +1168,10 @@
                         
                         <div class="d-flex justify-content-between mt-4">
                             <button id="backToAmountsBtn" class="btn btn-outline-light">
-                                <i class="fas fa-arrow-right me-2"></i> رجوع
+                                <i class="fas fa-arrow-right me-2"></i> Back
                             </button>
                             <button id="processPaymentBtn" class="custom-btn btn-red" disabled>
-                                إتمام الدفع
+                                Process Payment
                             </button>
                         </div>
                     </div>
@@ -1164,8 +1179,8 @@
                     <div id="processingView" style="display: none;">
                         <div class="text-center py-5">
                             <span class="loader"></span>
-                            <h4 class="mt-4">جاري معالجة طلب الدفع</h4>
-                            <p class="text-muted">يرجى الانتظار...</p>
+                            <h4 class="mt-4">Processing Payment Request</h4>
+                            <p class="text-muted">Please wait...</p>
                         </div>
                     </div>
 
@@ -1174,10 +1189,10 @@
                             <div class="mb-4">
                                 <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
                             </div>
-                            <h4>تمت عملية الدفع بنجاح!</h4>
-                            <p>تم إضافة <span id="addedCoinsDisplay" class="fw-bold text-warning">0</span> عملة إلى حسابك</p>
+                            <h4>Payment Successful!</h4>
+                            <p><span id="addedCoinsDisplay" class="fw-bold text-warning">0</span> Coins have been added to your account</p>
                             <button class="custom-btn btn-red mt-3" data-bs-dismiss="modal">
-                                العودة للملف الشخصي
+                                Return to Profile
                             </button>
                         </div>
                     </div>
@@ -1270,7 +1285,7 @@
         
         // Process payment function
         function processPayment(amount, price, paymentMethod) {
-            fetch('/recharge-wallet', {  // تم تغيير المسار للتوافق مع الروت
+            fetch('/recharge-wallet', {  // Path updated to match route
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1292,12 +1307,12 @@
                     let currentCoins = parseInt(document.getElementById('userCoins').textContent);
                     document.getElementById('userCoins').textContent = currentCoins + amount;
                 } else {
-                    alert('حدث خطأ أثناء معالجة الدفع');
+                    alert('An error occurred while processing the payment');
                     resetModalViews();
                 }
             })
             .catch(error => {
-                alert('حدث خطأ أثناء معالجة الدفع');
+                alert('An error occurred while processing the payment');
                 resetModalViews();
                 console.error('Error:', error);
             });
@@ -1330,16 +1345,16 @@
                     const currentValue = displayElement.textContent;
                     
                     if (field === 'country') {
-                        // إنشاء واجهة تحرير خاصة بالدول
+                        // Create edit interface for countries
                         const editContainer = document.createElement('div');
                         editContainer.className = 'editing d-flex align-items-center';
                         editContainer.innerHTML = `
                             <select class="form-select form-select-sm bg-dark text-white me-2">
-                                <option value="">اختر دولة</option>
-                                <option value="eg">مصر</option>
-                                <option value="sa">السعودية</option>
-                                <option value="ae">الإمارات</option>
-                                <option value="jo">الأردن</option>
+                                <option value="">Select Country</option>
+                                <option value="eg">Egypt</option>
+                                <option value="sa">Saudi Arabia</option>
+                                <option value="ae">UAE</option>
+                                <option value="jo">Jordan</option>
                             </select>
                             <button class="save-btn"><i class="fas fa-check"></i></button>
                             <button class="cancel-btn"><i class="fas fa-times"></i></button>
@@ -1347,27 +1362,27 @@
                         
                         displayElement.replaceWith(editContainer);
                         
-                        // تحديد القيمة الحالية في القائمة المنسدلة
+                        // Set current value in dropdown
                         const select = editContainer.querySelector('select');
                         const countryMap = {
-                            'مصر': 'eg',
-                            'السعودية': 'sa',
-                            'الإمارات': 'ae',
-                            'الأردن': 'jo'
+                            'Egypt': 'eg',
+                            'Saudi Arabia': 'sa',
+                            'UAE': 'ae',
+                            'Jordan': 'jo'
                         };
                         select.value = countryMap[currentValue] || '';
                         
-                        // معالجة الحفظ
+                        // Handle save
                         editContainer.querySelector('.save-btn').addEventListener('click', function() {
                             updateField(field, select.value, editContainer, currentValue);
                         });
                         
-                        // معالجة الإلغاء
+                        // Handle cancel
                         editContainer.querySelector('.cancel-btn').addEventListener('click', function() {
                             restoreDisplay(field, currentValue, editContainer);
                         });
                     } else {
-                        // الكود الخاص بباقي الحقول
+                        // Code for other fields
                         const editContainer = document.createElement('div');
                         editContainer.className = 'editing d-flex align-items-center';
                         editContainer.innerHTML = `
@@ -1393,9 +1408,9 @@
             });
         });
 
-        // دالة تحديث الحقل
+        // Update field function
         function updateField(field, value, editContainer, oldValue) {
-            // تحديد قيمة الدولة للعرض
+            // Determine country value for display
             const displayValue = field === 'country' ? getCountryName(value) : value;
             
             fetch('/update_profile', {
@@ -1403,32 +1418,32 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ field, value }) // نرسل رمز الدولة للتخزين
+                body: JSON.stringify({ field, value }) // Send country code for storage
             })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    restoreDisplay(field, value, editContainer); // نمرر رمز الدولة
+                    restoreDisplay(field, value, editContainer, currentValue); // Pass country code
                 } else {
-                    alert(data.message || 'حدث خطأ في التحديث');
+                    alert(data.message || 'An error occurred during the update');
                     restoreDisplay(field, oldValue, editContainer);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('حدث خطأ أثناء التحديث');
+                alert('An error occurred during the update');
                 restoreDisplay(field, oldValue, editContainer);
             });
         }
 
-        // دالة استعادة العرض
+        // Restore display function
         function restoreDisplay(field, value, editContainer) {
             const displayElement = document.createElement('span');
             displayElement.id = `${field}-display`;
             
             if (field === 'country') {
-                displayElement.textContent = getCountryName(value); // تحويل رمز الدولة إلى اسمها
-                displayElement.dataset.value = value; // نحتفظ برمز الدولة
+                displayElement.textContent = getCountryName(value); // Convert country code to name
+                displayElement.dataset.value = value; // Retain country code
             } else {
                 displayElement.textContent = value;
             }
@@ -1438,18 +1453,18 @@
             parentContainer.replaceChild(displayElement, editContainer);
         }
 
-        // دالة مساعدة للحصول على اسم الدولة من رمزها
+        // Helper function to get country name from code
         function getCountryName(code) {
             const countries = {
-                'eg': 'مصر',
-                'sa': 'السعودية',
-                'ae': 'الإمارات',
-                'jo': 'الأردن'
+                'eg': 'Egypt',
+                'sa': 'Saudi Arabia',
+                'ae': 'UAE',
+                'jo': 'Jordan'
             };
             return countries[code] || code;
         }
 
-        // إضافة كود التعامل مع تغيير الصورة
+        // Add code to handle image change
         document.getElementById('changePhotoBtn').addEventListener('click', function() {
             document.getElementById('imageInput').click();
         });
@@ -1458,9 +1473,9 @@
             if (e.target.files && e.target.files[0]) {
                 const file = e.target.files[0];
                 
-                // التحقق من حجم الملف (5MB كحد أقصى)
+                // Check file size (5MB max)
                 if (file.size > 5 * 1024 * 1024) {
-                    alert('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+                    alert('Image size must be less than 5MB');
                     return;
                 }
 
@@ -1474,21 +1489,21 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        // تحديث الصورة في الصفحة
+                        // Update image on page
                         document.getElementById('profileImage').src = data.image_url + '?t=' + new Date().getTime();
-                        alert('تم تحديث الصورة بنجاح');
+                        alert('Image updated successfully');
                     } else {
                         alert(data.message);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('حدث خطأ أثناء تحديث الصورة');
+                    alert('An error occurred while updating the image');
                 });
             }
         });
 
-        // دالة إنشاء العملات المتطايرة
+        // Function to create floating coins
         function createFloatingCoins(startElement, endElement, amount) {
             // Play coin sound
             const coinSound = document.getElementById('coinSound');
@@ -1497,9 +1512,9 @@
             
             const startRect = startElement.getBoundingClientRect();
             const endRect = endElement.getBoundingClientRect();
-            const coinsCount = amount > 10 ? 10 : amount; // تحديد عدد العملات المتحركة
+            const coinsCount = amount > 10 ? 10 : amount; // Determine number of moving coins
             
-            // إنشاء قصاصات ورقية متطايرة
+            // Create floating confetti
             for(let i = 0; i < 30; i++) {
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti';
@@ -1509,7 +1524,7 @@
                 confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
                 document.body.appendChild(confetti);
                 
-                // حركة القصاصات
+                // Confetti movement
                 confetti.animate([
                     { 
                         top: startRect.top + 'px',
@@ -1526,7 +1541,7 @@
                 }).onfinish = () => confetti.remove();
             }
 
-            // إنشاء وتحريك العملات
+            // Create and move coins
             for(let i = 0; i < coinsCount; i++) {
                 setTimeout(() => {
                     const coin = document.createElement('div');
@@ -1538,13 +1553,13 @@
                     
                     document.body.appendChild(coin);
 
-                    // مسار العملة
+                    // Coin path
                     const controlPoint1X = startRect.left + (endRect.left - startRect.left) * 0.5;
                     const controlPoint1Y = startRect.top - 100;
                     const controlPoint2X = startRect.left + (endRect.left - startRect.left) * 0.8;
                     const controlPoint2Y = startRect.top - 50;
 
-                    // حركة العملة في مسار منحني
+                    // Coin movement along curved path
                     coin.animate([
                         {
                             left: coin.style.left,
@@ -1573,28 +1588,28 @@
                         fill: 'forwards'
                     }).onfinish = () => {
                         coin.remove();
-                        // تشغيل صوت عند وصول كل عملة
+                        // Play sound when each coin reaches
                         if (i < coinsCount - 1) {
                             coinSound.currentTime = 0;
                             coinSound.play();
                         }
-                        // تحديث العداد بعد آخر عملة
+                        // Update counter after last coin
                         if (i === coinsCount - 1) {
                             updateCoinsCounter(amount);
                         }
                     };
-                }, i * 200); // تأخير بين كل عملة
+                }, i * 200); // Delay between each coin
             }
         }
 
-        // دالة تحديث عداد العملات
+        // Function to update coin counter
         function updateCoinsCounter(amount) {
             const coinsDisplay = document.getElementById('userCoins');
             const startValue = parseInt(coinsDisplay.textContent);
             const endValue = startValue + amount;
             let current = startValue;
 
-            // تحديث تدريجي للعداد
+            // Gradual counter update
             const updateCounter = () => {
                 if (current < endValue) {
                     const increment = Math.ceil((endValue - current) / 10);
@@ -1607,7 +1622,7 @@
             updateCounter();
         }
 
-        // إضافة مستمع الحدث لزر التحصيل
+        // Add event listener for collect button
         document.getElementById('newMemberReward')?.addEventListener('click', function(e) {
             const button = e.currentTarget;
             button.disabled = true;
@@ -1625,11 +1640,11 @@
                     const rewardStatus = button.closest('.reward-status');
                     createFloatingCoins(button, coinsDisplay, 50);
                     
-                    // إنشاء أيقونة النجاح
+                    // Create success icon
                     const successIcon = document.createElement('i');
                     successIcon.className = 'fas fa-check-circle text-success fs-4';
                     
-                    // تبديل الزر بأيقونة النجاح
+                    // Replace button with success icon
                     rewardStatus.innerHTML = '';
                     rewardStatus.appendChild(successIcon);
                 } else {
@@ -1639,7 +1654,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('حدث خطأ أثناء تحصيل المكافأة');
+                alert('An error occurred while collecting the reward');
                 button.disabled = false;
             });
         });
@@ -1661,11 +1676,11 @@
                     const rewardStatus = button.closest('.reward-status');
                     createFloatingCoins(button, coinsDisplay, 60);
                     
-                    // إنشاء أيقونة النجاح
+                    // Create success icon
                     const successIcon = document.createElement('i');
                     successIcon.className = 'fas fa-check-circle text-success fs-4';
                     
-                    // تبديل الزر بأيقونة النجاح
+                    // Replace button with success icon
                     rewardStatus.innerHTML = '';
                     rewardStatus.appendChild(successIcon);
                 } else {
@@ -1675,7 +1690,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('حدث خطأ أثناء تحصيل المكافأة');
+                alert('An error occurred while collecting the reward');
                 button.disabled = false;
             });
         });
@@ -1697,11 +1712,11 @@
                     const rewardStatus = button.closest('.reward-status');
                     createFloatingCoins(button, coinsDisplay, 100);
                     
-                    // إنشاء أيقونة النجاح
+                    // Create success icon
                     const successIcon = document.createElement('i');
                     successIcon.className = 'fas fa-check-circle text-success fs-4';
                     
-                    // تبديل الزر بأيقونة النجاح
+                    // Replace button with success icon
                     rewardStatus.innerHTML = '';
                     rewardStatus.appendChild(successIcon);
                 } else {
@@ -1711,7 +1726,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('حدث خطأ أثناء تحصيل المكافأة');
+                alert('An error occurred while collecting the reward');
                 button.disabled = false;
             });
         });
@@ -1733,11 +1748,11 @@
                     const rewardStatus = button.closest('.reward-status');
                     createFloatingCoins(button, coinsDisplay, 150);
                     
-                    // إنشاء أيقونة النجاح
+                    // Create success icon
                     const successIcon = document.createElement('i');
                     successIcon.className = 'fas fa-check-circle text-success fs-4';
                     
-                    // تبديل الزر بأيقونة النجاح
+                    // Replace button with success icon
                     rewardStatus.innerHTML = '';
                     rewardStatus.appendChild(successIcon);
                 } else {
@@ -1747,7 +1762,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('حدث خطأ أثناء تحصيل المكافأة');
+                alert('An error occurred while collecting the reward');
                 button.disabled = false;
             });
         });
@@ -1769,11 +1784,11 @@
                     const rewardStatus = button.closest('.reward-status');
                     createFloatingCoins(button, coinsDisplay, 200);
                     
-                    // إنشاء أيقونة النجاح
+                    // Create success icon
                     const successIcon = document.createElement('i');
                     successIcon.className = 'fas fa-check-circle text-success fs-4';
                     
-                    // تبديل الزر بأيقونة النجاح
+                    // Replace button with success icon
                     rewardStatus.innerHTML = '';
                     rewardStatus.appendChild(successIcon);
                 } else {
@@ -1783,22 +1798,22 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('حدث خطأ أثناء تحصيل المكافأة');
+                alert('An error occurred while collecting the reward');
                 button.disabled = false;
             });
         });
 
-        // تعديل في الكود الخاص بعرض الدولة
+        // Update country display
         document.addEventListener('DOMContentLoaded', function() {
-            // تحويل رموز الدول عند تحميل الصفحة
+            // Convert country codes on page load
             const countryDisplay = document.getElementById('country-display');
             if (countryDisplay) {
                 const countryCode = countryDisplay.textContent.trim();
                 const countries = {
-                    'eg': 'مصر',
-                    'sa': 'السعودية',
-                    'ae': 'الإمارات',
-                    'jo': 'الأردن'
+                    'eg': 'Egypt',
+                    'sa': 'Saudi Arabia',
+                    'ae': 'UAE',
+                    'jo': 'Jordan'
                 };
                 countryDisplay.textContent = countries[countryCode] || countryCode;
             }
@@ -1817,23 +1832,23 @@
                 if (data.status === 'success') {
                     if (field === 'country') {
                         const countries = {
-                            'eg': 'مصر',
-                            'sa': 'السعودية',
-                            'ae': 'الإمارات',
-                            'jo': 'الأردن'
+                            'eg': 'Egypt',
+                            'sa': 'Saudi Arabia',
+                            'ae': 'UAE',
+                            'jo': 'Jordan'
                         };
                         restoreDisplay(field, countries[value] || value, editContainer);
                     } else {
                         restoreDisplay(field, value, editContainer);
                     }
                 } else {
-                    alert(data.message || 'حدث خطأ في التحديث');
+                    alert(data.message || 'An error occurred during the update');
                     restoreDisplay(field, oldValue, editContainer);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('حدث خطأ أثناء التحديث');
+                alert('An error occurred during the update');
                 restoreDisplay(field, oldValue, editContainer);
             });
         }

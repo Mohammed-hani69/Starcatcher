@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>{{ club.club_name }} - كتالوج</title>
+    <title>{{ club.club_name }} - Catalog</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -39,17 +39,26 @@
             left: 0;
             width: 100%;
             z-index: 2000;
-            background: linear-gradient(to right, #e63946, #000000);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            padding: 10px 0;
+            background: linear-gradient(to right, #000000, #440000);
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.2);
+            padding: 15px 0;
         }
         
         .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #e63946 !important;
-            text-shadow: 0 0 8px rgba(230,57,70,0.6);
-            margin-left: 15px;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .navbar-brand img {
+            height: 80px;
+            width: auto;
+            transition: all 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .navbar-brand img {
+                height: 65px;
+            }
         }
         
         .nav-link {
@@ -378,7 +387,7 @@
         }
         
         .not-collected::after {
-            content: 'غير مجمع';
+            content: 'Not Collected';
             position: absolute;
             top: 50%;
             left: 50%;
@@ -940,16 +949,18 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('home') }}">Star Catcher</a>
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}" alt="Star Catcher">
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <div class="navbar-nav ms-auto">
-                    <a class="nav-link" href="{{ url_for('profile') }}">الملف الشخصي</a>
-                    <a class="nav-link" href="{{ url_for('myplayers') }}">لاعبيني</a>
-                    <a class="nav-link" href="{{ url_for('catalog') }}">الكتالوج</a>
-                    <a class="nav-link" href="{{ url_for('market') }}">السوق</a>
+                    <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+                    <a class="nav-link" href="{{ url_for('myplayers') }}">My Players</a>
+                    <a class="nav-link" href="{{ url_for('catalog') }}">Catalog</a>
+                    <a class="nav-link" href="{{ url_for('market') }}">Market</a>
                 </div>
             </div>
         </div>
@@ -961,7 +972,7 @@
     <!-- Main Content Container -->
     <div class="main-container">
         <!-- رسالة المساعدة -->
-        <div class="navigation-hint">اسحب الصفحة للتقليب أو استخدم الأزرار</div>
+        <div class="navigation-hint">Swipe the page to flip or use the buttons</div>
         
         <!-- Catalog Container -->
         <div id="catalog-container">
@@ -975,10 +986,10 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            السابق
+            Previous
         </button>
         <button id="next-page">
-            التالي
+            Next
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -987,23 +998,23 @@
 
     <!-- إضافة مؤشرات الصفحات القابلة للتجميع -->
     <div class="collectible-indicator right">
-        <span class="text">لاعب قابل للتجميع</span>
+        <span class="text">Collectible Player</span>
         <span class="arrow">⟶</span>
     </div>
     <div class="collectible-indicator left">
         <span class="arrow">⟵</span>
-        <span class="text">لاعب قابل للتجميع</span>
+        <span class="text">Collectible Player</span>
     </div>
 
     <!-- تحديث موضع المؤشرات في الصفحة قبل نهاية body -->
     <div class="collectible-indicators">
         <div class="collectible-indicator right">
-            <span class="text">لاعب قابل للتجميع</span>
+            <span class="text">Collectible Player</span>
             <span class="arrow">⟶</span>
         </div>
         <div class="collectible-indicator left">
             <span class="arrow">⟵</span>
-            <span class="text">لاعب قابل للتجميع</span>
+            <span class="text">Collectible Player</span>
         </div>
     </div>
     
@@ -1028,11 +1039,11 @@
                             <h1>{{ club.club_name }}</h1>
                         </div>
                         <div class="cover-details">
-                            <p>تأسس عام: {{ club.founded_year }}</p>
-                            <p>المدرب: {{ club.coach_name }}</p>
-                            <p>عدد اللاعبين: {{ total_players }}</p>
-                            <p>تم جمع: {{ collected_count }}/{{ total_players }}</p>
-                            <p>نسبة الإكتمال: {{ completion_percentage|round|int }}%</p>
+                            <p>Founded: {{ club.founded_year }}</p>
+                            <p>Coach: {{ club.coach_name }}</p>
+                            <p>Total Players: {{ total_players }}</p>
+                            <p>Collected: {{ collected_count }}/{{ total_players }}</p>
+                            <p>Completion Percentage: {{ completion_percentage|round|int }}%</p>
                         </div>
                     </div>
                 </div>
@@ -1060,7 +1071,7 @@
                 const pagePlayers = allPlayers.slice(startIdx, startIdx + playersPerPage);
                 
                 html += `<div class="page"><div class="page-content">`;
-                html += `<h3 class="section-title">تشكيلة الفريق</h3>`;
+                html += `<h3 class="section-title">Team Formation</h3>`;
                 html += `<div class="player-grid">`;
                 
                 pagePlayers.forEach(player => {
@@ -1077,7 +1088,7 @@
                                                  </button>
                                                </div>`
                                             : `<span class="locked-icon">🔒</span>
-                                               <span class="locked-text">اجمع اللاعب لرؤية صورته</span>`
+                                               <span class="locked-text">Collect the player to see their image</span>`
                                          }
                                        </div>`
                                 }
@@ -1098,14 +1109,14 @@
                         <div class="player-spot empty-spot fade-effect">
                             <div class="empty-spot-info">
                                 <span class="locked-icon">➕</span>
-                                <span class="locked-text">مكان فارغ</span>
+                                <span class="locked-text">Empty Spot</span>
                             </div>
                         </div>
                     `;
                 }
                 
                 html += `</div>`;
-                html += `<div class="page-number">صفحة ${i + 1}</div>`;
+                html += `<div class="page-number">Page ${i + 1}</div>`;
                 html += `</div></div>`;
             }
             
@@ -1291,7 +1302,7 @@
                         }
                     },
                     error: function(xhr) {
-                        alert(xhr.responseJSON?.message || 'حدث خطأ أثناء تجميع اللاعب');
+                        alert(xhr.responseJSON?.message || 'An error occurred while collecting the player');
                     }
                 });
             });
@@ -1472,18 +1483,18 @@
                         playerSpot.removeClass('not-collected');
         
                         // Update collected count in cover
-                        const collectedCount = parseInt($('.cover-details p:contains("تم جمع")').text().split(':')[1]);
-                        $('.cover-details p:contains("تم جمع")').text(`تم جمع: ${collectedCount + 1}/{{ total_players }}`);
+                        const collectedCount = parseInt($('.cover-details p:contains("Collected")').text().split(':')[1]);
+                        $('.cover-details p:contains("Collected")').text(`Collected: ${collectedCount + 1}/{{ total_players }}`);
         
                         // Update completion percentage
                         const newPercentage = Math.round(((collectedCount + 1) / {{ total_players }}) * 100);
-                        $('.cover-details p:contains("نسبة")').text(`نسبة الإكتمال: ${newPercentage}%`);
+                        $('.cover-details p:contains("Completion Percentage")').text(`Completion Percentage: ${newPercentage}%`);
                     } else {
                         alert(response.message);
                     }
                 },
                 error: function(xhr) {
-                    alert(xhr.responseJSON?.message || 'حدث خطأ أثناء تجميع اللاعب');
+                    alert(xhr.responseJSON?.message || 'An error occurred while collecting the player');
                 }
             });
         });

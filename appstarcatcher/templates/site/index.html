@@ -40,10 +40,26 @@
             text-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
             transition: all 0.3s ease;
             padding-left: 20px;
+            display: flex;
+            align-items: center;
         }
-        
-        .navbar-brand:hover {
-            transform: scale(1.05);
+
+        .navbar-brand img {
+            height: 70px;
+            width: auto;
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand img {
+                height: 80px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-brand img {
+                height: 65px;
+            }
         }
         
         .nav-link {
@@ -1500,7 +1516,9 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('home') }}">Star Catcher</a>
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}" alt="Star Catcher">
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
