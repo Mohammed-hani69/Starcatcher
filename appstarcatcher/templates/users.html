@@ -530,7 +530,7 @@
             .main-content {
                 margin-right: 0;
                 width: 100%;
-                padding: 15px;
+                padding: 10px;
             }
 
             .search-box input {
@@ -546,76 +546,146 @@
             }
 
             .filter-section {
+                flex-direction: column;
+                padding: 15px;
                 gap: 10px;
             }
 
             .filter-section input,
             .filter-section select {
                 width: 100%;
-                min-width: 100%;
+                margin-bottom: 10px;
             }
 
-            /* Responsive Table */
+            /* تحسين عرض الجدول على الموبايل */
             .users-table {
+                border: 0;
                 display: block;
-                overflow-x: auto;
-                white-space: nowrap;
             }
 
-            .users-table th,
-            .users-table td {
-                padding: 12px 15px;
-            }
-
-            /* Mobile Menu Toggle */
-            .mobile-menu-toggle {
-                display: block;
-                position: fixed;
-                top: 15px;
-                right: 15px;
-                z-index: 1000;
-                background: #ff3e3e;
-                color: white;
-                padding: 10px;
-                border-radius: 5px;
-                cursor: pointer;
-            }
-
-            .header-title {
-                margin-right: 50px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header-actions {
-                justify-content: flex-end;
-            }
-
-            .search-box {
-                position: fixed;
-                top: 70px;
-                left: 0;
-                right: 0;
-                padding: 10px;
-                background: #1e1e1e;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            .users-table thead {
                 display: none;
             }
 
-            .search-box.active {
+            .users-table tbody tr {
                 display: block;
+                margin-bottom: 1rem;
+                background: #1e1e1e;
+                border-radius: 8px;
+                padding: 15px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            .users-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 0;
+                border-bottom: 1px solid #333;
+            }
+
+            .users-table td::before {
+                content: attr(data-label);
+                font-weight: bold;
+                margin-left: 10px;
+            }
+
+            .users-table td:last-child {
+                border-bottom: 0;
+            }
+
+            /* تحسين عناصر التحكم على الموبايل */
+            .coins-control {
+                justify-content: flex-end;
+                gap: 15px;
+            }
+
+            .coin-btn {
+                width: 35px;
+                height: 35px;
+            }
+
+            .user-controls {
+                justify-content: flex-end;
+                gap: 12px;
+            }
+
+            .status-btn, 
+            .delete-btn {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+
+            /* تحسين شكل التوجلز على الموبايل */
+            .toggle-switch {
+                transform: scale(1.2);
+                margin: 5px 0;
+            }
+
+            /* تحسين البحث على الموبايل */
+            .search-box {
+                width: 100%;
+                margin: 10px 0;
             }
 
             .search-box input {
                 width: 100%;
+                padding: 12px 40px 12px 15px;
             }
 
-            .mobile-search-toggle {
-                display: block;
-                margin-left: 15px;
-                color: #fff;
-                cursor: pointer;
+            body {
+                font-size: 14px;
             }
+
+            .header-title {
+                font-size: 20px;
+            }
+
+            .status-badge {
+                font-size: 11px;
+                padding: 4px 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                flex-direction: column;
+                height: auto;
+                padding: 10px;
+            }
+
+            .header-title {
+                margin-bottom: 10px;
+                margin-right: 0;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .user-info {
+                margin-top: 10px;
+            }
+
+            /* تحسين الفلترة على الشاشات الصغيرة جداً */
+            .filter-section {
+                gap: 8px;
+            }
+        }
+
+        /* تحسينات إضافية للقراءة */
+        .users-table td[data-label]::before {
+            min-width: 120px;
+            color: #999;
+        }
+
+        /* تحسين تجربة المستخدم عند التفاعل */
+        .nav-item:active,
+        .coin-btn:active,
+        .status-btn:active,
+        .delete-btn:active {
+            transform: scale(0.95);
         }
 
         /* Dark mode optimization */
@@ -805,11 +875,11 @@
             <tbody>
                 {% for user_data in users %}
                 <tr data-user-id="{{ user_data.user.id }}" class="{% if not user_data.user.is_active %}inactive-user{% endif %}">
-                    <td>{{ user_data.user.id }}</td>
-                    <td>{{ user_data.user.username }}</td>
-                    <td>{{ user_data.user.email }}</td>
-                    <td>{{ user_data.user.phone or 'غير متوفر' }}</td>
-                    <td>
+                    <td data-label="الرقم التعريفي">{{ user_data.user.id }}</td>
+                    <td data-label="اسم المستخدم">{{ user_data.user.username }}</td>
+                    <td data-label="البريد الإلكتروني">{{ user_data.user.email }}</td>
+                    <td data-label="رقم الهاتف">{{ user_data.user.phone or 'غير متوفر' }}</td>
+                    <td data-label="الدولة">
                         {% if user_data.user.country == 'eg' %}
                             مصر
                         {% elif user_data.user.country == 'sa' %}
@@ -822,16 +892,16 @@
                             {{ user_data.user.country or 'غير متوفر' }}
                         {% endif %}
                     </td>
-                    <td>{{ user_data.user.state or 'غير متوفر' }}</td>
-                    <td>{{ user_data.user.city or 'غير متوفر' }}</td>
-                    <td>
+                    <td data-label="المحافظة">{{ user_data.user.state or 'غير متوفر' }}</td>
+                    <td data-label="المدينة">{{ user_data.user.city or 'غير متوفر' }}</td>
+                    <td data-label="العملات">
                         <div class="coins-control">
                             <button onclick="updateCoins('{{ user_data.user.id }}', -50)" class="coin-btn decrease">-</button>
                             <span class="coins-value" onclick="makeEditable(this, '{{ user_data.user.id }}')" data-user-id="{{ user_data.user.id }}">{{ user_data.user.coins }}</span>
                             <button onclick="updateCoins('{{ user_data.user.id }}', 50)" class="coin-btn increase">+</button>
                         </div>
                     </td>
-                    <td>
+                    <td data-label="الحالة">
                         {% if user_data.user.is_admin %}
                             <span class="status-badge status-admin">مدير</span>
                         {% endif %}
@@ -842,7 +912,7 @@
                             <span class="status-badge status-gold">ذهبي</span>
                         {% endif %}
                     </td>
-                    <td>
+                    <td data-label="الاشتراك">
                         {% if user_data.subscription_info %}
                             <div class="subscription-info">
                                 <span class="status-badge status-subscribed">{{ user_data.subscription_info.package_type }}</span>
@@ -852,16 +922,16 @@
                             <span class="status-badge status-no-subscription">غير مشترك</span>
                         {% endif %}
                     </td>
-                    <td>
+                    <td data-label="الترتيب">
                         <span class="rank-badge {% if user_data.user.is_admin %}rank-badge-admin{% endif %}">
                             #{{ user_data.rank }}
                         </span>
                     </td>
-                    <td>{{ user_data.player_count }}</td>
-                    <td>{{ user_data.user.created_at.strftime('%Y-%m-%d') }}</td>
-                    <td>{{ user_data.user.last_login.strftime('%Y-%m-%d %H:%M') if user_data.user.last_login else 'لم يسجل دخول' }}</td>
+                    <td data-label="عدد اللاعبين">{{ user_data.player_count }}</td>
+                    <td data-label="تاريخ التسجيل">{{ user_data.user.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td data-label="آخر دخول">{{ user_data.user.last_login.strftime('%Y-%m-%d %H:%M') if user_data.user.last_login else 'لم يسجل دخول' }}</td>
                     {% if current_user.is_admin%}
-                    <td>
+                    <td data-label="إدارة المستخدم">
                         <div class="user-controls">
                             <button onclick="toggleUserStatus('{{ user_data.user.id }}', {{ user_data.user.is_active|tojson }})"
                                     class="status-btn {% if user_data.user.is_active %}active{% else %}inactive{% endif %}"
@@ -875,7 +945,7 @@
                             </button>
                         </div>
                     </td>
-                    <td class="admin-toggle-cell">
+                    <td data-label="صلاحيات الأدمن" class="admin-toggle-cell">
                         <label class="toggle-switch">
                             <input type="checkbox" 
                                    {% if user_data.user.is_admin %}checked{% endif %}
@@ -884,7 +954,7 @@
                             <span class="toggle-slider"></span>
                         </label>
                     </td>
-                    <td class="permission-toggle-cell">
+                    <td data-label="إدارة الرئيسيه" class="permission-toggle-cell">
                         <label class="toggle-switch">
                             <input type="checkbox" 
                                    {% if user_data.user.can_manage_dashboard %}checked{% endif %}
@@ -893,7 +963,7 @@
                             <span class="toggle-slider"></span>
                         </label>
                     </td>
-                    <td class="permission-toggle-cell">
+                    <td data-label="إدارة المستخدمين" class="permission-toggle-cell">
                         <label class="toggle-switch">
                             <input type="checkbox" 
                                    {% if user_data.user.can_manage_users %}checked{% endif %}
@@ -902,7 +972,7 @@
                             <span class="toggle-slider"></span>
                         </label>
                     </td>
-                    <td class="permission-toggle-cell">
+                    <td data-label="إدارة اللاعبين" class="permission-toggle-cell">
                         <label class="toggle-switch">
                             <input type="checkbox" 
                                    {% if user_data.user.can_manage_players %}checked{% endif %}
@@ -911,7 +981,7 @@
                             <span class="toggle-slider"></span>
                         </label>
                     </td>
-                    <td class="permission-toggle-cell">
+                    <td data-label="إدارة الأندية" class="permission-toggle-cell">
                         <label class="toggle-switch">
                             <input type="checkbox" 
                                    {% if user_data.user.can_manage_clubs %}checked{% endif %}
@@ -920,7 +990,7 @@
                             <span class="toggle-slider"></span>
                         </label>
                     </td>
-                    <td class="permission-toggle-cell">
+                    <td data-label="إدارة الباكجات" class="permission-toggle-cell">
                         <label class="toggle-switch">
                             <input type="checkbox" 
                                    {% if user_data.user.can_manage_packs %}checked{% endif %}
@@ -929,7 +999,7 @@
                             <span class="toggle-slider"></span>
                         </label>
                     </td>
-                    <td class="permission-toggle-cell">
+                    <td data-label="إدارة السوق" class="permission-toggle-cell">
                         <label class="toggle-switch">
                             <input type="checkbox" 
                                    {% if user_data.user.can_manage_market %}checked{% endif %}
@@ -938,7 +1008,7 @@
                             <span class="toggle-slider"></span>
                         </label>
                     </td>
-                    <td class="permission-toggle-cell">
+                    <td data-label="إدارة الاشتراكات" class="permission-toggle-cell">
                         <label class="toggle-switch">
                             <input type="checkbox" 
                                    {% if user_data.user.can_manage_subscriptions %}checked{% endif %}
@@ -947,7 +1017,7 @@
                             <span class="toggle-slider"></span>
                         </label>
                     </td>
-                    <td class="permission-toggle-cell">
+                    <td data-label="إدارة العروض" class="permission-toggle-cell">
                         <label class="toggle-switch">
                             <input type="checkbox" 
                                    {% if user_data.user.can_manage_promotions %}checked{% endif %}
@@ -1302,6 +1372,38 @@
                 showNotification(error.message || 'حدث خطأ أثناء حذف المستخدم', 'error');
             }
         }
+
+        // إضافة مستمع أحداث عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+
+            // تحريك القائمة الجانبية
+            mobileMenuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                this.classList.toggle('active');
+            });
+
+            // إغلاق القائمة عند النقر خارجها
+            document.addEventListener('click', function(event) {
+                const isClickInside = sidebar.contains(event.target) || 
+                                    mobileMenuToggle.contains(event.target);
+                
+                if (!isClickInside && sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                    mobileMenuToggle.classList.remove('active');
+                }
+            });
+
+            // إغلاق القائمة عند تغيير حجم النافذة
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('active');
+                    mobileMenuToggle.classList.remove('active');
+                }
+            });
+        });
     </script>
 </body>
 </html>

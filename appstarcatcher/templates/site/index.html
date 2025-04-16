@@ -631,8 +631,80 @@
             border-radius: 15px;
         }
         
+        /* Pack Opening Modal Player Cards */
+        #players-reveal .player-card,
+        #daily-players-reveal .player-card {
+            background: linear-gradient(to bottom, var(--dark-gray), var(--black));
+            border-radius: 15px;
+            padding: 15px;
+            margin: 8px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            width: calc(33.33% - 16px);
+        }
+
+        #players-reveal .player-image-container,
+        #daily-players-reveal .player-image-container {
+            width: 100%;
+            height: 0;
+            padding-bottom: 100%;
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        #players-reveal .player-image-container img,
+        #daily-players-reveal .player-image-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .modal-dialog.modal-lg {
+                max-width: 95%;
+                margin: 10px auto;
+            }
+
+            #players-reveal .player-card,
+            #daily-players-reveal .player-card {
+                width: calc(50% - 16px);
+                padding: 10px;
+            }
+
+            #players-reveal .player-name,
+            #daily-players-reveal .player-name {
+                font-size: 0.9rem;
+            }
+
+            #players-reveal .player-rating,
+            #daily-players-reveal .player-rating {
+                font-size: 0.8rem;
+                padding: 2px 8px;
+            }
+
+            #players-reveal .player-details,
+            #daily-players-reveal .player-details {
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #players-reveal .player-card,
+            #daily-players-reveal .player-card {
+                margin: 4px;
+                width: calc(50% - 8px);
+            }
+        }
+
         .player-card {
-            background: linear-gradient(to bottom, var(--dark-gray), var (--black));
+            background: linear-gradient(to bottom, var(--dark-gray), var(--black));
             border-radius: 15px;
             padding: 20px;
             margin: 15px;
@@ -2269,14 +2341,24 @@
         // دالة موحدة لعرض اللاعبين
         function displayPlayers(players, container, onComplete) {
             container.innerHTML = '';
-            playPackOpenSound(); // تشغيل الصوت عند بدء عرض اللاعبين
+            playPackOpenSound();
             
             players.forEach((player, index) => {
                 setTimeout(() => {
                     const playerCard = document.createElement('div');
                     playerCard.className = 'player-card animate__animated animate__flipInY';
+                    
+                    // تصحيح مسار الصورة
+                    const imgSrc = player.image_url ? `/static/uploads/image_player/${player.image_url}` : '/static/image/STAR CATCHER FINAL LOGO-11.png';
+                    const defaultImage = '/static/image/STAR CATCHER FINAL LOGO-11.png';
+                    
                     playerCard.innerHTML = `
-                        <img src="${player.image_url}" alt="${player.name}" onerror="this.src='/static/images/default-player.png'">
+                        <div class="player-image-container">
+                            <img src="${imgSrc}" 
+                                 alt="${player.name}"
+                                 onerror="this.onerror=null; this.src='${defaultImage}'"
+                                 loading="lazy">
+                        </div>
                         <h4 class="player-name">${player.name}</h4>
                         <span class="player-rating">${player.rating}</span>
                         <div class="player-details mt-2">
