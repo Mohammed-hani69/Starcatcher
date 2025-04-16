@@ -1153,11 +1153,13 @@
             <div class="col-xl-3 col-lg-4 col-md-6 mb-3">
                 <div class="card h-100" data-listing-id="{{ item.listing_id }}">
                     <div class="card-img-wrapper">
-                        {% set image_url = item.player.image_url if item.player.image_url else 'default_player.png' %}
-                        <img src="{{ url_for('static', filename='uploads/image_player/' ~ image_url) }}" 
-                             class="card-img-top" 
-                             alt="{{ item.player.name }}" 
-                             onerror="this.src='{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}'">
+                        {% if item.player.image_url %}
+                        <img src="{{ url_for('static', filename='uploads/image_player/' ~ item.player.image_url) }}" class="card-img-top" alt="{{ item.player.name }}">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='img/placeholder.png') }}" class="card-img-top" alt="No Image">
+                        {% endif %}
+                        
+                        
                         
                         <!-- Rating Badge -->
                         <div class="rating-badge">{{ item.player.rating }}</div>
@@ -1188,12 +1190,10 @@
                         </div>
                         
                         <div class="club-info">
-                            {% set club_logo = item.club.club_image_url if item.club and item.club.club_image_url else 'default_club.png' %}
-                            <img src="{{ url_for('static', filename='uploads/clubs/' ~ club_logo) }}" 
-                                 class="club-logo" 
-                                 alt="{{ item.club.club_name if item.club else 'Unknown Club' }}" 
-                                 onerror="this.src='{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}'">
-                            <span>{{ item.club.club_name if item.club else 'Unknown Club' }}</span>
+                            {% if item.club.club_image_url %}
+                            <img src="{{ url_for('static', filename='uploads/clubs/' ~ item.club.club_image_url) }}" alt="Club Logo" class="club-logo">
+                            {% endif %}
+                            <span>{{ item.club.club_name }}</span>
                         </div>
                         
                         <button class="buy-button" onclick="buyPlayer({{ item.listing_id }}, {{ item.price }})">

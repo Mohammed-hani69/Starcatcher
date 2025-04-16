@@ -1046,7 +1046,7 @@
                     <div class="cover-content">
                         <div></div>
                         <div class="club-info">
-                            <img src="{{ url_for('static', filename='uploads/clubs/' + (club.club_image_url if club.club_image_url else 'default_club_logo.png')) }}" class="club-logo" alt="{{ club.club_name }}">
+                            <img src="{{ url_for('static', filename='uploads/clubs/' + club.club_image_url) }}" class="club-logo" alt="{{ club.club_name }}">
                             <h1>{{ club.club_name }}</h1>
                         </div>
                         <div class="cover-details">
@@ -1087,26 +1087,28 @@
                 
                 pagePlayers.forEach(player => {
                     html += `
-                        <div class="player-card {% if player.is_collected %}collected{% endif %}" data-player-id="{{ player.id }}">
-                            <div class="player-image">
-                                {% set image_url = player.image_url if player.is_collected and player.image_url else 'default_player.png' %}
-                                <img src="{{ url_for('static', filename='uploads/image_player/' + image_url) }}" 
-                                     alt="{{ player.name }}"
-                                     onerror="this.src='{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}'">
+                        <div class="player-spot ${!player.is_collected ? 'not-collected' : ''}" data-player-id="${player.id}">
+                            <div class="player-image-container">
+                                ${player.is_collected && player.image_url 
+                                    ? `<img src="{{ url_for('static', filename='uploads/image_player/') }}${player.image_url}" alt="${player.name}" class="zoom-effect">`
+                                    : `<div class="empty-spot-info fade-effect">
+                                         ${player.is_collectible 
+                                            ? `<div class="collect-btn-container">
+                                                 <button class="collect-btn" data-player-id="${player.id}" data-user-player-id="${player.user_player_id}">
+                                                   +
+                                                 </button>
+                                               </div>`
+                                            : `<span class="locked-icon">🔒</span>
+                                               <span class="locked-text">Collect the player to see their image</span>`
+                                         }
+                                       </div>`
+                                }
                             </div>
-                            <div class="player-info">
-                                <h3>{{ player.name }}</h3>
-                                <div class="player-stats">
-                                    <span class="rating">{{ player.rating }}</span>
-                                    <span class="position">{{ player.position }}</span>
-                                    <span class="rarity {{ player.rarity }}">{{ player.rarity }}</span>
-                                </div>
+                            <div class="player-details flip-effect">
+                                <span class="name">${player.name}</span>
+                                <span class="rating">${player.rating}</span>
+                                <span class="position">${player.position}</span>
                             </div>
-                            {% if player.is_collectible and not player.is_collected %}
-                            <button class="collect-btn" onclick="collectPlayer({{ player.id }}, {{ player.user_player_id }})">
-                                <i class="fas fa-plus"></i> Add to Collection
-                            </button>
-                            {% endif %}
                         </div>
                     `;
                 });
