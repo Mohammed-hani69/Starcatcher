@@ -2071,14 +2071,49 @@ def recharge_wallet():
 def myplayers():
     try:
         # تصحيح استعلام قاعدة البيانات باستخدام select_from وjoin بشكل صحيح
-        user_players = db.session.query(UserPlayer, Player.name, Player.rating, Player.position, Player.image_url, Player.rarity, Player.nationality, ClubDetail.club_name, ClubDetail.club_image_url).select_from(UserPlayer).join(Player, (UserPlayer.player_id == Player.id)).join(ClubDetail, (Player.club_id == ClubDetail.club_id)).filter(UserPlayer.user_id == current_user.id).all()
+        user_players = db.session.query(
+            UserPlayer, 
+            Player.name, 
+            Player.rating, 
+            Player.position, 
+            Player.image_url, 
+            Player.rarity, 
+            Player.nationality, 
+            ClubDetail.club_name, 
+            ClubDetail.club_image_url
+        ).select_from(UserPlayer).join(
+            Player, UserPlayer.player_id == Player.id
+        ).outerjoin(  # Change to outer join to handle cases where club might be None
+            ClubDetail, Player.club_id == ClubDetail.club_id
+        ).filter(UserPlayer.user_id == current_user.id).all()
+
         # حساب الأسعار المقترحة حسب الندرة
-        price_ranges = {'common': (20, 50), 'rare': (51, 100), 'epic': (101, 150), 'legendary': (151, 200)}
+        price_ranges = {
+            'common': (20, 50),
+            'rare': (51, 100),
+            'epic': (101, 150),
+            'legendary': (151, 200)
+        }
         players_data = []
-        for (user_player, name, rating, position, image_url, rarity, nationality, club_name, club_logo) in user_players:
-            (min_price, max_price) = price_ranges.get(rarity, (20, 50))
-            suggested_price = int((rating * (max_price / 100)))
-            players_data.append({'id': user_player.id, 'player_id': user_player.player_id, 'name': name, 'rating': rating, 'position': position, 'image_url': image_url, 'rarity': rarity, 'nationality': nationality, 'club_name': club_name, 'club_logo': club_logo, 'suggested_price': suggested_price, 'sale_code': user_player.sale_code})
+        
+        for user_player, name, rating, position, image_url, rarity, nationality, club_name, club_logo in user_players:
+            min_price, max_price = price_ranges.get(rarity, (20, 50))
+            suggested_price = int(rating * (max_price / 100))
+            players_data.append({
+                'id': user_player.id,
+                'player_id': user_player.player_id,
+                'name': name or "Unknown Player",
+                'rating': rating or 0,
+                'position': position or "Unknown",
+                'image_url': image_url or 'default_player.png',
+                'rarity': rarity or "common",
+                'nationality': nationality or "Unknown",
+                'club_name': club_name or "Unknown Club",
+                'club_logo': club_logo or 'default_club.png',
+                'suggested_price': suggested_price,
+                'sale_code': user_player.sale_code
+            })
+        
         return render_template('site/myplayers.html', players=players_data, user=current_user)
     except Exception as e:
         app.logger.error(f"Error in myplayers route: {str(e)}")

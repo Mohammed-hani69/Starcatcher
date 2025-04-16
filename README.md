@@ -79,7 +79,7 @@ git push -f origin main
 4. For future changes:
 ```bash
 git add .
-git commit -m "update to v 2.3.0"
+git commit -m "update to v 2.3.1"
 git push origin main
 ```
 

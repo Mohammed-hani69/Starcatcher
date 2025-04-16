@@ -604,7 +604,8 @@
                  data-rarity="{{ player.rarity }}" 
                  onclick="showPlayerModal(this)">
                 <div class="player-image-container">
-                    <img src="{{ url_for('static', filename='uploads/image_player/' + player.image_url) }}"
+                    {% set image_url = player.image_url if player.image_url else 'default_player.png' %}
+                    <img src="{{ url_for('static', filename='uploads/image_player/' + image_url) }}"
                          class="player-image" 
                          alt="{{ player.name }}"
                          onerror="this.src='{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}'">
@@ -620,7 +621,11 @@
                         <span><i class="fas fa-flag me-2"></i>{{ player.nationality }}</span>
                     </div>
                     <div class="club-info">
-                        <img src="{{ url_for('static', filename='uploads/clubs/' + player.club_logo) }}" class="club-logo" alt="{{ player.club_name }}">
+                        {% set club_logo = player.club_logo if player.club_logo else 'default_club.png' %}
+                        <img src="{{ url_for('static', filename='uploads/clubs/' + club_logo) }}" 
+                             class="club-logo" 
+                             alt="{{ player.club_name }}"
+                             onerror="this.src='{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}'">
                         <span>{{ player.club_name }}</span>
                     </div>
                 </div>
