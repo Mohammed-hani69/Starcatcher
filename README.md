@@ -79,8 +79,42 @@ git push -f origin main
 4. For future changes:
 ```bash
 git add .
-git commit -m "update to v 2.2.10"
+git commit -m "update to v 2.3.0"
 git push origin main
+```
+
+## Server Deployment & Updates
+
+To access and update the server:
+
+1. SSH into the server:
+```bash
+ssh root@95.216.63.94
+```
+
+2. Enter the password when prompted:
+```
+bHBy3XsSy687
+```
+
+3. Navigate to the project directory:
+```bash
+cd Starcatcher
+```
+
+4. Activate the virtual environment:
+```bash
+source venv/bin/activate
+```
+
+5. If this is your first time, clone the repository:
+```bash
+git clone https://github.com/Mohammed-hani69/Starcatcher.git
+```
+
+6. Pull the latest changes:
+```bash
+git pull origin main
 ```
 
 ## License
