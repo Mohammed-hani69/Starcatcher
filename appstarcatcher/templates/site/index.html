@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Star Catcher</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sigmar+One&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -301,6 +302,9 @@
         
         .pack-card {
             background: linear-gradient(145deg, var(--dark-gray), var(--black));
+            padding: 20px;
+            background-origin: padding-box;
+            background-clip: padding-box;
             border: 1px solid var(--light-gray);
             border-radius: 15px;
             overflow: hidden;
@@ -308,17 +312,91 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             height: 100%;
             position: relative;
+            min-height: 580px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            align-items: flex-end;
+            transition: transform 0.3s ease;
+            transform-style: preserve-3d;
+            perspective: 1000px;
         }
-        
-        .pack-card::before {
-            content: '';
+
+        @import url('https://fonts.googleapis.com/css2?family=Sigmar+One&display=swap'); /* خط عريض وغريب */
+
+        .pack-name {
+            font-family: 'Sigmar One', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            text-align: center;
+            color: #FF6B00; /* برتقالي */
+            margin-bottom: 20px;
+            position: absolute;
+            bottom: 470px;
+            left: 50%;
+            transform: translateX(-50%) translateY(0) translateZ(30px);
+            z-index: 5;
+            text-transform: uppercase;
+            text-shadow: 
+                2px 2px 0 #FF0000,
+                2px 2px 0 #FF0000,
+                2px 2px 0 #FF0000,
+                2px 2px 0 #FF0000,
+                4px 4px 0 #CC0000,
+                4px 4px 0 #CC0000,
+                4px 4px 0 #CC0000,
+                4px 4px 0 #CC0000,
+                6px 6px 0 #990000,
+                6px 6px 0 #990000,
+                6px 6px 0 #990000,
+                6px 6px 0 #990000,
+                8px 8px 10px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+
+        .pack-name:hover {
+            transform: translateX(-50%) translateY(-5px) translateZ(50px);
+            text-shadow: 
+                3px 3px 0 #FF0000,
+                6px 6px 0 #CC0000,
+                9px 9px 0 #990000,
+                12px 12px 15px rgba(0, 0, 0, 0.7);
+        }
+
+        .pack-card:hover .pack-name,
+        .pack-card:hover .pack-price,
+        .pack-card:hover .pack-btn {
+            transform: perspective(1000px) translateZ(30px);
+        }
+
+        .pack-card .overlay {
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, transparent 50%);
+            right: 0;
+            bottom: 0;
+            
             z-index: 1;
+        }
+
+        .pack-card .card-body {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            padding: 20px;
+            background: transparent;
+        }
+
+        .pack-card:hover .overlay {
+            background: linear-gradient(
+                to bottom,
+                rgba(0, 0, 0, 0.3) 0%,
+                rgba(0, 0, 0, 0.7) 50%,
+                rgba(0, 0, 0, 0.95) 100%
+            );
         }
         
         .pack-card:hover {
@@ -327,32 +405,22 @@
             border-color: var(--primary-red);
         }
         
-        .pack-card .card-header {
-            padding: 15px;
-            text-align: center;
-            background-color: var(--black);
-            border-bottom: 2px solid var(--primary-red);
-        }
-        
         .pack-card .card-body {
             position: relative;
             z-index: 2;
+            width: 100%;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            height: calc(100% - 60px);
+            background: linear-gradient(
+                to top,
+                rgba(0, 0, 0, 0.9) 0%,
+                rgba(0, 0, 0, 0.7) 50%,
+                transparent 100%
+            );
         }
         
         .pack-info {
-            flex-grow: 1;
-            margin-bottom: 20px;
-        }
-        
-        .pack-name {
-            font-size: 1.5rem;
-            font-weight: 700;
+            text-align: center;
             margin-bottom: 15px;
-            color: var(--text-light);
         }
         
         .pack-detail {
@@ -361,61 +429,76 @@
             display: flex;
             align-items: center;
             color: #adb5bd;
-        }
-        
-        .pack-detail i {
-            margin-left: 10px;
-            color: var(--primary-red);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 15px;
+            border-radius: 20px;
         }
         
         .pack-price {
             display: inline-block;
-            background: transparent;
+            background: linear-gradient(145deg, rgba(255, 193, 7, 0.2), rgba(255, 193, 7, 0.1));
             color: var(--accent-gold);
-            padding: 12px 30px;
+            padding: 12px 25px;
             border-radius: 50px;
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: 700;
+            border: 1px solid rgba(255, 193, 7, 0.3);
             transition: all 0.3s ease;
-        }
-
-        .pack-price small {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            margin-right: 5px;
-            color: var(--accent-gold);
+            transform-style: preserve-3d;
+            transform: perspective(1000px) translateZ(10px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.2),
+                        inset 0 2px 5px rgba(255, 255, 255, 0.1);
         }
 
         .pack-price:hover {
-            transform: translateY(-2px);
+            transform: perspective(1000px) translateZ(20px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 193, 7, 0.3),
+                        inset 0 2px 5px rgba(255, 255, 255, 0.2);
         }
 
-        .pack-price i {
-            color: var(--accent-gold);
-            margin-left: 5px;
-        }
-
-        .premium-price {
-            color: var (--accent-gold);
-        }
-        
         .pack-btn {
-            padding: 10px 20px;
-            font-weight: 600;
+            padding: 12px 25px;
+            font-weight: 700;
+            font-size: 1.1rem;
             border-radius: 50px;
             border: none;
-            background-color: var(--primary-red);
+            background: linear-gradient(145deg, var(--primary-red), var(--dark-red));
             color: white;
             transition: all 0.3s ease;
             width: 100%;
+            transform-style: preserve-3d;
+            transform: perspective(1000px) translateZ(15px);
+            box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3),
+                        inset 0 2px 5px rgba(255, 255, 255, 0.1);
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        
+
+        .pack-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), transparent);
+            border-radius: 50px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
         .pack-btn:hover {
-            background-color: var(--dark-red);
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
+            background: linear-gradient(145deg, var(--dark-red), var(--primary-red));
+            transform: perspective(1000px) translateZ(25px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(229, 9, 20, 0.4),
+                        inset 0 2px 5px rgba(255, 255, 255, 0.2);
         }
-        
+
+        .pack-btn:hover::before {
+            opacity: 1;
+        }
+
         /* Daily Pack */
         .daily-pack-card {
             background: linear-gradient(to bottom right, var(--black), var(--dark-gray));
@@ -1159,7 +1242,7 @@
             border-radius: 20px;
             color: white;
             font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             text-transform: uppercase;
             animation: neonGlow 1.5s ease-in-out infinite alternate;
         }
@@ -1878,12 +1961,13 @@
                             data.packs.forEach(pack => {
                                 const packHtml = `
                                     <div class="col-md-4 mb-4">
-                                        <div class="pack-card">
+                                        <div class="pack-card" style="background-image: url('/static/uploads/packs/${pack.image_url}')">
+                                            <div class="overlay"></div>
                                             <div class="card-body">
                                                 <div class="pack-info">
                                                     <h4 class="pack-name">${pack.name}</h4>
                                                     <div class="pack-detail">
-                                                        <i class="fas fa-users"></i>
+                                                        <i class="fas fa-users me-2"></i>
                                                         ${pack.player_count} Players
                                                     </div>
                                                     <span class="pack-price">
