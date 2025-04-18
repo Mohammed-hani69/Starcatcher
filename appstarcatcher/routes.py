@@ -2755,3 +2755,14 @@ def delete_user(user_id):
             'success': False,
             'message': f'حدث خطأ أثناء حذف المستخدم: {str(e)}'
         }), 500
+
+@app.route('/coming-soon')
+def coming_soon():
+    target_date = datetime(2025, 6, 15)
+    user = {
+        'is_authenticated': current_user.is_authenticated,
+        'coins': current_user.coins if current_user.is_authenticated else 0
+    }
+    return render_template('site/coming-soon.html', 
+                         target_date=target_date,
+                         user=user)

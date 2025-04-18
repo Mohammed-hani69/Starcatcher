@@ -1129,16 +1129,51 @@
                     <div id="amountSelectionView">
                         <h6 class="text-center mb-4">Select the amount of coins you want to recharge</h6>
                         <div class="row g-3 mb-3">
-                            {% for option in wallet_options %}
-                            <div class="col-6">
-                                <div class="payment-option" data-amount="{{ option.amount }}" data-price="{{ option.price }}">
-                                    <div class="text-warning mb-2">
-                                        <i class="fas fa-coins"></i> {{ option.amount }} Coins
+                            {% if user.country == 'eg' or user.country == 'Egypt' %}
+                                {% for option in wallet_options %}
+                                <div class="col-6">
+                                    <div class="payment-option" data-amount="{{ option.amount }}" data-price="{{ option.price }}">
+                                        <div class="text-warning mb-2">
+                                            <i class="fas fa-coins"></i> {{ option.amount }} Coins
+                                        </div>
+                                        <div class="fw-bold">{{ option.price }} EGP</div>
                                     </div>
-                                    <div class="fw-bold">{{ option.price }} EGP</div>
                                 </div>
-                            </div>
-                            {% endfor %}
+                                {% endfor %}
+                            {% else %}
+                                <div class="col-6">
+                                    <div class="payment-option" data-amount="100" data-price="3">
+                                        <div class="text-warning mb-2">
+                                            <i class="fas fa-coins"></i> 100 Coins
+                                        </div>
+                                        <div class="fw-bold">$3 USD</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="payment-option" data-amount="250" data-price="6">
+                                        <div class="text-warning mb-2">
+                                            <i class="fas fa-coins"></i> 250 Coins
+                                        </div>
+                                        <div class="fw-bold">$6 USD</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="payment-option" data-amount="750" data-price="10">
+                                        <div class="text-warning mb-2">
+                                            <i class="fas fa-coins"></i> 750 Coins
+                                        </div>
+                                        <div class="fw-bold">$10 USD</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="payment-option" data-amount="1000" data-price="14">
+                                        <div class="text-warning mb-2">
+                                            <i class="fas fa-coins"></i> 1000 Coins
+                                        </div>
+                                        <div class="fw-bold">$14 USD</div>
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="text-center mt-4">
                             <button id="continueToPaymentBtn" class="custom-btn btn-red" disabled>
@@ -1152,7 +1187,14 @@
                         
                         <div class="d-flex justify-content-between align-items-center p-3 mb-4 rounded" style="background: rgba(255,255,255,0.05);">
                             <div>Required Amount:</div>
-                            <div class="fw-bold"><span id="selectedPriceDisplay">0</span> EGP</div>
+                            <div class="fw-bold">
+                                <span id="selectedPriceDisplay">0</span>
+                                {% if user.country == 'eg' or user.country == 'Egypt' %}
+                                EGP
+                                {% else %}
+                                USD
+                                {% endif %}
+                            </div>
                         </div>
                         
                         <div class="row g-3 mb-4">
