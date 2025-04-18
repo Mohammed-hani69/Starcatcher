@@ -1415,24 +1415,27 @@ document.addEventListener('DOMContentLoaded', function() {
     function deleteSubscription(id, element) {
         if (!element) return;
         
-        element.style.transform = 'translateX(100%)';
-        element.style.opacity = '0';
-        
         fetch(`/delete_subscription/${id}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
         })
         .then(response => response.json())
         .then(data => {
-            if (data.message === "تم الحذف بنجاح") {
+            if (data.status === "success") {
+                element.style.transform = 'translateX(100%)';
+                element.style.opacity = '0';
                 setTimeout(() => {
                     element.remove();
                 }, 300);
             } else {
-                throw new Error('فشل الحذف');
+                // إظهار رسالة الخطأ للمستخدم
+                alert(data.message || 'حدث خطأ أثناء حذف الباقة');
             }
         })
-        
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ أثناء محاولة حذف الباقة');
+        })
         .finally(() => {
             hideDeleteModal();
         });

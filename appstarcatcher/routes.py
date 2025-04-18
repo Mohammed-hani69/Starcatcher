@@ -1268,21 +1268,40 @@ def add_subscription():
 
 
 @app.route('/delete_subscription/<int:id>', methods=['DELETE'])
-@csrf.exempt  # Add CSRF exemption
+@csrf.exempt  
 @permission_required('can_manage_subscriptions')
 def delete_subscription(id):
-    if (not request.is_json):
+    if not request.is_json:
         return jsonify({"status": "error", "message": "Content-Type must be application/json"}), 400
+    
     try:
         subscription = Subscription.query.get(id)
-        if (subscription is None):
+        if subscription is None:
             return jsonify({"status": "error", "message": "الاشتراك غير موجود"}), 404
+
+        # التحقق من وجود اشتراكات نشطة لهذه الباقة
+        active_subscriptions = UserSubscriptionPurchase.query.filter_by(
+            subscription_id=id,
+            status='active'
+        ).first()
+
+        if active_subscriptions:
+            return jsonify({
+                "status": "error", 
+                "message": "لا يمكن حذف هذه الباقة لوجود مشتركين نشطين فيها"
+            }), 400
+
         db.session.delete(subscription)
         db.session.commit()
-        return jsonify({"status": "success", "message": "تم حذف الاشتراك بنجاح"}), 200
+        return jsonify({"status": "success", "message": "تم الحذف بنجاح"}), 200
+
     except Exception as e:
         db.session.rollback()
-        return jsonify({"status": "error", "message": "حدث خطأ أثناء الحذف", "error": str(e)}), 500
+        return jsonify({
+            "status": "error", 
+            "message": "حدث خطأ أثناء الحذف", 
+            "error": str(e)
+        }), 500
 
 @app.route('/buy_market_player', methods=['POST'])
 @login_required
