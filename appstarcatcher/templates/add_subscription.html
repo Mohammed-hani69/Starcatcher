@@ -1136,6 +1136,21 @@
                     <span>الباقات</span>
                 </a>
                 {% endif %}
+                <!-- إضافة رابط طلبات الشحن -->
+                {% if current_user.can_manage_dashboard == True %}
+                <a href="/admin/recharge-requests" class="nav-item">
+                    <i>💰</i>
+                    <span>طلبات الشحن</span>
+                </a>
+                <a href="/admin/wallet-options" class="nav-item">
+                    <i>💎</i>
+                    <span>خيارات المحفظة</span>
+                </a>
+                <a href="/beneficiaries" class="nav-item">
+                    <i>🎭</i>
+                    <span>المستفيدين</span>
+                </a>
+                {% endif %}
             </nav>
         </div>
 
@@ -1251,6 +1266,15 @@
                         </label>
                         <span class="toggle-label">خارج مصر</span>
                     </div>
+                </div>
+
+                <div class="form-row">
+                    <label for="payment_link">{{ form.payment_link.label }}</label>
+                    {{ form.payment_link(class="form-control") }}
+                </div>
+                <div class="form-row">
+                    <label for="payment_link_usd">{{ form.payment_link_usd.label }}</label>
+                    {{ form.payment_link_usd(class="form-control") }}
                 </div>
                 
                 {{ form.submit(class="action-button") }}

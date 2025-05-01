@@ -1700,6 +1700,10 @@
                             <i class="fas fa-store me-2"></i>
                             Market
                         </a>
+                        <a class="nav-link" href="{{ url_for('orders') }}">
+                            <i class="fas fa-receipt me-2"></i>
+                            Orders
+                        </a>                        
                         <a class="nav-link text-danger" href="{{ url_for('logout') }}">
                             <i class="fas fa-sign-out-alt me-2"></i>
                             Logout
@@ -1903,7 +1907,7 @@
                     <div class="banner-text">
                         <h3 class="banner-title">Win with Star Catcher! 🎮</h3>
                         <p class="banner-description">Subscribe now and get 1000 free coins to start collecting your favorite players</p>
-                        <a href="#" class="banner-cta">
+                        <a href="/gift" class="banner-cta">
                             <i class="fas fa-gift me-2"></i>
                             Get Offer
                         </a>
@@ -2107,13 +2111,17 @@
                             <img src="{{ url_for('static', filename='image/vodafone-cash.png') }}" alt="Vodafone Cash">
                             <span>Vodafone Cash</span>
                         </div>
-                        <div class="payment-method-item" onclick="selectPaymentMethod('fawry')">
-                            <img src="{{ url_for('static', filename='image/fawry.png') }}" alt="Fawry">
-                            <span>Fawry</span>
+                        <div class="payment-method-item" onclick="selectPaymentMethod('etisalat-cash')">
+                            <img src="{{ url_for('static', filename='image/etisalat-cash.png') }}" alt="Etisalat Cash">
+                            <span>Etisalat Cash</span>
                         </div>
-                        <div class="payment-method-item" onclick="selectPaymentMethod('instapay')">
-                            <img src="{{ url_for('static', filename='image/instapay.png') }}" alt="InstaPay">
-                            <span>InstaPay</span>
+                        <div class="payment-method-item" onclick="selectPaymentMethod('we-pay')">
+                            <img src="{{ url_for('static', filename='image/we-pay.png') }}" alt="We pay">
+                            <span>We pay</span>
+                        </div>
+                        <div class="payment-method-item" onclick="selectPaymentMethod('orange-cash')">
+                            <img src="{{ url_for('static', filename='image/orange-cash.png') }}" alt="orange cash">
+                            <span>Orange cash</span>
                         </div>
                     </div>
 
@@ -2159,7 +2167,7 @@
         }
 
         .payment-method-item img {
-            width: 60px;
+            width: 120px;
             height: 60px;
             object-fit: contain;
             margin-bottom: 10px;
@@ -2847,29 +2855,22 @@
         function getPaymentInstructions(method) {
             const instructions = {
                 'vodafone-cash': `
-                    <h6>Vodafone Cash Payment Instructions:</h6>
-                    <ol>
-                        <li>Open your Vodafone Cash mobile app</li>
-                        <li>Send payment to wallet: 0123456789</li>
-                        <li>Keep your transaction ID</li>
-                    </ol>
+                    <h6>دفع آمن وسريع</h6>
+
                 `,
-                'fawry': `
-                    <h6>Fawry Payment Instructions:</h6>
-                    <ol>
-                        <li>Visit any Fawry outlet</li>
-                        <li>Provide this code: STAR${Date.now().toString().slice(-6)}</li>
-                        <li>Complete your payment</li>
-                    </ol>
+                'etisalat-cash': `
+                    <h6>دفع آمن وسريع</h6>
+                    
                 `,
-                'instapay': `
-                    <h6>InstaPay Instructions:</h6>
-                    <ol>
-                        <li>Open your InstaPay app</li>
-                        <li>Scan this QR code or enter ID: STARCATCHER</li>
-                        <li>Confirm payment in your app</li>
-                    </ol>
+                'we-pay': `
+                    <h6>دفع آمن وسريع</h6>
+
+                `,
+                'orange-cash': `
+                    <h6>دفع آمن وسريع</h6>
+
                 `
+                
             };
             return instructions[method];
         }

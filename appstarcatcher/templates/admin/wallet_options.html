@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>إدارة خيارات شحن المحفظة</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary-color: #e50914;
+            --primary-hover: #b30710;
+            --dark-bg: #121212;
+            --card-bg: #1a1a1a;
+            --input-bg: #333;
+            --input-focus: #444;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-color: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            font-family: 'Cairo', sans-serif;
+            min-height: 100vh;
+            display: flex;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background-color: var(--card-bg);
+            height: 100vh;
+            position: fixed;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .logo img {
+            margin-left: 0.75rem;
+            border-radius: 5px;
+        }
+        
+        .logo span {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-section-title {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            padding-right: 0.5rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover {
+            background-color: rgba(229, 9, 20, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .nav-item.active {
+            background-color: rgba(229, 9, 20, 0.2);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .nav-item i {
+            margin-left: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .logout-section {
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+        }
+        
+        .logout-btn {
+            color: var(--text-secondary);
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-right: 260px;
+            width: calc(100% - 260px);
+            padding: 2rem;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .page-title {
+            display: flex;
+            align-items: center;
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+        
+        .page-title i {
+            margin-left: 0.75rem;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        /* Table Styles */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        .table {
+            color: var(--text-color);
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            background-color: rgba(229, 9, 20, 0.1);
+            color: var(--text-color);
+            font-weight: 600;
+            border: none;
+            padding: 1rem;
+        }
+        
+        .table td {
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+            border-color: var(--border-color);
+        }
+        
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+        
+        .table tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Button Styles */
+        .btn {
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .badge {
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        /* Modal Styles */
+        .modal-content {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem;
+        }
+        
+        .modal-title {
+            font-weight: 600;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 1.25rem;
+        }
+        
+        .form-label {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 5px;
+            padding: 0.75rem;
+        }
+        
+        .form-control:focus {
+            background-color: var(--input-focus);
+            color: var(--text-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(229, 9, 20, 0.25);
+        }
+        
+        .form-check-input {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="/api/placeholder/45/45" alt="Logo">
+            <span>لوحة التحكم</span>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-title">القائمة الرئيسية</div>
+            <nav>
+                <a href="/dashboard" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>الرئيسية</span>
+                </a>
+                {% if current_user.can_manage_players == True %}
+                <a href="/add_player" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>اللاعبين</span>
+                </a>
+                {% endif %}
+                {% if current_user.can_manage_clubs == True %}
+                <a href="/add_club" class="nav-item">
+                    <i class="fas fa-futbol"></i>
+                    <span>الأنديه</span>
+                </a>
+                {% endif %}
+                {% if current_user.can_manage_subscriptions == True %}
+                <a href="/add_subscription" class="nav-item">
+                    <i class="fas fa-trophy"></i>
+                    <span>الباقات</span>
+                </a>
+                {% endif %}
+                {% if current_user.can_manage_dashboard == True %}
+                <a href="/admin/recharge-requests" class="nav-item">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>طلبات الشحن</span>
+                </a>
+                <a href="/admin/wallet-options" class="nav-item active">
+                    <i class="fas fa-gem"></i>
+                    <span>خيارات المحفظة</span>
+                </a>
+                <a href="/beneficiaries" class="nav-item">
+                    <i class="fas fa-theater-masks"></i>
+                    <span>المستفيدين</span>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+
+        <div class="nav-section">
+            {% if current_user.can_manage_users == True %}
+            <div class="nav-section-title">الإدارة</div>
+            <nav>
+                <a href="/users" class="nav-item">
+                    <i class="fas fa-user-shield"></i>
+                    <span>المستخدمين</span>
+                </a>
+                
+                <a href="/subscription_purchases" class="nav-item">
+                    <i class="fas fa-credit-card"></i>
+                    <span>مشتريات الباقات</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>الإعدادات</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>التقارير</span>
+                </a>
+            </nav>
+            {% endif %}
+        </div>
+        
+        <!-- زر تسجيل الخروج أسفل الشريط الجانبي -->
+        <div class="logout-section">
+            <a href="/" class="nav-item">
+                <i class="fas fa-globe"></i>
+                <span>الموقع</span>
+            </a>
+            <a href="/logout" class="nav-item logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>تسجيل الخروج</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-coins"></i>
+                إدارة خيارات شحن المحفظة
+            </h1>
+            <button class="btn btn-primary" onclick="showAddModal()">
+                <i class="fas fa-plus ml-2"></i> إضافة خيار جديد
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">جميع خيارات الشحن المتاحة</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>عدد العملات</th>
+                            <th>السعر بالجنيه المصري</th>
+                            <th>السعر بالدولار</th>
+                            <th>رابط الدفع</th>
+                            <th>الحالة</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for option in options %}
+                        <tr>
+                            <td>
+                                <span class="fw-bold">{{ option.coins_amount }}</span>
+                                <i class="fas fa-coins ms-1 text-warning"></i>
+                            </td>
+                            <td>{{ option.price_egp }} EGP</td>
+                            <td>${{ option.price_usd }}</td>
+                            <td>
+                                <a href="{{ option.payment_link }}" target="_blank" class="text-primary text-decoration-none">
+                                    <i class="fas fa-link me-1"></i>
+                                    {{ option.payment_link|truncate(30) }}
+                                </a>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if option.is_active else 'danger' }}">
+                                    {{ "نشط" if option.is_active else "غير نشط" }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-warning btn-sm" onclick="editOption({{ option.id }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteOption({{ option.id }})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- إضافة/تعديل خيارات الشحن Modal -->
+    <div class="modal fade" id="optionModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle"></h5>
+                    <button type="button" class="btn-close btn-close-white" aria-label="Close" onclick="hideModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="optionForm">
+                        <input type="hidden" name="option_id" id="option_id">
+                        
+                        <div class="form-group">
+                            <label for="coins_amount" class="form-label">عدد العملات</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-warning text-dark">
+                                    <i class="fas fa-coins"></i>
+                                </span>
+                                <input 
+                                    type="number" 
+                                    id="coins_amount"
+                                    name="coins_amount" 
+                                    class="form-control" 
+                                    placeholder="مثال: 100" 
+                                    required
+                                >
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="price_egp" class="form-label">السعر بالجنيه المصري</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-money-bill"></i>
+                                </span>
+                                <input 
+                                    type="number" 
+                                    id="price_egp"
+                                    step="0.01" 
+                                    name="price_egp" 
+                                    class="form-control" 
+                                    placeholder="مثال: 499.99" 
+                                    required
+                                >
+                                <span class="input-group-text">EGP</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="price_usd" class="form-label">السعر بالدولار</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </span>
+                                <input 
+                                    type="number" 
+                                    id="price_usd"
+                                    step="0.01" 
+                                    name="price_usd" 
+                                    class="form-control" 
+                                    placeholder="مثال: 12.99" 
+                                    required
+                                >
+                                <span class="input-group-text">USD</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="payment_link" class="form-label">رابط الدفع</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-link"></i>
+                                </span>
+                                <input 
+                                    type="text" 
+                                    id="payment_link"
+                                    name="payment_link" 
+                                    class="form-control" 
+                                    placeholder="مثال: https://payment-gateway.com/link" 
+                                    required
+                                >
+                            </div>
+                        </div>
+                        
+                        <div class="form-check form-switch mt-3">
+                            <input class="form-check-input" type="checkbox" id="is_active" name="is_active" checked>
+                            <label class="form-check-label" for="is_active">نشط</label>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="hideModal()">إلغاء</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save ml-1"></i>
+                                حفظ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // تعريف المودال كمتغير عام
+        let optionModal;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // تهيئة المودال
+            optionModal = new bootstrap.Modal(document.getElementById('optionModal'));
+            
+            // إضافة مستمع للنموذج
+            document.getElementById('optionForm').addEventListener('submit', handleFormSubmit);
+        });
+
+        function showAddModal() {
+            document.getElementById('modalTitle').textContent = 'إضافة خيار شحن جديد';
+            document.getElementById('option_id').value = '';
+            document.getElementById('optionForm').reset();
+            optionModal.show();
+        }
+
+        function editOption(id) {
+            document.getElementById('modalTitle').textContent = 'تعديل خيار الشحن';
+            fetch(`/api/wallet-options/${id}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('فشل في استرجاع بيانات الخيار');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('option_id').value = id;
+                    document.getElementById('coins_amount').value = data.coins_amount;
+                    document.getElementById('price_egp').value = data.price_egp;
+                    document.getElementById('price_usd').value = data.price_usd;
+                    document.getElementById('payment_link').value = data.payment_link;
+                    document.getElementById('is_active').checked = data.is_active;
+                    optionModal.show();
+                })
+                .catch(error => {
+                    showAlert('خطأ', error.message, 'danger');
+                });
+        }
+
+        function hideModal() {
+            optionModal.hide();
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                id: formData.get('option_id'),
+                coins_amount: parseInt(formData.get('coins_amount')),
+                price_egp: parseFloat(formData.get('price_egp')),
+                price_usd: parseFloat(formData.get('price_usd')),
+                payment_link: formData.get('payment_link'),
+                is_active: formData.get('is_active') === 'on'
+            };
+
+            const isEdit = data.id;
+            const url = isEdit ? `/api/wallet-options/${data.id}` : '/api/wallet-options';
+            const method = isEdit ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert('نجاح', result.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    throw new Error(result.message || 'حدث خطأ أثناء معالجة الطلب');
+                }
+            } catch (error) {
+                showAlert('خطأ', error.message, 'danger');
+            }
+        }
+
+        async function deleteOption(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا الخيار؟')) return;
+
+            try {
+                const response = await fetch(`/api/wallet-options/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert('نجاح', result.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    throw new Error(result.message || 'حدث خطأ أثناء محاولة الحذف');
+                }
+            } catch (error) {
+                showAlert('خطأ', error.message, 'danger');
+            }
+        }
+        
+        // إضافة وظيفة لعرض التنبيهات
+        function showAlert(title, message, type) {
+            // إنشاء عنصر التنبيه
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.setAttribute('role', 'alert');
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.style.minWidth = '300px';
+            
+            alertDiv.innerHTML = `
+                <strong>${title}:</strong> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            // إضافة التنبيه إلى الصفحة
+            document.body.appendChild(alertDiv);
+            
+            // إزالة التنبيه بعد 5 ثوانٍ
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

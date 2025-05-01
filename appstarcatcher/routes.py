@@ -1,9 +1,16 @@
 from datetime import time, timedelta
 import random
+import json
 from flask_jwt_extended import create_access_token, create_refresh_token, decode_token, get_jwt_identity, jwt_required
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 from numpy import identity
+import requests
 from sqlalchemy import desc, func, text
+
+# Define base URLs for images
+BASE_URL_LOGO = 'http://127.0.0.1:5000/static/uploads/clubs/'
+BASE_URL_BANNER = 'http://127.0.0.1:5000/static/uploads/clubs/bannerclub/'
+BASE_URL_PLAYERS = 'http://127.0.0.1:5000/static/uploads/image_player/'
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from appstarcatcher import db , app ,limiter,csrf
 from flask import jsonify, logging, render_template, request, redirect, session, url_for, flash
@@ -19,8 +26,10 @@ import time
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 from appstarcatcher.forms import AdminMarketListingForm, ClubForm, LoginForm, PackForm, PlayerForm, PromotionForm, RegistrationForm, SubscriptionForm
-from appstarcatcher.models import AdminMarketListing, ClubDetail, GeneratedPlayer, Pack, PackPurchase, Player, Promotion, Subscription, Transaction, User, UserClub, UserPlayer, UserSubscriptionPurchase, generate_random_code
+from appstarcatcher.models import AdminMarketListing, Beneficiary, ClubDetail, GeneratedPlayer, Pack, PackPurchase, Player, Promotion, Subscription, Transaction, User, UserClub, UserPlayer, UserSubscriptionPurchase, PaymentMethod, WalletRechargeOption, generate_random_code
 from appstarcatcher.utils.image_handler import save_image, delete_image
+from appstarcatcher.models import WalletRechargeRequest
+import uuid
 
 # دالة التحقق من كلمة المرور
 def verify_password(password_hash, password):
@@ -41,6 +50,14 @@ app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # الحد الأقصى لح
 
 app.config['UPLOAD_FOLDER_CLUB'] = 'appstarcatcher/static/uploads/clubs'
 app.config['UPLOAD_FOLDER_BANNERCLUBS'] = 'appstarcatcher/static/uploads/clubs/bannerclub'
+
+# إضافة ثابت لمجلد صور وسائل الدفع
+app.config['UPLOAD_FOLDER_PAYMENT_METHODS'] = 'appstarcatcher/static/uploads/payment_methods'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 #=======================================================================================================================
 #=======================================================================================================================
@@ -313,6 +330,31 @@ def collect_first_purchase_reward():
 
 
 
+@app.route('/collect_referral_earnings', methods=['POST'])
+@csrf.exempt
+@login_required
+def collect_referral_earnings():
+    user = current_user
+    if not user.referral_earnings or user.referral_earnings <= 0:
+        return jsonify({'status': 'error', 'message': 'No earnings to collect'})
+    
+    try:
+        earnings = user.referral_earnings
+        user.coins = user.coins + earnings
+        user.referral_earnings = 0
+        user.referral_earnings_collected = True
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': f'Successfully collected {earnings} coins',
+            'new_balance': user.coins
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': 'Failed to collect earnings'})
+
+
 
 @app.route('/api/purchase_subscription', methods=['POST'])
 @login_required
@@ -359,9 +401,11 @@ def purchase_subscription():
             username=current_user.username,
             email=current_user.email,
             country=current_user.country,
-            status='active',
+            status='expired',
             purchase_date=purchase_date,
-            expiry_date=expiry_date
+            expiry_date=expiry_date,
+            payment_link=subscription.payment_link
+
         )
         
         db.session.add(purchase)
@@ -370,21 +414,15 @@ def purchase_subscription():
         current_user.subscription = True
         current_user.type_subscription = subscription.package_type.lower()
 
-        # 🔹 تطبيق مزايا الاشتراك (بما فيها إضافة العملات)
-        success = apply_subscription_benefits(current_user.id, subscription.id)
-        if not success:
-            db.session.rollback()
-            return jsonify({
-                'success': False, 
-                'message': 'حدث خطأ أثناء تطبيق مزايا الاشتراك، الرجاء المحاولة مرة أخرى'
-            }), 500
+        
 
         # 🔹 تعيين الشارات - تم نقلها إلى apply_subscription_benefits
         db.session.commit()
 
+        
         return jsonify({
             'success': True,
-            'message': 'تم شراء الاشتراك بنجاح',
+            'message': 'تم طلب الاشتراك بنجاح',
             'data': {
                 'type_subscription': subscription.package_type,
                 'expiry_date': expiry_date.isoformat(),
@@ -408,7 +446,6 @@ def purchase_subscription():
             'success': False, 
             'message': 'حدث خطأ أثناء عملية الشراء، الرجاء المحاولة مرة أخرى'
         }), 500
-
 
 
 
@@ -1122,7 +1159,31 @@ def toggle_subscription_status():
             
             subscription_purchase.status = new_status
             user.subscription = bool(is_active)
-            
+
+            # فقط في حالة التحول من expired إلى active نطبق المزايا
+            if old_status == 'expired' and new_status == 'active':
+                success = apply_subscription_benefits(user.id, subscription_purchase.subscription_id)
+                if not success:
+                    db.session.rollback()
+                    return jsonify({
+                        'success': False, 
+                        'message': 'حدث خطأ أثناء تطبيق مزايا الاشتراك، الرجاء المحاولة مرة أخرى'
+                    }), 500
+
+                # ✅ تطبيق العمولة إن وُجد مُحيل وكان من المستفيدين
+                if user.referred_by:
+                    referrer = User.query.filter_by(referral_code=user.referred_by).first()
+                    if referrer and referrer.email:
+                        beneficiary = Beneficiary.query.filter_by(email=referrer.email, is_active=True).first()
+                        if beneficiary and beneficiary.is_active == True:
+                            commission_rate = beneficiary.commission_rate or 0
+                            commission_amount = (subscription_purchase.price * commission_rate) / 100.0
+                            referrer.earned_money += commission_amount
+                            app.logger.info(
+                                f"أُضيفت عمولة {commission_amount:.2f} للمستخدم {referrer.username} "
+                                f"من اشتراك المستخدم {user.username}"
+                            )
+
             db.session.commit()
 
             status_text = "تم تفعيل الاشتراك" if is_active else "تم إلغاء تفعيل الاشتراك"
@@ -1146,6 +1207,7 @@ def toggle_subscription_status():
             'success': False,
             'message': f'حدث خطأ: {str(e)}'
         }), 500
+
 
 
 
@@ -1256,7 +1318,9 @@ def add_subscription():
             has_vip_badge=form.has_vip_badge.data,
             has_vip_badge_plus=form.has_vip_badge_plus.data,
             subscription_achievement_coins=form.subscription_achievement_coins.data,
-            allow_old_ahly_catalog=form.allow_old_ahly_catalog.data
+            allow_old_ahly_catalog=form.allow_old_ahly_catalog.data,
+            payment_link=form.payment_link.data,
+            payment_link_usd=form.payment_link_usd.data,
         )
         # إضافة الاشتراك إلى قاعدة البيانات
         db.session.add(subscription)
@@ -1428,54 +1492,52 @@ def preview_subscription_rewards():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    # If user is already logged in, redirect
     if current_user.is_authenticated:
         return redirect(url_for('home'))
-    # Handle API request (JSON)
-    if request.is_json:
-        try:
-            data = request.get_json()
-            username = data.get('username')
-            email = data.get('email')
-            password = data.get('password')
-            if (not username or (not email) or (not password)):
-                return jsonify({'success': False, 'message': 'Missing required fields'}), 400
-            if User.query.filter_by(username=username).first():
-                return jsonify({'success': False, 'message': 'Username already exists'}), 400
-            if User.query.filter_by(email=email).first():
-                return jsonify({'success': False, 'message': 'Email already registered'}), 400
-            password_hash = hash_password(password)
-            user = User(username=username, email=email, password_hash=password_hash)
-            db.session.add(user)
-            db.session.commit()
-            access_token = create_access_token(identity=str(user.id))
-            refresh_token = create_refresh_token(identity=str(user.id))
-            return jsonify({"success": True, "message": "User registered successfully", "data": {"id": user.id, "username": user.username, "email": user.email, "coins": user.coins, "token": access_token, "refresh_token": refresh_token}}), 201
-        except Exception as e:
-            db.session.rollback()
-            return jsonify({'success': False, 'message': str(e)}), 500
-    # Handle web form request
+        
     form = RegistrationForm()
-    if (form.validate_on_submit()):
+    if form.validate_on_submit():
         try:
-            # Process profile image if uploaded
+            # حفظ صورة الملف الشخصي إذا تم تحميلها
             image_url = None
             if form.profile_image.data:
-                filename = secure_filename(form.profile_image.data.filename)
-                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                form.profile_image.data.save(filepath)
-                image_url = filename
-            # Create new user
-            user = User(username=form.username.data, email=form.email.data.lower(), phone=form.phone.data, country=form.country.data, state=form.state.data, city=form.city.data, image_url=image_url)
+                filename = f"profile_{datetime.utcnow().timestamp()}"
+                image_file = save_image(form.profile_image.data, app.config['UPLOAD_FOLDER'], filename)
+                image_url = image_file if image_file else 'default.png'
+            
+            # إنشاء المستخدم الجديد
+            user = User(
+                username=form.username.data,
+                email=form.email.data.lower(),
+                phone=form.phone.data,
+                country=form.country.data,
+                state=form.state.data,
+                city=form.city.data,
+                image_url=image_url
+            )
             user.set_password(form.password.data)
+            
+            # حفظ المستخدم في قاعدة البيانات
             db.session.add(user)
             db.session.commit()
+
+            # معالجة كود الإحالة إذا تم إدخاله
+            if form.referral_code.data:
+                referral_result = User.apply_referral_code(form.referral_code.data, user)
+                if referral_result:
+                    db.session.commit()
+                    flash('تم تطبيق كود الإحالة بنجاح! تم إضافة 50 عملة إلى حسابك.', 'success')
+                else:
+                    flash('كود الإحالة غير صالح أو لا يمكن استخدامه.', 'warning')
+            
             flash('تم إنشاء حسابك بنجاح! يمكنك تسجيل الدخول الآن.', 'success')
             return redirect(url_for('login'))
+            
         except Exception as e:
             db.session.rollback()
-            flash('حدث خطأ أثناء إنشاء الحساب. الرجاء المحاولة مرة أخرى.', 'danger')
             app.logger.error(f"Registration error: {str(e)}")
+            flash('حدث خطأ أثناء إنشاء الحساب. الرجاء المحاولة مرة أخرى.', 'danger')
+    
     return render_template('register.html', form=form)
 
 
@@ -1689,10 +1751,6 @@ def get_csrf_token():
 #=====================   الانديه    =============================================
 
 # 📌 قاعدة URL للصور
-BASE_URL_LOGO = "http:#127.0.0.1:5000/static/uploads/clubs/"
-BASE_URL_BANNER = "http:#127.0.0.1:5000/static/uploads/clubs/bannerclub/"
-
-# 🎯 API لاسترجاع بيانات جميع الأندية
 @app.route('/api_clubs', methods=['GET'])
 def api_clubs():
     try:
@@ -1737,7 +1795,7 @@ def get_rarity_label(rarity):
     translations = {"common": "عادي", "rare": "نادر", "epic": "أسطوري", "legendary": "خارق"}
     return translations.get(rarity, "غير معروف")
 
-@app.route('/api_generate_players', methods=['POST'])
+@app.route('/api/generate_players', methods=['POST'])
 @jwt_required()  # ✅ تأمين الوصول باستخدام JWT
 def generate_daily_players():
     try:
@@ -2001,8 +2059,8 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(check_expired_subscriptions, 'interval', hours=24)  # يتم التحقق كل 24 ساعة
 scheduler.start()
 
-#=================  اللاعبين    =====================================================
-#=================  اللاعبين    =====================================================
+
+
 
 @app.route('/')
 def home():
@@ -2043,32 +2101,81 @@ def home():
 @app.route('/profile')
 @login_required
 def profile():
-    try:
-        # حساب عدد اللاعبين في الكتالوج للمستخدم
-        catalog_count = UserClub.query.filter_by(user_id=current_user.id).count()
-        # حساب إجمالي اللاعبين المملوكين
-        owned_count = UserPlayer.query.filter_by(user_id=current_user.id).count()
-        # التحقق من حالة الشراء الأول
-        has_completed_purchase = (Transaction.query.filter_by(buyer_id=current_user.id, status='completed').first() is not None)
-        # الحصول على معلومات الترتيب والمستخدمين القريبين
-        all_users = db.session.query(User.id, User.username, func.count(UserClub.id).label('catalog_count')).outerjoin(UserClub).group_by(User.id).order_by(desc('catalog_count')).all()
-        # تحديد ترتيب المستخدم
-        user_rank = next(((index + 1) for (index, user) in enumerate(all_users) if (user.id == current_user.id)), 0)
-        # الحصول على المتسابقين القريبين (3 أعلى و3 أسفل)
+        # Initialize default values
+        catalog_count = 0
+        owned_count = 0
+        user_rank = 1
         nearby_users = []
-        if (user_rank > 0):
-            start_idx = max(0, (user_rank - 4))
-            end_idx = min(len(all_users), (user_rank + 3))
-            nearby_users = all_users[start_idx:end_idx]
-        # خيارات شحن المحفظة
-        wallet_options_in_side = [{'amount': 100, 'price': 25, 'description': '100 عملة'}, {'amount': 250, 'price': 50, 'description': '250 عملة'}, {'amount': 750, 'price': 100, 'description': '750 عملة'}, {'amount': 1000, 'price': 150, 'description': '1000 عملة'}]
-        wallet_options_out_side = [{'amount': 100, 'price': 1.5, 'description': '100 عملة'}, {'amount': 250, 'price': 3, 'description': '250 عملة'}, {'amount': 750, 'price': 6, 'description': '750 عملة'}, {'amount': 1000, 'price': 9, 'description': '1000 عملة'}]
-        # طرق الدفع
-        payment_methods = [{'id': 'vodafone', 'name': 'فودافون كاش', 'icon': 'vodafone.png'}, {'id': 'etisalat', 'name': 'اتصالات كاش', 'icon': 'etisalat.png'}, {'id': 'orange', 'name': 'اورانج كاش', 'icon': 'orange.png'}, {'id': 'we', 'name': 'وي باي', 'icon': 'we.png'}]
-        return render_template('site/profile.html', user=current_user, catalog_count=catalog_count, owned_count=owned_count, user_rank=user_rank, nearby_users=nearby_users, has_completed_purchase=has_completed_purchase, Transaction=Transaction, wallet_options=wallet_options_in_side, payment_methods=payment_methods)
-    except Exception as e:
-        app.logger.error(f"Error in profile route: {str(e)}")
-        return jsonify({'status': 'error', 'message': 'حدث خطأ أثناء تحميل الصفحة'}), 500
+        
+        # Get user statistics with safe handling
+        try:
+            catalog_count = UserClub.query.filter_by(user_id=current_user.id).count() or 0
+            owned_count = UserPlayer.query.filter_by(user_id=current_user.id).count() or 0
+        except Exception as e:
+            app.logger.error(f"Error getting user statistics: {e}")
+
+        # Calculate user ranking safely
+        try:
+            # Get all users and their catalog counts
+            user_catalogs = {}
+            all_users = User.query.all()
+            
+            for user in all_users:
+                count = UserClub.query.filter_by(user_id=user.id).count()
+                user_catalogs[user.id] = count if count is not None else 0
+            
+            # Sort users by catalog count
+            sorted_users = sorted(user_catalogs.items(), key=lambda x: x[1], reverse=True)
+            
+            # Find current user's rank
+            for i, (uid, _) in enumerate(sorted_users):
+                if uid == current_user.id:
+                    user_rank = i + 1
+                    break
+            
+            # Get nearby users (2 above and 2 below)
+            user_position = user_rank - 1
+            start_idx = max(0, user_position - 2)
+            end_idx = min(len(sorted_users), user_position + 3)
+            
+            nearby_users = []
+            for idx in range(start_idx, end_idx):
+                if idx < len(sorted_users):
+                    user_id = sorted_users[idx][0]
+                    user = User.query.get(user_id)
+                    if user:
+                        nearby_users.append({
+                            'id': user.id,
+                            'username': user.username,
+                            'catalog_count': user_catalogs[user.id]
+                        })
+                        
+        except Exception as e:
+            app.logger.error(f"Error calculating rankings: {e}")
+
+        # Get payment methods and wallet options safely
+        try:
+            payment_methods = PaymentMethod.query.filter_by(is_active=True).all() or []
+            wallet_options = WalletRechargeOption.query.filter_by(is_active=True).all() or []
+        except Exception as e:
+            app.logger.error(f"Error getting payment info: {e}")
+            payment_methods = []
+            wallet_options = []
+
+        # التحقق من وجود المستخدم في جدول المستفيدين
+        beneficiary_info = Beneficiary.query.filter_by(email=current_user.email).first()
+
+        return render_template('site/profile.html',
+                             user=current_user,
+                             catalog_count=catalog_count,
+                             owned_count=owned_count,
+                             user_rank=user_rank,
+                             nearby_users=nearby_users,
+                             payment_methods=payment_methods,
+                             wallet_options=wallet_options,
+                             beneficiary_info=beneficiary_info)
+                             
+
 
 # إضافة route للتعامل مع طلبات شحن المحفظة
 @app.route('/recharge-wallet', methods=['POST'])
@@ -2785,3 +2892,751 @@ def coming_soon():
     return render_template('site/coming-soon.html', 
                          target_date=target_date,
                          user=user)
+
+@app.route('/admin/payment_methods', methods=['GET', 'POST'])
+@login_required
+@permission_required('can_manage_dashboard')
+def manage_payment_methods():
+    try:
+        payment_methods = PaymentMethod.query.all()
+        # Initialize empty icon if None
+        for method in payment_methods:
+            if method.icon is None:
+                method.icon = 'default-payment.png'
+                
+        return render_template('admin/payment_methods.html', 
+                             payment_methods=payment_methods, 
+                             username=current_user.username)
+    except Exception as e:
+        app.logger.error(f"Error in manage_payment_methods: {str(e)}")
+        flash('حدث خطأ أثناء تحميل طرق الدفع', 'error')
+        return redirect(url_for('dashboard'))
+
+@app.route('/admin/payment_methods', methods=['POST'])
+@login_required
+@permission_required('can_manage_dashboard')
+def add_payment_method():
+    try:
+        # التحقق من نوع الطلب
+        if request.content_type == 'application/json':
+            data = request.get_json()
+        else:
+            data = request.form.to_dict()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'message': 'لم يتم استلام بيانات'
+            }), 400
+
+        # معالجة الصورة إذا وجدت
+        icon = None
+        if 'icon' in request.files:
+            file = request.files['icon']
+            if file and file.filename:
+                filename = secure_filename(file.filename)
+                icon_path = os.path.join(app.config['UPLOAD_FOLDER_PAYMENT_METHODS'], filename)
+                file.save(icon_path)
+                icon = filename
+
+        # إنشاء كائن طريقة دفع جديد
+        new_method = PaymentMethod(
+            name=data.get('name'),
+            description=data.get('description'),
+            icon=icon,
+            wallet_number=data.get('wallet_number'),
+            is_egypt_only=data.get('is_egypt_only', False),
+            is_active=data.get('is_active', True)
+        )
+
+         # حفظ معلومات بوابة الدفع
+        if 'gateway_type' in data:
+            gateway_config = {
+               'type': data['gateway_type'],
+                'config': data.get('gateway_config', {})
+            }
+            new_method.gateway_config = json.dumps(gateway_config)
+
+        db.session.add(new_method)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'تم إضافة طريقة الدفع بنجاح',
+            'method': {
+                'id': new_method.id,
+                'name': new_method.name,
+                'icon': icon
+            }
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error in add_payment_method: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'حدث خطأ أثناء إضافة طريقة الدفع: {str(e)}'
+        }), 500
+
+
+import requests
+from requests.exceptions import RequestException
+
+def get_paymob_auth(api_key):
+    """Enhanced PayMob authentication with proper token handling"""
+    if not api_key or len(api_key.strip()) < 10:
+        raise ValueError("Invalid PayMob API key format")
+        
+    try:
+        # First authentication step - Get authentication token
+        auth_response = requests.post(
+            "https://accept.paymob.com/api/auth/tokens",
+            json={"api_key": api_key.strip()},
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "User-Agent": "StarcatcherWeb/1.0"
+            },
+            timeout=30,
+            verify=True
+        )
+        
+        # Handle common API errors
+        if auth_response.status_code == 403:
+            raise ValueError("Invalid or unauthorized PayMob API key")
+        elif auth_response.status_code == 429:
+            raise ValueError("Too many API requests, please try again later")
+        
+        auth_response.raise_for_status()
+        auth_data = auth_response.json()
+        
+        if 'token' not in auth_data:
+            raise ValueError("Invalid PayMob response: missing token")
+            
+        # Second step - Register order
+        token = auth_data['token']
+        order_data = {
+            "auth_token": token,
+            "delivery_needed": "false",
+            "amount_cents": session.get('payment_data', {}).get('amount', 0),
+            "currency": "EGP",
+            "items": []
+        }
+        
+        order_response = requests.post(
+            "https://accept.paymob.com/api/ecommerce/orders",
+            json=order_data,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {token}"
+            }
+        )
+        
+        order_response.raise_for_status()
+        order_data = order_response.json()
+        
+        if 'id' not in order_data:
+            raise ValueError("Failed to create PayMob order")
+            
+        # Third step - Get payment key
+        payment_key_request = {
+            "auth_token": token,
+            "amount_cents": session.get('payment_data', {}).get('amount', 0),
+            "expiration": 3600,
+            "order_id": order_data['id'],
+            "billing_data": {
+                "email": "test@test.com",
+                "first_name": "Test",
+                "last_name": "Account",
+                "phone_number": "+20000000000",
+                "apartment": "NA",
+                "floor": "NA",
+                "street": "NA",
+                "building": "NA",
+                "shipping_method": "NA",
+                "postal_code": "NA",
+                "city": "NA",
+                "country": "NA",
+                "state": "NA"
+            },
+            "currency": "EGP",
+            "integration_id": session.get('payment_data', {}).get('integration_id')
+        }
+        
+        payment_key_response = requests.post(
+            "https://accept.paymob.com/api/acceptance/payment_keys",
+            json=payment_key_request,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {token}"
+            }
+        )
+        
+        payment_key_response.raise_for_status()
+        payment_key_data = payment_key_response.json()
+        
+        if 'token' not in payment_key_data:
+            raise ValueError("Failed to get payment key")
+            
+        return payment_key_data['token']
+        
+    except requests.exceptions.RequestException as e:
+        app.logger.error(f"PayMob API request failed: {str(e)}")
+        raise Exception(f"Payment gateway connection error: {str(e)}")
+        
+    except ValueError as e:
+        app.logger.error(f"PayMob API error: {str(e)}")
+        raise
+        
+    except Exception as e:
+        app.logger.error(f"Unexpected PayMob error: {str(e)}")
+        raise Exception("Payment gateway error occurred")
+
+
+@app.route('/start_payment', methods=['POST'])
+@login_required
+@csrf.exempt
+def start_payment():
+    try:
+        if not request.is_json:
+            return jsonify({'success': False, 'message': 'Invalid content type'}), 400
+
+        data = request.get_json()
+        if not all(k in data for k in ['amount', 'coins', 'method_id']):
+            return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+
+        method = PaymentMethod.query.get(data['method_id'])
+        if not method or not method.is_active:
+            return jsonify({'success': False, 'message': 'Invalid or inactive payment method'}), 400
+
+        try:
+            amount_cents = int(float(data['amount']) * 100)
+            api_key = method.gateway_api_key
+
+            # Get authentication token with proper headers
+            auth_response = requests.post(
+                "https://accept.paymob.com/api/auth/tokens",
+                json={"api_key": api_key},
+                headers={
+                    "Content-Type": "application/json"
+                },
+                timeout=30
+            )
+
+            app.logger.info(f"Auth Response: {auth_response.text}")
+            auth_data = auth_response.json()
+            
+            # Fix token extraction - it's directly in the response
+            auth_token = auth_data.get('token')
+            if not auth_token:
+                app.logger.error(f"No token found in response: {auth_data}")
+                raise ValueError("Invalid PayMob response: no token found")
+
+            # Rest of the payment flow...
+            order_request = {
+                "auth_token": auth_token,
+                "delivery_needed": "false",
+                "amount_cents": str(amount_cents),  # Convert to string
+                "currency": "EGP",
+                "merchant_order_id": str(int(time.time())),  # Add unique order ID
+                "items": [],
+            }
+
+            order_response = requests.post(
+                "https://accept.paymob.com/api/ecommerce/orders",
+                json=order_request,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {auth_token}"
+                }
+            )
+
+            if order_response.status_code != 201:
+                app.logger.error(f"Order creation failed: {order_response.text}")
+                raise ValueError("Order creation failed")
+
+            order_id = order_response.json().get('id')
+
+            # Get payment key
+            billing_data = {
+                "apartment": "NA",
+                "email": current_user.email,
+                "floor": "NA",
+                "first_name": current_user.username,
+                "street": "NA",
+                "building": "NA",
+                "phone_number": "+201111111111",
+                "shipping_method": "NA",
+                "postal_code": "NA",
+                "city": "NA",
+                "country": "EG",
+                "last_name": "NA",
+                "state": "NA"
+            }
+
+            payment_token_request = {
+                "auth_token": auth_token,
+                "amount_cents": str(amount_cents),  # Convert to string
+                "expiration": 3600,
+                "order_id": order_id,
+                "billing_data": billing_data,
+                "currency": "EGP",
+                "integration_id": method.gateway_integration_id,
+                "lock_order_when_paid": "false"
+            }
+
+            payment_key_response = requests.post(
+                "https://accept.paymob.com/api/acceptance/payment_keys",
+                json=payment_token_request,
+                headers={
+                    "Content-Type": "application/json"
+                }
+            )
+
+            if payment_key_response.status_code != 201:
+                app.logger.error(f"Payment key error: {payment_key_response.text}")
+                raise ValueError("Failed to get payment key")
+
+            payment_token = payment_key_response.json().get('token')
+
+            if not payment_token:
+                raise ValueError("No payment token received")
+
+            # Save to session
+            session['payment_data'] = {
+                'order_id': order_id,
+                'amount': amount_cents,
+                'coins': data['coins'],
+                'method_id': data['method_id']
+            }
+
+            # Return iframe URL
+            return jsonify({
+                'success': True,
+                'redirect_url': f"https://accept.paymob.com/api/acceptance/iframes/{method.gateway_iframe_id}?payment_token={payment_token}"
+            })
+
+        except ValueError as e:
+            app.logger.error(f"Payment configuration error: {str(e)}")
+            return jsonify({'success': False, 'message': str(e)}), 400
+
+        except Exception as e:
+            app.logger.error(f"Payment processing error: {str(e)}")
+            return jsonify({'success': False, 'message': 'Payment processing failed'}), 500
+
+    except Exception as e:
+        app.logger.error(f"Payment route error: {str(e)}")
+        return jsonify({'success': False, 'message': 'Payment system error'}), 500
+
+
+@app.route('/api/payment-methods', methods=['GET'])
+@login_required
+def get_payment_methods():
+    try:
+        methods = PaymentMethod.query.all()
+        return jsonify({
+            'success': True,
+            'methods': [method.to_dict() for method in methods]
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'حدث خطأ أثناء جلب طرق الدفع: {str(e)}'
+        }), 400
+
+@app.route('/api/payment-methods/add', methods=['POST'])
+@login_required
+@permission_required('can_manage_dashboard')
+@csrf.exempt
+def add_payment_method_api():
+    try:
+        data = request.get_json()
+        
+        new_method = PaymentMethod(
+            name=data.get('name'),
+            description=data.get('description'),
+            icon=data.get('icon'),
+            wallet_number=data.get('wallet_number'),
+            is_egypt_only=data.get('is_egypt_only', False),
+            is_active=data.get('is_active', True),
+            instructions=data.get('instructions'),
+            # Add new gateway fields
+            gateway_type=data.get('gateway_type'),
+            gateway_api_key=data.get('gateway_api_key'),
+            gateway_integration_id=data.get('gateway_integration_id'),
+            gateway_iframe_id=data.get('gateway_iframe_id')
+        )
+
+        db.session.add(new_method)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'تم إضافة طريقة الدفع بنجاح',
+            'method': new_method.to_dict()
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'حدث خطأ أثناء إضافة طريقة الدفع: {str(e)}'
+        }), 500
+
+
+
+@app.route('/admin/recharge-requests')
+@login_required
+@permission_required('can_manage_dashboard')
+def recharge_requests():
+        # Get all recharge requests with related user and option data
+        requests = db.session.query(
+            WalletRechargeRequest,
+            User,
+            WalletRechargeOption
+        ).join(
+            User,
+            WalletRechargeRequest.user_id == User.id
+        ).join(
+            WalletRechargeOption,
+            WalletRechargeRequest.option_id == WalletRechargeOption.id
+        ).order_by(WalletRechargeRequest.created_at.desc()).all()
+
+        return render_template('admin/recharge_requests.html',
+                             requests=requests,
+                             username=current_user.username)
+
+
+@app.route('/admin/approve-recharge/<int:request_id>', methods=['POST'])
+@login_required
+@csrf.exempt
+@permission_required('can_manage_dashboard')
+def approve_recharge(request_id):
+    try:
+        recharge_request = WalletRechargeRequest.query.get_or_404(request_id)
+        
+        if recharge_request.status != 'pending':
+            return jsonify({
+                'success': False,
+                'message': 'هذا الطلب تم معالجته مسبقاً'
+            }), 400
+
+        # Add coins to user's wallet
+        user = User.query.get(recharge_request.user_id)
+        user.coins += recharge_request.option.coins_amount
+        
+        # Update request status
+        recharge_request.status = 'completed'
+        recharge_request.notes = 'تم الموافقة على الطلب وإضافة العملات'
+        recharge_request.updated_at = datetime.utcnow()
+        
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'تم الموافقة على الطلب وإضافة العملات بنجاح',
+            'new_status': 'completed',
+            'new_coins': user.coins
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'حدث خطأ: {str(e)}'
+        }), 500
+
+@app.route('/admin/reject-recharge/<int:request_id>', methods=['POST'])
+@login_required
+@csrf.exempt
+@permission_required('can_manage_dashboard')
+def reject_recharge(request_id):
+    try:
+        data = request.get_json()
+        rejection_reason = data.get('reason', 'تم رفض الطلب')
+        
+        recharge_request = WalletRechargeRequest.query.get_or_404(request_id)
+        
+        if recharge_request.status != 'pending':
+            return jsonify({
+                'success': False,
+                'message': 'هذا الطلب تم معالجته مسبقاً'
+            }), 400
+
+        recharge_request.status = 'rejected'
+        recharge_request.notes = rejection_reason
+        recharge_request.updated_at = datetime.utcnow()
+        
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'تم رفض الطلب بنجاح',
+            'new_status': 'rejected'
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'حدث خطأ: {str(e)}'
+        }), 500
+
+# Wallet Options Admin Routes
+@app.route('/admin/wallet-options')
+@admin_required
+def admin_wallet_options():
+    try:
+        # Make sure the WalletRechargeOption is imported
+        options = WalletRechargeOption.query.all()
+        return render_template('admin/wallet_options.html', options=options)
+    except Exception as e:
+        # Log the error
+        app.logger.error(f"Error in admin_wallet_options: {str(e)}")
+        # Create table if it doesn't exist
+        db.create_all()
+        # Return empty options for first time
+        return render_template('admin/wallet_options.html', options=[])
+
+# Wallet Options API Routes
+@app.route('/api/wallet-options', methods=['GET', 'POST'])
+@admin_required
+def wallet_options():
+    WalletOptions = WalletRechargeOption
+    if request.method == 'POST':
+        data = request.get_json()
+        new_option = WalletOptions(
+            coins_amount=data['coins_amount'],
+            price_egp=data['price_egp'],
+            price_usd=data['price_usd'],
+            payment_link=data['payment_link'],
+            is_active=data['is_active']
+        )
+        db.session.add(new_option)
+        db.session.commit()
+        return jsonify({'message': 'تم إضافة الخيار بنجاح'}), 201
+    
+    options = WalletOptions.query.all()
+    return jsonify([option.to_dict() for option in options])
+
+@app.route('/api/wallet-options/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+@admin_required
+def wallet_option(id):
+    WalletOptions = WalletRechargeOption
+    option = WalletOptions.query.get_or_404(id)
+    
+    if request.method == 'GET':
+        return jsonify(option.to_dict())
+    
+    elif request.method == 'PUT':
+        data = request.get_json()
+        option.coins_amount = data['coins_amount']
+        option.price_egp = data['price_egp']
+        option.price_usd = data['price_usd']
+        option.payment_link = data['payment_link']
+        option.is_active = data['is_active']
+        db.session.commit()
+        return jsonify({'message': 'تم تحديث الخيار بنجاح'})
+    
+    elif request.method == 'DELETE':
+        db.session.delete(option)
+        db.session.commit()
+        return jsonify({'message': 'تم حذف الخيار بنجاح'})
+
+@app.route('/beneficiaries')
+@login_required
+@permission_required('can_manage_dashboard')
+def beneficiaries():
+    try:
+        beneficiaries = db.session.query(
+            Beneficiary, User, func.sum(User.earned_money).label('total_earned')
+        ).outerjoin(
+            User, User.email == Beneficiary.email
+        ).group_by(Beneficiary.id).all()
+
+        return render_template(
+            'admin/beneficiaries.html',
+            beneficiaries=beneficiaries,
+            username=current_user.username
+        )
+    except Exception as e:
+        app.logger.error(f"Error in beneficiaries route: {str(e)}")
+        flash('حدث خطأ أثناء تحميل صفحة المستفيدين', 'error')
+        return redirect(url_for('dashboard'))
+
+@app.route('/add_beneficiary', methods=['POST'])
+@login_required
+@permission_required('can_manage_users')
+def add_beneficiary():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        commission_rate = float(data.get('commission_rate', 0))
+
+        if not email or commission_rate < 0 or commission_rate > 100:
+            return jsonify({
+                'success': False,
+                'message': 'بيانات غير صحيحة'
+            }), 400
+
+        # التحقق من وجود المستفيد
+        existing = Beneficiary.query.filter_by(email=email).first()
+        if existing:
+            return jsonify({
+                'success': False,
+                'message': 'هذا البريد الإلكتروني مسجل بالفعل'
+            }), 400
+
+        new_beneficiary = Beneficiary(
+            email=email,
+            commission_rate=commission_rate,
+            is_active=True
+        )
+        db.session.add(new_beneficiary)
+        db.session.commit()
+
+        # إرجاع البيانات المطلوبة للتحديث المباشر للجدول
+        return jsonify({
+            'success': True,
+            'message': 'تمت إضافة المستفيد بنجاح',
+            'beneficiary': {
+                'id': new_beneficiary.id,
+                'email': new_beneficiary.email,
+                'commission_rate': new_beneficiary.commission_rate,
+                'created_at': new_beneficiary.created_at.strftime('%Y-%m-%d'),
+                'is_active': new_beneficiary.is_active,
+                'total_earned': 0
+            }
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error adding beneficiary: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'حدث خطأ أثناء إضافة المستفيد'
+        }), 500
+
+# Update subscription purchase to handle beneficiary commission
+def handle_beneficiary_commission(user_email, amount):
+    try:
+        beneficiary = Beneficiary.query.filter_by(email=user_email).first()
+        if beneficiary and beneficiary.user:
+            commission = (amount * beneficiary.commission_rate) / 100
+            beneficiary.user.earned_money += commission
+            db.session.commit()
+    except Exception as e:
+        app.logger.error(f"Error handling beneficiary commission: {str(e)}")
+        db.session.rollback()
+
+@app.route('/get_beneficiary/<int:id>')
+@login_required
+@permission_required('can_manage_users')
+def get_beneficiary(id):
+    try:
+        beneficiary = Beneficiary.query.get_or_404(id)
+        return jsonify({
+            'email': beneficiary.email,
+            'commission_rate': beneficiary.commission_rate,
+            'is_active': beneficiary.is_active
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+@app.route('/update_beneficiary/<int:id>', methods=['POST'])
+@login_required
+@permission_required('can_manage_users')
+def update_beneficiary(id):
+    try:
+        data = request.get_json()
+        beneficiary = Beneficiary.query.get_or_404(id)
+        
+        beneficiary.commission_rate = float(data.get('commission_rate', beneficiary.commission_rate))
+        beneficiary.is_active = data.get('is_active', beneficiary.is_active)
+        
+        db.session.commit()
+        return jsonify({
+            'success': True,
+            'message': 'تم تحديث المستفيد بنجاح'
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+@app.route('/delete_beneficiary/<int:id>', methods=['DELETE'])
+@login_required
+@permission_required('can_manage_users')
+def delete_beneficiary(id):
+    try:
+        beneficiary = Beneficiary.query.get_or_404(id)
+        db.session.delete(beneficiary)
+        db.session.commit()
+        return jsonify({
+            'success': True,
+            'message': 'تم حذف المستفيد بنجاح'
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+@app.route('/orders')
+@login_required
+def orders():
+        # جلب طلبات شراء الباقات
+        subscription_orders = UserSubscriptionPurchase.query.filter_by(
+            user_id=current_user.id
+        ).order_by(UserSubscriptionPurchase.purchase_date.desc()).all()
+
+        return render_template('site/orders.html',
+                             subscription_orders=subscription_orders,
+                             user=current_user)  # Pass the full user object
+
+@app.route('/create_recharge_request', methods=['POST'])
+@csrf.exempt
+@login_required
+def create_recharge_request():
+    try:
+        data = request.json
+        option_id = data.get('option_id')
+        amount = data.get('amount')
+        payment_link = data.get('payment_link')
+        currency = 'EGP' if current_user.country == 'eg' else 'USD'
+        
+        # Create unique transaction ID
+        transaction_id = str(uuid.uuid4())
+        
+        # Create new recharge request
+        recharge_request = WalletRechargeRequest(
+            user_id=current_user.id,
+            option_id=option_id,
+            amount=amount,
+            currency=currency,
+            payment_method='online',  # You can modify this based on your needs
+            payment_link=payment_link,
+            transaction_id=transaction_id,
+            status='pending'
+        )
+        
+        db.session.add(recharge_request)
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Recharge request created successfully',
+            'redirect_url': payment_link
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+
+@app.route('/gift')
+def gift():
+    return render_template('site/gift.html',
+                         user={'is_authenticated': current_user.is_authenticated,
+                               'coins': current_user.coins if current_user.is_authenticated else 0})
+

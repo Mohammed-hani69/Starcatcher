@@ -5,6 +5,37 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from appstarcatcher import db  # استيراد db من التطبيق بدلاً من تعريفه هنا
 import random
 import string
+import json
+
+try:
+    from cryptography.fernet import Fernet
+except ImportError:
+    print("Warning: cryptography module not installed. Please run 'pip install cryptography'")
+    # Provide fallback for encryption
+    class Fernet:
+        @staticmethod
+        def generate_key():
+            return b'dummy_key_for_development_only'
+        
+        def __init__(self, key):
+            self.key = key
+            
+        def encrypt(self, data):
+            return data
+            
+        def decrypt(self, data):
+            return data
+
+import os
+
+# Get encryption key from environment or generate one
+try:
+    ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY', Fernet.generate_key())
+    cipher_suite = Fernet(ENCRYPTION_KEY)
+except Exception as e:
+    print(f"Warning: Error setting up encryption: {e}")
+    ENCRYPTION_KEY = b'dummy_key_for_development_only'
+    cipher_suite = Fernet(ENCRYPTION_KEY)
 
 # دالة لتوليد كود عشوائي
 def generate_random_code():
@@ -40,6 +71,7 @@ class User(UserMixin, db.Model):
     team_collector_reward_collected = db.Column(db.Boolean, default=False)  # Add this new column
     rare_expert_reward_collected = db.Column(db.Boolean, default=False)
     catalog_king_reward_collected = db.Column(db.Boolean, default=False)
+    earned_money = db.Column(db.Float, default=0)  # New field for earned money
 
     # Page permissions
     can_manage_users = db.Column(db.Boolean, default=False)
@@ -59,6 +91,61 @@ class User(UserMixin, db.Model):
     owned_players = db.relationship('UserPlayer', backref='owner', lazy=True, foreign_keys='UserPlayer.user_id')
     pack_purchases = db.relationship('PackPurchase', backref='user', lazy=True)
     user_clubs = db.relationship('UserClub', backref='user', lazy=True)
+
+    # Referral fields
+    referral_code = db.Column(db.String(10), unique=True)
+    referred_by = db.Column(db.String(10), nullable=True)
+    total_referrals = db.Column(db.Integer, default=0)
+    referral_earnings = db.Column(db.Integer, default=0)
+    
+    @staticmethod
+    def generate_referral_code():
+        while True:
+            code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            if not User.query.filter_by(referral_code=code).first():
+                return code
+    
+    def __init__(self, **kwargs):
+        super(User, self).__init__(**kwargs)
+        if not self.referral_code:
+            self.referral_code = self.generate_referral_code()
+
+    @staticmethod
+    def apply_referral_code(referral_code, new_user):
+        """
+        تطبيق كود الإحالة للمستخدم الجديد
+        """
+        if not referral_code:
+            return None
+            
+        referrer = User.query.filter_by(referral_code=referral_code).first()
+        if not referrer or referrer.id == new_user.id:
+            return None
+            
+        # إنشاء سجل الإحالة
+        referral = ReferralCode(
+            referrer_id=referrer.id,
+            referred_id=new_user.id,
+            code_used=referral_code,
+            status='completed'
+        )
+        
+        # تحديث البيانات
+        new_user.referred_by = referral_code
+        referrer.total_referrals += 1
+        
+        # منح المكافآت
+        referrer.referral_earnings += 100  # مكافأة للمحيل
+        new_user.coins += 50  # مكافأة للمستخدم الجديد
+        
+        try:
+            db.session.add(referral)
+            db.session.commit()
+            return referral
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error applying referral code: {e}")
+            return None
 
     @property
     def has_bought_player(self):
@@ -237,6 +324,11 @@ class Subscription(db.Model):
     has_vip_badge_plus = db.Column(db.Boolean, default=False)  # هل يحصل على شارة VIP plus في ملفه الشخصي
     subscription_achievement_coins = db.Column(db.Integer, default=0)  # كوينز إنجاز الاشتراك
     allow_old_ahly_catalog = db.Column(db.Boolean, default=False)  # السماح بجمع كتالوج النادي الأهلي القديم
+    price_egp = db.Column(db.Float, nullable=False, default=0.0)  # السعر بالجنيه المصري
+    price_usd = db.Column(db.Float, nullable=False, default=0.0)  # السعر بالدولار
+    payment_link = db.Column(db.String(255), nullable=True)
+    payment_link_usd = db.Column(db.String(255), nullable=True)
+
 
     def __repr__(self):
         return (f"Subscription(id={self.id}, package_type='{self.package_type}', "
@@ -261,6 +353,7 @@ class UserSubscriptionPurchase(db.Model):
     status = db.Column(db.String(20), default='pending')
     purchase_date = db.Column(db.DateTime, default=datetime.utcnow)
     expiry_date = db.Column(db.DateTime)
+    payment_link = db.Column(db.String(255), nullable=True)
     
     def __repr__(self):
         return f"UserSubscriptionPurchase('{self.id}', '{self.user_id}', '{self.subscription_id}', '{self.status}', '{self.purchase_date}')"
@@ -396,6 +489,131 @@ class Promotion(db.Model):
                 }
         return None
 
+class PaymentMethod(db.Model):
+    __tablename__ = 'payment_methods'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    icon = db.Column(db.String(255))
+    is_active = db.Column(db.Boolean, default=True)
+    is_egypt_only = db.Column(db.Boolean, default=False)
+    wallet_number = db.Column(db.String(50))
+    instructions = db.Column(db.Text)
+    gateway_config = db.Column(db.Text)  # لتخزين إعدادات بوابة الدفع كـ JSON
+    gateway_type = db.Column(db.String(50))  # paymob, fawry, stripe etc
+    gateway_api_key = db.Column(db.String(512))
+    gateway_integration_id = db.Column(db.String(255))
+    gateway_iframe_id = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    @property 
+    def decrypted_api_key(self):
+        """Safely decrypt the API key"""
+        try:
+            if self.gateway_api_key:
+                if isinstance(self.gateway_api_key, bytes):
+                    return cipher_suite.decrypt(self.gateway_api_key).decode()
+                return self.gateway_api_key
+            return None
+        except Exception as e:
+            print(f"Warning: Error decrypting API key: {e}")
+            return None
+
+    def set_api_key(self, api_key):
+        """Safely encrypt API key before storage"""
+        try:
+            if (api_key):
+                self.gateway_api_key = cipher_suite.encrypt(
+                    api_key.encode()
+                )
+        except Exception as e:
+            print(f"Warning: Error encrypting API key: {e}")
+            self.gateway_api_key = None
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'icon': self.icon,
+            'is_active': self.is_active,
+            'is_egypt_only': self.is_egypt_only,
+            'wallet_number': self.wallet_number,
+            'gateway_config': json.loads(self.gateway_config) if self.gateway_config else {},
+            'instructions': self.instructions,
+            'gateway_type': self.gateway_type,
+            'gateway_api_key': self.decrypted_api_key,
+            'gateway_integration_id': self.gateway_integration_id,
+            'gateway_iframe_id': self.gateway_iframe_id
+        }
+
+class WalletRechargeOption(db.Model):
+    __tablename__ = 'wallet_recharge_option'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    coins_amount = db.Column(db.Integer, nullable=False)
+    price_egp = db.Column(db.Float, nullable=False)
+    price_usd = db.Column(db.Float, nullable=False)
+    payment_link = db.Column(db.String(255))
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'coins_amount': self.coins_amount,
+            'price_egp': self.price_egp,
+            'price_usd': self.price_usd,
+            'payment_link': self.payment_link,
+            'is_active': self.is_active,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+
+class WalletRechargeRequest(db.Model):
+    __tablename__ = 'wallet_recharge_requests'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    option_id = db.Column(db.Integer, db.ForeignKey('wallet_recharge_option.id'), nullable=False)
+    amount = db.Column(db.Float, nullable=False)  # المبلغ المطلوب
+    currency = db.Column(db.String(3), nullable=False)  # EGP or USD
+    payment_method = db.Column(db.String(50), nullable=False)  # طريقة الدفع
+    payment_link = db.Column(db.String(255))
+    transaction_id = db.Column(db.String(100), unique=True, nullable=True)  # رقم العملية
+    payment_proof = db.Column(db.String(255), nullable=True)  # رابط صورة إثبات الدفع
+    status = db.Column(db.String(20), default='pending')  # pending, completed, rejected
+    notes = db.Column(db.Text, nullable=True)  # ملاحظات إضافية
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # العلاقات
+    user = db.relationship('User', backref='recharge_requests')
+    option = db.relationship('WalletRechargeOption', backref='requests')
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'option_id': self.option_id,
+            'amount': self.amount,
+            'currency': self.currency,
+            'payment_method': self.payment_method,
+            'transaction_id': self.transaction_id,
+            'payment_proof': self.payment_proof,
+            'status': self.status,
+            'notes': self.notes,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+
+# إضافة index للبحث السريع
+db.Index('idx_recharge_requests_user', WalletRechargeRequest.user_id)
+db.Index('idx_recharge_requests_status', WalletRechargeRequest.status)
+
 # إضافة index للبحث السريع
 db.Index('idx_promotions_active', Promotion.is_active)
 db.Index('idx_promotions_type', Promotion.promotion_type)
@@ -405,3 +623,51 @@ db.Index('idx_user_players_user_id', UserPlayer.user_id)
 db.Index('idx_market_listings_status', UserMarketListing.status)
 db.Index('idx_transactions_date', Transaction.transaction_date)
 db.Index('idx_pack_purchases_user_id', PackPurchase.user_id)
+
+class ReferralCode(db.Model):
+    __tablename__ = 'referral_codes'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    referrer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    referred_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    code_used = db.Column(db.String(10), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(20), default='pending')  # pending, completed, expired
+    
+    # Relationships
+    referrer = db.relationship('User', foreign_keys=[referrer_id], backref='referrals_made')
+    referred = db.relationship('User', foreign_keys=[referred_id], backref='referral_info')
+
+class ReferralReward(db.Model):
+    __tablename__ = 'referral_rewards'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    referral_id = db.Column(db.Integer, db.ForeignKey('referral_codes.id'), nullable=False)
+    coins_amount = db.Column(db.Integer, nullable=False)
+    reward_type = db.Column(db.String(20))  # referrer_bonus, referred_bonus
+    claimed_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationship
+    referral = db.relationship('ReferralCode', backref='rewards')
+
+# Add indexes for better performance
+db.Index('idx_referral_codes_referrer', ReferralCode.referrer_id)
+db.Index('idx_referral_codes_referred', ReferralCode.referred_id)
+db.Index('idx_referral_codes_status', ReferralCode.status)
+db.Index('idx_users_referral_code', User.referral_code)
+
+class Beneficiary(db.Model):
+    __tablename__ = 'beneficiaries'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    commission_rate = db.Column(db.Float, nullable=False) # Percentage (0-100)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=True)
+    
+    # Relationship with User
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user = db.relationship('User', backref='beneficiary')
+
+    def __repr__(self):
+        return f'<Beneficiary {self.email}>'

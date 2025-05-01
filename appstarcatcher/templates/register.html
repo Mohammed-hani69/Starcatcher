@@ -571,6 +571,21 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-ticket-alt"></i> {{ form.referral_code.label }}
+                    </label>
+                    {{ form.referral_code(class="form-control" + (" is-invalid" if form.referral_code.errors else "")) }}
+                    {% if form.referral_code.errors %}
+                        {% for error in form.referral_code.errors %}
+                            <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    <small class="text-muted">
+                        احصل على 50 عملة مجانية عند استخدام كود إحالة صحيح!
+                    </small>
+                </div>
+
                 <div class="text-center mt-4">
                     <button type="submit" class="btn btn-primary px-5">
                         <i class="fas fa-user-plus me-2"></i> إنشاء الحساب

@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Catcher - Gifts</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sigmar+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap">
+    <style>
+        :root {
+            --primary-red: #e50914;
+            --dark-red: #8b0000;
+            --accent-gold: #ffd700;
+            --accent-silver: #c0c0c0;
+            --accent-bronze: #cd7f32;
+            --black: #121212;
+            --dark-gray: #1a1a1a;
+            --light-gray: #2d2d2d;
+            --text-light: #f8f9fa;
+        }
+        
+        body {
+            background-color: var(--black);
+            color: var(--text-light);
+            font-family: 'Tajawal', sans-serif;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDYwIDYwIj48cGF0aCBkPSJNMTIgMTJIMFYwaDEydjEyem02IDZIMTJWNmg2djEyem0xMiAwSDI0VjBoNnYxOHptNiA2SDMwVjEyaDZ2MTJ6IiBvcGFjaXR5PSIuMDgiIGZpbGw9IiNmZmYiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjwvc3ZnPg==');
+        }
+        
+        /* Navbar Styling */
+        .navbar {
+            background: linear-gradient(to right, #000000, #440000);
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+            padding: 15px 0;
+        }
+        
+        .navbar-brand {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-red) !important;
+            text-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
+            transition: all 0.3s ease;
+            padding-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand img {
+            height: 70px;
+            width: auto;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link {
+            color: var(--text-light) !important;
+            font-weight: 600;
+            margin: 0 10px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            right: 0;
+            background-color: var(--primary-red);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover:after {
+            width: 100%;
+        }
+
+        .coins-display {
+            background-color: rgba(255, 215, 0, 0.2);
+            border-radius: 20px;
+            padding: 5px 15px;
+            margin-left: 15px;
+            color: var(--accent-gold);
+            font-weight: 700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            position: relative;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), 
+                url('/api/placeholder/1200/500') center/cover no-repeat;
+            padding: 100px 0;
+            margin-bottom: 50px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            color: var(--primary-red);
+            animation: glow 2s infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 5px var(--primary-red), 0 0 10px var(--primary-red);
+            }
+            to {
+                text-shadow: 0 0 10px var(--primary-red), 0 0 20px var(--primary-red), 0 0 30px var(--dark-red);
+            }
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        /* Ranking Section */
+        .ranking-section {
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .section-title {
+            position: relative;
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            color: var(--primary-red);
+        }
+
+        .section-title:after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, var(--dark-red), var(--accent-gold), var(--dark-red));
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .top-winner {
+            background: linear-gradient(135deg, var(--dark-gray), var(--light-gray));
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .top-winner:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .winner-rank {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 2rem;
+            font-weight: bold;
+            z-index: 2;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .rank-1 {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: var(--black);
+        }
+
+        .rank-2 {
+            background: linear-gradient(135deg, #C0C0C0, #E0E0E0);
+            color: var(--black);
+        }
+
+        .rank-3 {
+            background: linear-gradient(135deg, #CD7F32, #A05A2C);
+            color: var(--black);
+        }
+
+        .rank-others {
+            background: linear-gradient(135deg, var(--dark-red), var(--primary-red));
+            color: var(--text-light);
+            font-size: 1.5rem;
+        }
+
+        .winner-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .winner-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-left: 20px;
+            border: 3px solid var(--primary-red);
+            box-shadow: 0 0 15px rgba(229, 9, 20, 0.3);
+        }
+
+        .winner-name {
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .winner-score {
+            color: var(--accent-gold);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .gift-details {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .gift-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-bottom: 10px;
+        }
+
+        .gift-description {
+            color: var(--text-light);
+            margin-bottom: 15px;
+        }
+
+        .gift-value {
+            display: inline-block;
+            background: rgba(229, 9, 20, 0.2);
+            color: var(--primary-red);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        /* Gifts Grid */
+        .gifts-grid {
+            margin-top: 50px;
+        }
+
+        .gift-card {
+            border-radius: 15px;
+            overflow: hidden;
+            height: 100%;
+            background: linear-gradient(145deg, var(--dark-gray), var(--light-gray));
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            position: relative;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(229, 9, 20, 0.3);
+        }
+
+        .gift-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(229, 9, 20, 0.3);
+        }
+
+        .gift-image {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .gift-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: fit;
+            transition: transform 0.5s ease;
+        }
+
+        .gift-card:hover .gift-image img {
+            transform: scale(1.1);
+        }
+
+        .gift-level {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            z-index: 2;
+        }
+
+        .level-1 {
+            background: linear-gradient(to right, var(--accent-gold), #FFA500);
+            color: var(--black);
+        }
+
+        .level-2 {
+            background: linear-gradient(to right, var(--accent-silver), #E0E0E0);
+            color: var(--black);
+        }
+
+        .level-3 {
+            background: linear-gradient(to right, var(--accent-bronze), #A05A2C);
+            color: var(--black);
+        }
+
+        .level-4 {
+            background: linear-gradient(to right, var(--primary-red), var(--dark-red));
+            color: var(--text-light);
+        }
+
+        .level-5 {
+            background: linear-gradient(to right, #6441A5, #2a0845);
+            color: var(--text-light);
+        }
+
+        .gift-content {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .gift-name {
+            color: var (--text-light);
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .gift-text {
+            color: #aaa;
+            margin-bottom: 15px;
+            min-height: 50px;
+        }
+
+        .gift-points {
+            color: var(--accent-gold);
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .gift-btn {
+            width: 100%;
+            border-radius: 25px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+            background: linear-gradient(to right, var(--primary-red), var(--dark-red));
+            border: none;
+            color: var(--text-light);
+            padding: 10px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .gift-btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(to right, var(--dark-red), var(--primary-red));
+            transition: all 0.3s ease;
+            z-index: -1;
+        }
+
+        .gift-btn:hover:before {
+            width: 100%;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(to right, rgba(17, 17, 17, 0.9), rgba(68, 0, 0, 0.9)), url('/api/placeholder/1200/300') center/cover no-repeat;
+            padding: 50px 0;
+            text-align: center;
+            border-radius: 15px;
+            margin: 50px 0;
+        }
+
+        .cta-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--accent-gold);
+        }
+
+        .cta-text {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-btn {
+            background: linear-gradient(to right, var(--primary-red), var(--dark-red));
+            color: var(--text-light);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .cta-btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(to right, var(--dark-red), var(--primary-red));
+            transition: all 0.3s ease;
+            z-index: -1;
+        }
+
+        .cta-btn:hover:before {
+            width: 100%;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(to right, #000000, #1a0000);
+            padding: 30px 0;
+            text-align: center;
+        }
+
+        .social-icons {
+            margin-bottom: 20px;
+        }
+
+        .social-icons a {
+            color: var (--text-light);
+            font-size: 1.5rem;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            color: var(--primary-red);
+            transform: translateY(-5px);
+        }
+
+        .footer-text {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .section-title {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 70px 0;
+            }
+            
+            .top-winner {
+                padding: 15px;
+            }
+            
+            .winner-rank {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+            
+            .winner-avatar {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .winner-name {
+                font-size: 1.2rem;
+            }
+            
+            .gift-title {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Stars Animation */
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' d='M0 0h24v24H0z'/%3E%3Cpath d='M12 18.26l-7.053 3.948 1.575-7.928L.587 8.792l8.027-.952L12 .5l3.386 7.34 8.027.952-5.935 5.488 1.575 7.928z' fill='rgba(255, 215, 0, 0.5)'/%3E%3C/svg%3E");
+            width: 15px;
+            height: 15px;
+            animation: falling linear infinite;
+        }
+
+        @keyframes falling {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Modal Styling */
+        .modal-content {
+            background: linear-gradient(to bottom, var(--dark-gray), var(--black));
+            border-radius: 15px;
+            border: 1px solid var(--primary-red);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(229, 9, 20, 0.2);
+            padding: 15px 20px;
+        }
+
+        .modal-title {
+            color: var(--primary-red);
+            font-weight: 700;
+        }
+
+        .modal-body {
+            padding: 20px;
+            color: var(--text-light);
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(229, 9, 20, 0.2);
+            padding: 15px 20px;
+        }
+
+        .modal-btn {
+            background: linear-gradient(to right, var(--primary-red), var(--dark-red));
+            color: var(--text-light);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn:hover {
+            background: linear-gradient(to right, var(--dark-red), var(--primary-red));
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}" alt="Star Catcher">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <span class="coins-display">
+                            <i class="fas fa-coins me-2"></i>
+                            {{ user.coins }} Coins
+                        </span>
+                        <a class="nav-link" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user me-2"></i>
+                            Profile
+                        </a>
+                        <a class="nav-link" href="{{ url_for('myplayers') }}">
+                            <i class="fas fa-users me-2"></i>
+                            My Players
+                        </a>
+                        <a class="nav-link" href="{{ url_for('catalog') }}">
+                            <i class="fas fa-book me-2"></i>
+                            Catalog
+                        </a>
+                        <a class="nav-link" href="{{ url_for('market') }}">
+                            <i class="fas fa-store me-2"></i>
+                            Market
+                        </a>
+                        <a class="nav-link" href="{{ url_for('orders') }}">
+                            <i class="fas fa-receipt me-2"></i>
+                            Orders
+                        </a>                        
+                        <a class="nav-link text-danger" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            Logout
+                        </a>
+                    {% else %}
+                        <a class="nav-link" href="{{ url_for('login') }}">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            Login
+                        </a>
+                        <a class="nav-link" href="{{ url_for('register') }}">
+                            <i class="fas fa-user-plus me-2"></i>
+                            Register
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Gift Content -->
+    <div class="gifts-container my-5">
+        <!-- Hero Section -->
+        <div class="text-center mb-5 position-relative gift-hero">
+            <div class="overlay"></div>
+            <h1 class="display-4 fw-bold text-white position-relative">Star Catcher Prizes</h1>
+            <p class="lead text-white position-relative">Collect points and win valuable prizes</p>
+        </div>
+
+        <!-- Gift Grid -->
+        <div class="container">
+            <div class="row g-4">
+                <!-- Ultimate Prize -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="gift-card h-100">
+                        <div class="gift-image">
+                            <img src="{{ url_for('static', filename='image/50,000 جنيه مصري.png') }}" alt="Cash Prize" class="img-fluid">
+                        </div>
+                        <div class="gift-content">
+                            <h3>50,000 EGP</h3>
+                            <p>Grand Prize</p>
+                            <button class="btn btn-primary gift-btn" onclick="showPrizeConditions('ultimate', '50,000 EGP Prize', ['Rank #1 in the game', 'Complete all clubs 100%', 'Collect 50 rare players'])">Prize Conditions</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- iPhone Prize -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="gift-card h-100">
+                        <div class="gift-image">
+                            <img src="{{ url_for('static', filename='image/15 Pro Max.png') }}" alt="iPhone" class="img-fluid">
+                        </div>
+                        <div class="gift-content">
+                            <h3>iPhone 15 Pro Max</h3>
+                            <p>Latest Apple Release</p>
+                            <button class="btn btn-primary gift-btn" onclick="showPrizeConditions('platinum', 'iPhone 15 Pro Max', ['Rank #2 in the game', 'Complete 15 clubs 100%', 'Collect 30 rare players'])">Prize Conditions</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PlayStation Prize -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="gift-card h-100">
+                        <div class="gift-image">
+                            <img src="{{ url_for('static', filename='image/PlayStation 5.png') }}" alt="PS5" class="img-fluid">
+                        </div>
+                        <div class="gift-content">
+                            <h3>PlayStation 5</h3>
+                            <p>With 2 Controllers and 3 Games</p>
+                            <button class="btn btn-primary gift-btn" onclick="showPrizeConditions('gold', 'PlayStation 5', ['Rank #3 in the game', 'Complete 10 clubs 100%', 'Collect 20 rare players'])">Prize Conditions</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gaming PC Prize -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="gift-card h-100">
+                        <div class="gift-image">
+                            <img src="{{ url_for('static', filename='image/كمبيوتر ألعاب احترافي.png') }}" alt="Gaming PC" class="img-fluid">
+                        </div>
+                        <div class="gift-content">
+                            <h3>Pro Gaming PC</h3>
+                            <p>With 240Hz Monitor and Full Setup</p>
+                            <button class="btn btn-primary gift-btn" onclick="showPrizeConditions('diamond', 'Pro Gaming PC', ['Rank #4 or #5', 'Complete 8 clubs 100%', 'Collect 15 rare players'])">Prize Conditions</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xbox Prize -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="gift-card h-100">
+                        <div class="gift-image">
+                            <img src="{{ url_for('static', filename='image/Xbox Series X.png') }}" alt="Xbox" class="img-fluid">
+                        </div>
+                        <div class="gift-content">
+                            <h3>Xbox Series X</h3>
+                            <p>With 1-Year Game Pass</p>
+                            <button class="btn btn-primary gift-btn" onclick="showPrizeConditions('silver', 'Xbox Series X', ['Rank #6 to #10', 'Complete 5 clubs 100%', 'Collect 10 rare players'])">Prize Conditions</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Special Prize -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="gift-card h-100">
+                        <div class="gift-image">
+                            <img src="{{ url_for('static', filename='image/large.jpg') }}" alt="VIP Tickets" class="img-fluid">
+                        </div>
+                        <div class="gift-content">
+                            <h3>Al-Ahly VIP Tickets</h3>
+                            <p>5 VIP Tickets for Full Season</p>
+                            <button class="btn btn-primary gift-btn" onclick="showPrizeConditions('bronze', 'VIP Tickets', ['Complete Al-Ahly club 100%', 'Collect 5 rare Al-Ahly players', 'Participate in 50 matches'])">Prize Conditions</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prize Conditions Modal -->
+    <div class="modal fade" id="prizeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Prize Conditions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-trophy fa-3x mb-3 prize-icon"></i>
+                        <h4 id="prizeName" class="mb-4"></h4>
+                    </div>
+                    <div class="conditions-list text-start" id="conditionsList"></div>
+                </div>
+                <div class="modal-footer justify-content-start">
+                    <button type="button" class="btn modal-btn" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .prize-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .prize-icon.ultimate { color: #FFD700; }
+        .prize-icon.platinum { color: #E5E4E2; }
+        .prize-icon.gold { color: #FFD700; }
+        .prize-icon.diamond { color: #B9F2FF; }
+        .prize-icon.silver { color: #C0C0C0; }
+        .prize-icon.bronze { color: #CD7F32; }
+
+        .conditions-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .condition-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .condition-item i {
+            margin-left: 10px;
+            color: var(--primary-red);
+        }
+
+        /* تحديث تصميم نافذة الشروط */
+        #prizeModal .modal-content {
+            background: linear-gradient(145deg, var(--dark-gray), var(--black));
+            border: 2px solid var(--primary-red);
+        }
+        
+        #prizeModal .modal-header {
+            border-bottom: 1px solid rgba(229, 9, 20, 0.2);
+            padding: 1rem;
+        }
+        
+        #prizeModal .modal-title {
+            color: var(--accent-gold);
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        #prizeModal .condition-item {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        #prizeModal .condition-item:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(-5px);
+        }
+        
+        #prizeModal .condition-item i {
+            margin-left: 15px;
+            color: var(--accent-gold);
+            font-size: 1.2rem;
+        }
+        
+        #prizeModal #prizeName {
+            color: var(--primary-red);
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(229, 9, 20, 0.3);
+        }
+        
+        #prizeModal .modal-btn {
+            background: linear-gradient(to right, var(--primary-red), var(--dark-red));
+            color: white;
+            padding: 8px 25px;
+            border-radius: 20px;
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        #prizeModal .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3);
+        }
+    </style>
+
+    <script>
+        function showPrizeConditions(type, prizeName, conditions) {
+            const modal = new bootstrap.Modal(document.getElementById('prizeModal'));
+            document.getElementById('prizeName').textContent = prizeName;
+            
+            // تحديث أيقونة الجائزة وتطبيق التأثير الحركي
+            const icon = document.querySelector('.prize-icon');
+            icon.classList.remove('ultimate', 'platinum', 'gold', 'diamond', 'silver', 'bronze');
+            icon.classList.add(type);
+            icon.style.animation = 'bounceIn 0.5s';
+
+            // إضافة الشروط مع تأثير حركي
+            const conditionsList = document.getElementById('conditionsList');
+            conditionsList.innerHTML = conditions.map((condition, index) => `
+                <div class="condition-item" style="animation: slideInRight ${0.3 + index * 0.1}s">
+                    <i class="fas fa-check-circle"></i>
+                    <span>${condition}</span>
+                </div>
+            `).join('');
+
+            modal.show();
+        }
+    </script>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+
+    <script>
+        function showPrizeConditions(type, prizeName, conditions) {
+            const modal = new bootstrap.Modal(document.getElementById('prizeModal'));
+            document.getElementById('prizeName').textContent = prizeName;
+            
+            // تحديث أيقونة الجائزة
+            const icon = document.querySelector('.prize-icon');
+            icon.classList.remove('ultimate', 'platinum', 'gold', 'diamond', 'silver', 'bronze');
+            icon.classList.add(type);
+
+            // إضافة الشروط
+            const conditionsList = document.getElementById('conditionsList');
+            conditionsList.innerHTML = conditions.map(condition => `
+                <div class="condition-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>${condition}</span>
+                </div>
+            `).join('');
+
+            // عرض المودال
+            modal.show();
+        }
+    </script>
+</body>
+</html>

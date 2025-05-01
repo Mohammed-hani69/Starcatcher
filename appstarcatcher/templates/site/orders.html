@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap">
+
+    <style>
+        :root {
+            --primary-red: #e50914;
+            --dark-red: #b30710;
+            --accent-gold: #ffc107;
+            --black: #121212;
+            --dark-gray: #1a1a1a;
+            --lighter-gray: #333333;
+        }
+
+        /* Navbar Links Styling */
+        .navbar-nav .nav-link {
+            color: #ffffff !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            padding: 8px 15px;
+            border-radius: 8px;
+        }
+
+        .navbar-nav .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .navbar-nav .nav-link.text-danger {
+            color: var(--primary-red) !important;
+        }
+
+        .navbar-nav .nav-link.text-danger:hover {
+            background: rgba(229, 9, 20, 0.1);
+        }
+
+        .navbar-nav .nav-link i {
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover i {
+            transform: scale(1.2);
+        }
+
+        body {
+            background-color: var(--black);
+            color: white;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            background: linear-gradient(to right, #000000, #440000);
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.2);
+            padding: 15px 0;
+        }
+
+        .navbar-brand img {
+            height: 65px;
+            width: auto;
+            transition: all 0.3s ease;
+        }
+
+        .coins-display {
+            background-color: rgba(255, 193, 7, 0.2);
+            border-radius: 20px;
+            padding: 5px 15px;
+            margin-left: 15px;
+            color: var(--accent-gold);
+            font-weight: 700;
+        }
+
+        /* Enhanced Orders Section */
+        .section {
+            background: linear-gradient(145deg, var(--dark-gray), var(--black));
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .section-title {
+            color: var(--primary-red);
+            font-weight: bold;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Enhanced Card Styling */
+        .card {
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.95), rgba(38, 38, 38, 0.95));
+            border: 2px solid var(--primary-red);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(229, 9, 20, 0.4);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            color: var(--accent-gold);
+            font-size: 1.4rem;
+            margin-bottom: 1.2rem;
+            border-bottom: 2px solid rgba(255, 193, 7, 0.3);
+            padding-bottom: 0.5rem;
+        }
+
+        .card-text {
+            color: #e1e1e1;
+            margin-bottom: 0.8rem;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-text i {
+            margin-right: 8px;
+            color: var(--accent-gold);
+        }
+
+        /* Enhanced Badge Styling */
+        .badge {
+            padding: 0.6em 1.2em;
+            border-radius: 50px;
+            font-size: 0.9em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .badge.bg-success {
+            background: linear-gradient(45deg, #198754, #20c997) !important;
+            box-shadow: 0 2px 10px rgba(25, 135, 84, 0.3);
+        }
+
+        .badge.bg-danger {
+            background: linear-gradient(45deg, #dc3545, #ff4d5c) !important;
+            box-shadow: 0 2px 10px rgba(220, 53, 69, 0.3);
+        }
+
+        .badge.bg-warning {
+            background: linear-gradient(45deg, #ffc107, #ffcd39) !important;
+            box-shadow: 0 2px 10px rgba(255, 193, 7, 0.3);
+        }
+
+        /* Empty State Styling */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(26, 26, 26, 0.5);
+            border-radius: 15px;
+            margin: 2rem 0;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: #e1e1e1;
+            font-size: 1.2rem;
+        }
+
+        /* Responsive Navbar */
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                background: linear-gradient(to bottom, var(--black), var(--dark-gray));
+                padding: 1rem;
+                border-radius: 10px;
+                margin-top: 1rem;
+            }
+            
+            .navbar-nav {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}" alt="Star Catcher">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto">
+                    <span class="coins-display">
+                        <i class="fas fa-coins me-2"></i>
+                        {% if user %}{{ user.coins }}{% else %}0{% endif %} Coins
+                    </span>
+                    <a class="nav-link" href="{{ url_for('profile') }}">
+                        <i class="fas fa-user me-2"></i>الملف الشخصي
+                    </a>
+                    <a class="nav-link" href="{{ url_for('myplayers') }}">
+                        <i class="fas fa-users me-2"></i>اللاعبين
+                    </a>
+                    <a class="nav-link" href="{{ url_for('catalog') }}">
+                        <i class="fas fa-book me-2"></i>الكتالوج
+                    </a>
+                    <a class="nav-link" href="{{ url_for('market') }}">
+                        <i class="fas fa-store me-2"></i>السوق
+                    </a>
+                    <a class="nav-link text-danger" href="{{ url_for('logout') }}">
+                        <i class="fas fa-sign-out-alt me-2"></i>تسجيل خروج
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <!-- Subscription Orders Section -->
+        <div class="section">
+            <h2 class="section-title">
+                <i class="fas fa-shopping-cart me-2"></i>
+                طلبات شراء الباقات
+            </h2>
+            <div class="row g-4">
+                {% if subscription_orders %}
+                    {% for order in subscription_orders %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-crown me-2"></i>
+                                    {{ order.package_type }}
+                                </h5>
+                                <p class="card-text">
+                                    <span><i class="fas fa-tag"></i> السعر:</span>
+                                    <span>{{ order.price }} ج.م</span>
+                                </p>
+                                <p class="card-text">
+                                    <span><i class="fas fa-calendar-plus"></i> تاريخ الشراء:</span>
+                                    <span>{{ order.purchase_date.strftime('%Y-%m-%d') }}</span>
+                                </p>
+                                <p class="card-text">
+                                    <span><i class="fas fa-calendar-times"></i> تاريخ الانتهاء:</span>
+                                    <span>{{ order.expiry_date.strftime('%Y-%m-%d') }}</span>
+                                </p>
+                                <p class="card-text">
+                                    <span><i class="fas fa-info-circle"></i> الحالة:</span>
+                                    <span class="badge {% if order.status == 'active' %}bg-success{% elif order.status == 'expired' %}bg-danger{% else %}bg-warning{% endif %}">
+                                        {{ order.status }}
+                                    </span>
+                                </p>
+                                {% if order.status == 'expired' %}
+                                <div class="mt-3 text-center">
+                                    <a href="{{ order.payment_link }}" class="btn btn-primary" target="_blank">
+                                        <i class="fas fa-credit-card me-2"></i>
+                                        دفع الاشتراك
+                                    </a>
+                                    <button class="btn btn-danger ms-2 delete-order" data-order-id="{{ order.id }}">
+                                        <i class="fas fa-trash me-2"></i>
+                                        حذف الطلب
+                                    </button>
+                                </div>
+                                {% elif order.status != 'active' %}
+                                <div class="mt-3 text-center">
+                                    <button class="btn btn-danger delete-order" data-order-id="{{ order.id }}">
+                                        <i class="fas fa-trash me-2"></i>
+                                        حذف الطلب
+                                    </button>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                        <div class="empty-state">
+                            <i class="fas fa-shopping-basket mb-3"></i>
+                            <p>لا توجد طلبات شراء باقات</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        
+        // إضافة معالج النقر لجميع أزرار التجديد
+        document.querySelectorAll('.renew-subscription').forEach(button => {
+            button.addEventListener('click', async function() {
+                const subscriptionId = this.dataset.subscriptionId;
+                const price = this.dataset.price;
+                
+                try {
+                    const response = await fetch('/api/purchase_subscription', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            subscription_id: subscriptionId,
+                            payment_method: 'wallet'
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        location.reload(); // تحديث الصفحة بعد نجاح العملية
+                    } else {
+                        alert(data.message || 'حدث خطأ أثناء تجديد الاشتراك');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('حدث خطأ أثناء تجديد الاشتراك');
+                }
+            });
+        });
+
+        
+    });
+    </script>
+</body>
+</html>

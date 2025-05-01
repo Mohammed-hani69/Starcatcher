@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>إدارة المستفيدين - StarCatcher</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/add_player.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            width: 90%;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .status-badge.active {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-badge.inactive {
+            background: #dc3545;
+            color: white;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 5px 10px;
+            margin: 0 2px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .edit-btn { background: #ffc107; }
+        .delete-btn { background: #dc3545; }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: #1a1a1a;
+            border-bottom: 1px solid #333;
+        }
+
+        .burger-menu {
+            display: none;
+            cursor: pointer;
+        }
+
+        .burger-line {
+            width: 25px;
+            height: 3px;
+            background: white;
+            margin: 5px 0;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding: 0.5rem 2rem 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid #333;
+            background: #2a2a2a;
+            color: white;
+        }
+
+        .header-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .header-icon {
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-details {
+            text-align: left;
+        }
+
+        .user-name {
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-role {
+            color: #888;
+            font-size: 0.8rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #4a4a4a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        /* Update Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: #1a1a1a;
+            position: fixed;
+            right: 0;
+            top: 0;
+            padding: 0;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .logo {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid #333;
+            margin-bottom: 1rem;
+            position: sticky;
+            top: 0;
+            background: #1a1a1a;
+            z-index: 2;
+        }
+
+        .nav-section {
+            padding: 0.5rem 0;
+            flex-shrink: 0;
+        }
+
+        .nav-section-title {
+            padding: 0.5rem 1.5rem;
+            color: #888;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .nav-item {
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #fff;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .nav-item i {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-item.active {
+            background: #2a2a2a;
+            position: relative;
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: #ff0000;
+        }
+
+        .logout-section {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid #333;
+            background: #1a1a1a;
+            position: sticky;
+            bottom: 0;
+            z-index: 2;
+        }
+
+        .logout-section .nav-item {
+            padding: 0.6rem 1.5rem;
+        }
+
+        /* Scrollbar Styles */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+
+        /* Adjust main content */
+        .main-content {
+            margin-right: 250px;
+            padding: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .burger-menu {
+                display: block;
+            }
+            .sidebar {
+                transform: translateX(100%);
+                transition: transform 0.3s;
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-right: 0;
+            }
+        }
+
+        /* Add new styles to match add_player.css */
+        body {
+            background-color: #121212;
+            color: white;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .main-content {
+            margin-right: 250px;
+            padding: 2rem;
+            min-height: 100vh;
+            background-color: #121212;
+            transition: margin-right 0.3s ease;
+        }
+
+        .table-container {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table th {
+            background: #2a2a2a;
+            padding: 12px;
+            text-align: right;
+            font-weight: bold;
+            border-bottom: 2px solid #333;
+        }
+
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid #333;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .content-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .add-btn {
+            background: #ff0000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-btn:hover {
+            background: #cc0000;
+        }
+
+        /* Update modal styles */
+        .modal-content {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background-color: #2a2a2a;
+            color: white;
+        }
+
+        .submit-btn,
+        .cancel-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-btn {
+            background: #ff0000;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            background: #cc0000;
+        }
+
+        .cancel-btn {
+            background: #333;
+            color: white;
+            margin-right: 10px;
+        }
+
+        .cancel-btn:hover {
+            background: #444;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .main-content {
+                margin-right: 0;
+            }
+
+            .content-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .add-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div style="margin-top: 40px;" class="logo">
+            <img src="/api/placeholder/45/45" alt="Logo">
+            <span>لوحة التحكم</span>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-title">القائمة الرئيسية</div>
+            <nav>
+                <a href="/dashboard" class="nav-item">
+                    <i>🏠</i>
+                    <span>الرئيسية</span>
+                </a>
+                {% if current_user.can_manage_players == True %}
+                <a href="/add_player" class="nav-item ">
+                    <i>👥</i>
+                    <span>اللاعبين</span>
+                </a>
+                {% endif %}
+                {% if current_user.can_manage_clubs == True %}
+                <a href="/add_club" class="nav-item ">
+                    <i>⚽</i>
+                    <span>الأنديه</span>
+                </a>
+                {% endif %}
+                {% if current_user.can_manage_subscriptions == True %}
+                <a href="/add_subscription" class="nav-item">
+                    <i>🏆</i>
+                    <span>الباقات</span>
+                </a>
+                {% endif %}
+                <!-- إضافة رابط طلبات الشحن -->
+                {% if current_user.can_manage_dashboard == True %}
+                <a href="/admin/recharge-requests" class="nav-item">
+                    <i>💰</i>
+                    <span>طلبات الشحن</span>
+                </a>
+                <a href="/admin/wallet-options" class="nav-item">
+                    <i>💎</i>
+                    <span>خيارات المحفظة</span>
+                </a>
+                <a href="/beneficiaries" class="nav-item  active">
+                    <i>🎭</i>
+                    <span>المستفيدين</span>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+
+        <div class="nav-section">
+            {% if current_user.can_manage_users == True %}
+            <div class="nav-section-title">الإدارة</div>
+            <nav>
+                    <a href="/users" class="nav-item">
+                        <i>👥</i>
+                        <span>المستخدمين</span>
+                    </a>
+                    <a href="/subscription_purchases" class="nav-item">
+                        <i>💳</i>
+                        <span>مشتريات الباقات</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i>⚙️</i>
+                        <span>الإعدادات</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i>📝</i>
+                        <span>التقارير</span>
+                    </a>
+                </nav>
+            </div>
+            {% endif %}
+        <!-- إضافة زر تسجيل الخروج أسفل الشريط الجانبي -->
+    <div class="logout-section">
+        <a href="/" class="nav-item logout-btn">
+            <i class="fas fa-globe"></i>
+            <span>الموقع</span>
+        </a>
+        <a href="/logout" class="nav-item logout-btn">
+            <i>🚪</i>
+            <span>تسجيل الخروج</span>
+        </a>
+    </div>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <button class="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h2 class="header-title">Catcher<span style="color:red">Star</span></h2>
+        
+        <div class="header-actions">
+            <div class="search-box">
+                <input type="text" placeholder="بحث...">
+                <i class="fas fa-search"></i>
+            </div>
+            
+            <div class="header-links">
+                <div class="header-icon">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </div>
+                <div class="header-icon">
+                    <i class="fas fa-envelope"></i>
+                    <span class="notification-badge">5</span>
+                </div>
+            </div>
+
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name">{{username}}</div>
+                    <div class="user-role">مدير النظام</div>
+                </div>
+                <div class="user-avatar">{{username[:1]}}</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="content-header">
+            <h1>إدارة المستفيدين</h1>
+            <button class="add-btn" onclick="showAddBeneficiaryModal()">
+                <i class="fas fa-plus"></i> إضافة مستفيد
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>البريد الإلكتروني</th>
+                        <th>نسبة العمولة</th>
+                        <th>المال المكتسب</th>
+                        <th>تاريخ الإضافة</th>
+                        <th>الحالة</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for beneficiary, user, total_earned in beneficiaries %}
+                    <tr>
+                        <td>{{ beneficiary.email or 'غير محدد' }}</td>
+                        <td>{{ beneficiary.commission_rate or 0 }}%</td>
+                        <td>
+                            {% if user and user.country == 'eg' %}
+                                {{ "%.2f"|format(total_earned or 0) }} جنيه
+                            {% else %}
+                                ${{ "%.2f"|format(total_earned or 0) }}
+                            {% endif %}
+                        </td>
+                        <td>{{ beneficiary.created_at.strftime('%Y-%m-%d') if beneficiary.created_at else 'غير محدد' }}</td>
+                        <td>
+                            <span class="status-badge {{ 'active' if beneficiary.is_active else 'inactive' }}">
+                                {{ 'نشط' if beneficiary.is_active else 'غير نشط' }}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="edit-btn" onclick="editBeneficiary('{{ beneficiary.id }}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="delete-btn" onclick="deleteBeneficiary('{{ beneficiary.id }}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Add Beneficiary Modal -->
+    <div id="addBeneficiaryModal" class="modal">
+        <div class="modal-content">
+            <h2>إضافة مستفيد جديد</h2>
+            <form id="addBeneficiaryForm">
+                <div class="form-group">
+                    <label>البريد الإلكتروني</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>نسبة العمولة (%)</label>
+                    <input type="number" name="commission_rate" min="0" max="100" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">إضافة</button>
+                    <button type="button" class="cancel-btn" onclick="hideAddBeneficiaryModal()">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Beneficiary Modal -->
+    <div id="editBeneficiaryModal" class="modal">
+        <div class="modal-content">
+            <h2>تعديل المستفيد</h2>
+            <form id="editBeneficiaryForm">
+                <input type="hidden" name="beneficiary_id" id="edit_beneficiary_id">
+                <div class="form-group">
+                    <label>البريد الإلكتروني</label>
+                    <input type="email" name="email" id="edit_email" required readonly>
+                </div>
+                <div class="form-group">
+                    <label>نسبة العمولة (%)</label>
+                    <input type="number" name="commission_rate" id="edit_commission_rate" min="0" max="100" required>
+                </div>
+                <div class="form-group">
+                    <label>الحالة</label>
+                    <select name="is_active" id="edit_is_active">
+                        <option value="true">نشط</option>
+                        <option value="false">غير نشط</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">حفظ التغييرات</button>
+                    <button type="button" class="cancel-btn" onclick="hideEditBeneficiaryModal()">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Add beneficiary form handling
+        document.getElementById('addBeneficiaryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                email: e.target.email.value,
+                commission_rate: e.target.commission_rate.value
+            };
+
+            try {
+                const response = await fetch('/add_beneficiary', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert(data.message);
+                    
+                    // إضافة الصف الجديد مباشرة للجدول
+                    if (data.beneficiary) {
+                        const tbody = document.querySelector('.data-table tbody');
+                        const newRow = document.createElement('tr');
+                        newRow.innerHTML = `
+                            <td>${data.beneficiary.email}</td>
+                            <td>${data.beneficiary.commission_rate}%</td>
+                            <td>${data.beneficiary.total_earned}</td>
+                            <td>${data.beneficiary.created_at}</td>
+                            <td>
+                                <span class="status-badge ${data.beneficiary.is_active ? 'active' : 'inactive'}">
+                                    ${data.beneficiary.is_active ? 'نشط' : 'غير نشط'}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="edit-btn" onclick="editBeneficiary('${data.beneficiary.id}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="delete-btn" onclick="deleteBeneficiary('${data.beneficiary.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(newRow);
+                    }
+                    
+                    // إعادة تعيين النموذج وإخفاء النافذة المنبثقة
+                    e.target.reset();
+                    hideAddBeneficiaryModal();
+                } else {
+                    alert(data.message || 'حدث خطأ أثناء إضافة المستفيد');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء إضافة المستفيد');
+            }
+        });
+
+        // Modal functions
+        function showAddBeneficiaryModal() {
+            document.getElementById('addBeneficiaryModal').style.display = 'block';
+        }
+
+        function hideAddBeneficiaryModal() {
+            document.getElementById('addBeneficiaryModal').style.display = 'none';
+        }
+
+        function editBeneficiary(id) {
+            fetch(`/get_beneficiary/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('edit_beneficiary_id').value = id;
+                    document.getElementById('edit_email').value = data.email;
+                    document.getElementById('edit_commission_rate').value = data.commission_rate;
+                    document.getElementById('edit_is_active').value = data.is_active;
+                    document.getElementById('editBeneficiaryModal').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('حدث خطأ أثناء تحميل بيانات المستفيد');
+                });
+        }
+
+        document.getElementById('editBeneficiaryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit_beneficiary_id').value;
+            
+            const formData = {
+                email: document.getElementById('edit_email').value,
+                commission_rate: document.getElementById('edit_commission_rate').value,
+                is_active: document.getElementById('edit_is_active').value === 'true'
+            };
+
+            try {
+                const response = await fetch(`/update_beneficiary/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.message || 'حدث خطأ أثناء تحديث المستفيد');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء تحديث المستفيد');
+            }
+        });
+
+        function deleteBeneficiary(id) {
+            if (confirm('هل أنت متأكد من حذف هذا المستفيد؟')) {
+                fetch(`/delete_beneficiary/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert(data.message || 'حدث خطأ أثناء حذف المستفيد');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('حدث خطأ أثناء حذف المستفيد');
+                });
+            }
+        }
+
+        function hideEditBeneficiaryModal() {
+            document.getElementById('editBeneficiaryModal').style.display = 'none';
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Add new script for burger menu
+        document.querySelector('.burger-menu').addEventListener('click', () => {
+            document.querySelector('.sidebar').classList.toggle('active');
+        });
+
+        // Add mobile menu toggle functionality
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

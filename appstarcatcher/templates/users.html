@@ -776,6 +776,21 @@
                     <i class="fas fa-flag"></i>
                     <span>الباقات</span>
                 </a>
+                <!-- إضافة رابط طلبات الشحن -->
+                {% if current_user.can_manage_dashboard == True %}
+                <a href="/admin/recharge-requests" class="nav-item">
+                    <i>💰</i>
+                    <span>طلبات الشحن</span>
+                </a>
+                <a href="/admin/wallet-options" class="nav-item">
+                    <i>💎</i>
+                    <span>خيارات المحفظة</span>
+                </a>
+                <a href="/beneficiaries" class="nav-item">
+                    <i>🎭</i>
+                    <span>المستفيدين</span>
+                </a>
+                {% endif %}
             </nav>
 
             <div class="nav-section-title">إدارة النظام</div>

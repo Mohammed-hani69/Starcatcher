@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>إدارة طرق الدفع - Starcatcher</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <style>
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .slide-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 1001;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .slide-modal.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translate(-50%, -60%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, -50%);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close-modal:hover {
+            color: #000;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+            outline: none;
+        }
+
+        .error-feedback {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .form-loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .form-spinner {
+            display: none;
+            margin-right: 8px;
+        }
+
+        .gateway-fields {
+            padding: 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="/api/placeholder/45/45" alt="Logo">
+            <span>لوحة التحكم</span>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-title">القائمة الرئيسية</div>
+            <nav>
+                <a href="/dashboard" class="nav-item">
+                    <i>🏠</i>
+                    <span>الرئيسية</span>
+                </a>
+                <a href="/payment-methods" class="nav-item active">
+                    <i>💳</i>
+                    <span>طرق الدفع</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="logout-section">
+            <a href="/" class="nav-item logout-btn">
+                <i class="fas fa-globe"></i>
+                <span>الموقع</span>
+            </a>
+            <a href="/logout" class="nav-item logout-btn">
+                <i>🚪</i>
+                <span>تسجيل الخروج</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="burger-menu">
+            <div class="burger-line"></div>
+            <div class="burger-line"></div>
+            <div class="burger-line"></div>
+        </div>
+        
+        <h2 class="header-title">Catcher<span style="color:red">Star</span></h2>
+        
+        <div class="header-actions">
+            <div class="search-box">
+                <input type="text" placeholder="بحث...">
+                <i>🔍</i>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name">{{username}}</div>
+                    <div class="user-role">مدير النظام</div>
+                </div>
+                <div class="user-avatar">{{username[:1]}}</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-grid">
+            <div class="market-section">
+                <div class="section-header">
+                    <h3>إدارة طرق الدفع</h3>
+                    <button class="action-button" onclick="showAddModal()">
+                        <i class="fas fa-plus"></i> إضافة طريقة دفع جديدة
+                    </button>
+                </div>
+
+                <div class="payment-methods-list">
+                    {% for method in payment_methods %}
+                    <div class="payment-method-card">
+                        <div class="method-icon">
+                            <img src="{{ url_for('static', filename='images/payment/' + (method.icon or 'default-payment.png')) }}" 
+                                 alt="{{ method.name }}">
+                        </div>
+                        <div class="method-details">
+                            <h3>{{ method.name }}</h3>
+                            <p>{{ method.description }}</p>
+                            <div class="method-info">
+                                <span>رقم المحفظة: {{ method.wallet_number }}</span>
+                                <span>{{ 'مصر فقط' if method.is_egypt_only else 'عالمي' }}</span>
+                                <span class="status-{{ 'active' if method.is_active else 'inactive' }}">
+                                    {{ 'نشط' if method.is_active else 'غير نشط' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="method-actions">
+                            <button class="action-button" onclick="editMethod({{ method.id }})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-button delete-btn" onclick="deleteMethod({{ method.id }})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for Add/Edit -->
+    <div class="modal-overlay" id="paymentMethodModalOverlay"></div>
+    <div class="slide-modal" id="paymentMethodModal">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modalTitle">إضافة طريقة دفع جديدة</h3>
+            <button type="button" class="close-modal" onclick="closeModal()">×</button>
+        </div>
+        
+        <div class="modal-body">
+            <form id="paymentMethodForm" enctype="multipart/form-data">
+                <div class="form-section">
+                    <h4>معلومات أساسية</h4>
+                    
+                    <div class="form-group">
+                        <label class="form-label">اسم طريقة الدفع *</label>
+                        <input type="text" class="form-input" id="methodName" required>
+                        <div id="methodNameError" class="error-feedback">هذا الحقل مطلوب</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">الوصف</label>
+                        <textarea class="form-input" id="methodDescription"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">رقم المحفظة (اختياري)</label>
+                        <input type="text" class="form-input" id="walletNumber">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">تعليمات</label>
+                        <textarea class="form-input" id="methodInstructions"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="iconInput" class="form-label">أيقونة طريقة الدفع</label>
+                        <input type="file" class="form-control" id="iconInput" name="icon" accept="image/*">
+                        <small class="text-muted">يجب أن تكون الصورة بصيغة PNG, JPG, أو GIF</small>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4>تفاصيل بوابة الدفع</h4>
+                    
+                    <div class="form-group">
+                        <label class="form-label">نوع بوابة الدفع *</label>
+                        <select class="form-input" id="gatewayType" onchange="toggleGatewayFields()">
+                            <option value="">اختر بوابة الدفع</option>
+                            <option value="paymob">PayMob</option>
+                            <option value="fawry">Fawry</option>
+                            <option value="stripe">Stripe</option>
+                        </select>
+                        <div id="gatewayTypeError" class="error-feedback">يرجى اختيار بوابة الدفع</div>
+                    </div>
+
+                    <!-- PayMob Fields -->
+                    <div id="paymobFields" class="gateway-fields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">PayMob API Key</label>
+                            <input type="text" class="form-input" id="paymobApiKey">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Integration ID</label>
+                            <input type="text" class="form-input" id="integrationId">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">IFRAME ID</label>
+                            <input type="text" class="form-input" id="iframeId">
+                        </div>
+                    </div>
+
+                    <!-- Fawry Fields -->
+                    <div id="fawryFields" class="gateway-fields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Merchant Code</label>
+                            <input type="text" class="form-input" id="merchantCode">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Security Key</label>
+                            <input type="text" class="form-input" id="securityKey">
+                        </div>
+                    </div>
+
+                    <!-- Stripe Fields -->
+                    <div id="stripeFields" class="gateway-fields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Publishable Key</label>
+                            <input type="text" class="form-input" id="publishableKey">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Secret Key</label>
+                            <input type="text" class="form-input" id="secretKey">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-checkbox">
+                        <input type="checkbox" id="isEgyptOnly">
+                        <span>متاح في مصر فقط</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-checkbox">
+                        <input type="checkbox" id="isActive" checked>
+                        <span>نشط</span>
+                    </label>
+                </div>
+            </form>
+        </div>
+        
+        <div class="modal-footer">
+            <button type="button" class="action-button" onclick="closeModal()">إلغاء</button>
+            <button type="submit" class="action-button primary-button" onclick="savePaymentMethod(event)">
+                <span class="form-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </span>
+                حفظ
+            </button>
+        </div>
+    </div>
+
+    <div class="sidebar-overlay"></div>
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addButton = document.querySelector('.action-button');
+            const modal = document.getElementById('paymentMethodModal');
+            const modalOverlay = document.getElementById('paymentMethodModalOverlay');
+            
+            function showModal() {
+                console.log('Showing modal');
+                modalOverlay.style.display = 'block';
+                modal.style.display = 'block';
+                setTimeout(() => modal.classList.add('show'), 10);
+            }
+            
+            function hideModal() {
+                console.log('Hiding modal');
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    modalOverlay.style.display = 'none';
+                }, 300);
+            }
+            
+            // تعديل وظيفة showAddModal
+            window.showAddModal = function() {
+                showModal();
+            };
+            
+            // تعديل وظيفة closeModal
+            window.closeModal = function() {
+                hideModal();
+            };
+            
+            // إغلاق النافذة عند النقر خارجها
+            modalOverlay.addEventListener('click', function(event) {
+                if (event.target === modalOverlay) {
+                    hideModal();
+                }
+            });
+            
+            // إغلاق النافذة باستخدام زر ESC
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    hideModal();
+                }
+            });
+        });
+
+        // تحديث وظيفة toggleGatewayFields
+        function toggleGatewayFields() {
+            const gatewayType = document.getElementById('gatewayType').value;
+            const allFields = document.querySelectorAll('.gateway-fields');
+            
+            allFields.forEach(field => {
+                field.style.display = 'none';
+            });
+            
+            if (gatewayType) {
+                const selectedFields = document.getElementById(`${gatewayType}Fields`);
+                if (selectedFields) {
+                    selectedFields.style.display = 'block';
+                }
+            }
+        }
+
+        async function savePaymentMethod(event) {
+            event.preventDefault();
+            
+            try {
+                const formData = {
+                    name: document.getElementById('methodName').value,
+                    description: document.getElementById('methodDescription').value,
+                    gateway_type: document.getElementById('gatewayType').value,
+                    is_egypt_only: document.getElementById('isEgyptOnly').checked,
+                    wallet_number: document.getElementById('walletNumber').value,
+                    is_active: document.getElementById('isActive').checked,
+                    instructions: document.getElementById('methodInstructions').value,
+                };
+
+                // Add PayMob specific fields if gateway type is paymob
+                if (formData.gateway_type === 'paymob') {
+                    formData.gateway_api_key = document.getElementById('paymobApiKey').value;
+                    formData.gateway_integration_id = document.getElementById('integrationId').value;
+                    formData.gateway_iframe_id = document.getElementById('iframeId').value;
+                }
+
+                const response = await fetch('/api/payment-methods/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to add payment method');
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('تم إضافة طريقة الدفع بنجاح', 'success');
+                    // Refresh the page or update UI as needed
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showNotification(result.message || 'حدث خطأ أثناء إضافة طريقة الدفع', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification(error.message || 'حدث خطأ في الاتصال بالخادم', 'error');
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.padding = '15px';
+            notification.style.borderRadius = '5px';
+            notification.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
+            notification.style.color = 'white';
+            notification.style.zIndex = '1000';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        // Make sure form is properly set up
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('paymentMethodForm');
+            if (form) {
+                form.addEventListener('submit', savePaymentMethod);
+            }
+        });
+    </script>
+</body>
+</html>

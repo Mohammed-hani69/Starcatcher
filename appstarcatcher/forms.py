@@ -110,6 +110,9 @@ class RegistrationForm(FlaskForm):
     profile_image = FileField('الصورة الشخصية', validators=[
         FileAllowed(['jpg', 'png', 'jpeg'], 'يسمح فقط بملفات الصور')
     ])
+    referral_code = StringField('كود الإحالة (اختياري)', 
+                              validators=[Optional(), Length(min=8, max=8)],
+                              render_kw={"placeholder": "أدخل كود الإحالة إذا كان لديك"})
     submit = SubmitField('تسجيل')
 
     def validate_username(self, username):
@@ -182,6 +185,9 @@ class SubscriptionForm(FlaskForm):
     has_vip_badge_plus = BooleanField('شارة VIP Plus', default=False)
     subscription_achievement_coins = IntegerField('كوينز إنجاز الاشتراك', default=0, validators=[DataRequired()])
     allow_old_ahly_catalog = BooleanField('السماح بكتالوج الأهلي القديم', default=False)
+    payment_link = StringField('رابط الدفع داخل مصر')
+    payment_link_usd = StringField('رابط الدفع خارج مصر')
+
 
     submit = SubmitField('إضافة الاشتراك') 
 
