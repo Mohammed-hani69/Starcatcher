@@ -273,19 +273,10 @@
                                         <i class="fas fa-credit-card me-2"></i>
                                         دفع الاشتراك
                                     </a>
-                                    <button class="btn btn-danger ms-2 delete-order" data-order-id="{{ order.id }}">
-                                        <i class="fas fa-trash me-2"></i>
-                                        حذف الطلب
-                                    </button>
-                                </div>
-                                {% elif order.status != 'active' %}
-                                <div class="mt-3 text-center">
-                                    <button class="btn btn-danger delete-order" data-order-id="{{ order.id }}">
-                                        <i class="fas fa-trash me-2"></i>
-                                        حذف الطلب
-                                    </button>
+                                    
                                 </div>
                                 {% endif %}
+                                
                             </div>
                         </div>
                     </div>

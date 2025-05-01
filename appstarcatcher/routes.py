@@ -372,7 +372,7 @@ def purchase_subscription():
         # 🔹 قفل السجل لمنع التكرار
         existing_subscription = UserSubscriptionPurchase.query.filter_by(
             user_id=current_user.id,
-            status='active'
+            status='expired'
         ).with_for_update().first()
 
         if existing_subscription:
