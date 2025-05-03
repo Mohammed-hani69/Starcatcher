@@ -79,7 +79,7 @@ git push -f origin main
 4. For future changes:
 ```bash
 git add .
-git commit -m "update to v 2.3.7"
+git commit -m "update to v 2.3.8"
 git push origin main
 ```
 
@@ -117,6 +117,14 @@ git clone https://github.com/Mohammed-hani69/Starcatcher.git
 git pull origin main
 ```
 
+7. enter to database :
+```bash
+mysql -u root -p -D starcatcher
+```
+8. enter password :
+```bash
+zxc65432
+```
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

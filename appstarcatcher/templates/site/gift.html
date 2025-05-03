@@ -666,16 +666,16 @@
         <!-- Gift Grid -->
         <div class="container">
             <div class="row g-4">
-                <!-- Ultimate Prize -->
+                <!-- Special Prize -->
                 <div class="col-md-6 col-lg-4">
                     <div class="gift-card h-100">
                         <div class="gift-image">
-                            <img src="{{ url_for('static', filename='image/50,000 جنيه مصري.png') }}" alt="Cash Prize" class="img-fluid">
+                            <img src="{{ url_for('static', filename='image/large.jpg') }}" alt="VIP Tickets" class="img-fluid">
                         </div>
                         <div class="gift-content">
-                            <h3>50,000 EGP</h3>
-                            <p>Grand Prize</p>
-                            <button class="btn btn-primary gift-btn" onclick="showPrizeConditions('ultimate', '50,000 EGP Prize', ['Rank #1 in the game', 'Complete all clubs 100%', 'Collect 50 rare players'])">Prize Conditions</button>
+                            <h3>Al-Ahly VIP Tickets</h3>
+                            <p>One week trip including 2 matches Acvomodation and flight</p>
+                            <button class="btn btn-primary gift-btn" onclick="showPrizeConditions('bronze', 'VIP Tickets', ['Complete Al-Ahly club 100%', 'Collect 5 rare Al-Ahly players', 'Participate in 50 matches'])">Prize Conditions</button>
                         </div>
                     </div>
                 </div>
@@ -735,20 +735,21 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Special Prize -->
+                <!-- T shirt Prize -->
                 <div class="col-md-6 col-lg-4">
                     <div class="gift-card h-100">
                         <div class="gift-image">
-                            <img src="{{ url_for('static', filename='image/large.jpg') }}" alt="VIP Tickets" class="img-fluid">
+                            <img src="{{ url_for('static', filename='image/Xbox Series X.png') }}" alt="T shirt" class="img-fluid">
                         </div>
                         <div class="gift-content">
-                            <h3>Al-Ahly VIP Tickets</h3>
-                            <p>5 VIP Tickets for Full Season</p>
-                            <button class="btn btn-primary gift-btn" onclick="showPrizeConditions('bronze', 'VIP Tickets', ['Complete Al-Ahly club 100%', 'Collect 5 rare Al-Ahly players', 'Participate in 50 matches'])">Prize Conditions</button>
+                            <h3>T shirt team </h3>
+                            <p>t shirt of your favourite team</p>
+                            <button class="btn btn-primary gift-btn" onclick="showPrizeConditions('silver', 'T shirt team', ['Rank #7 to #10', 'Complete 5 clubs 100%', 'Collect 10 rare players'])">Prize Conditions</button>
                         </div>
                     </div>
                 </div>
+
+                
             </div>
         </div>
     </div>
