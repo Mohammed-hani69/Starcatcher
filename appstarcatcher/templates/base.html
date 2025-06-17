@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Starcatcher{% endblock %}</title>
+    <!-- Common CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site/common.css') }}">
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav>
+            <!-- Add your navigation menu here -->
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <!-- Add your footer content here -->
+    </footer>
+
+    <!-- Common JavaScript -->
+    <script src="{{ url_for('static', filename='js/site/common.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

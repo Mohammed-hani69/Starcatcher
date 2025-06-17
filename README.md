@@ -79,7 +79,7 @@ git push -f origin main
 4. For future changes:
 ```bash
 git add .
-git commit -m "update to v 2.3.8"
+git commit -m "update to v 2.3.9 unlimited"
 git push origin main
 ```
 
@@ -125,6 +125,10 @@ mysql -u root -p -D starcatcher
 ```bash
 zxc65432
 ```
+
+للدخول إلى الجلسة:
+tmux attach -t starcatcher
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

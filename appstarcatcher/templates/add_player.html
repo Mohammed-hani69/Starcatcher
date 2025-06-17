@@ -58,6 +58,14 @@
                     <i>🎭</i>
                     <span>المستفيدين</span>
                 </a>
+                <a href="/unlimited/admin/events" class="nav-item">
+                    <i>🥅</i>
+                    <span>احداث المباريات</span>
+                </a>
+                <a href="/unlimited/admin/players" class="nav-item ">
+                    <i>⚽</i>
+                    <span>لاعبين النهائي</span>
+                </a>
                 {% endif %}
             </nav>
         </div>
@@ -269,12 +277,13 @@
                     <div class="rating-circle">
                         <span class="rating-number">{{ player.rating }}</span>
                         <span class="position">{{ player.position }}</span>
-                    </div>
-
-                    <!-- Player Image Section -->
+                    </div>                    <!-- Player Image Section -->
                     <div class="player-image-container">
                         {% if player.image_url %}
-                            <img src="static/uploads/image_player/{{ player.image_url }}" alt="{{ player.name }}" class="player-image">
+                            <img src="{{ url_for('static', filename='uploads/image_player/' + player.image_url) }}" 
+                                 alt="{{ player.name }}" 
+                                 class="player-image"
+                                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}'; this.classList.add('fallback-image');">
                         {% else %}
                             <div class="player-avatar">{{ player.name[0] }}</div>
                         {% endif %}

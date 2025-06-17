@@ -671,3 +671,76 @@ class Beneficiary(db.Model):
 
     def __repr__(self):
         return f'<Beneficiary {self.email}>'
+
+class UnlimitedPlayer(db.Model):
+    __tablename__ = 'unlimited_players'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), nullable=False)
+    position = db.Column(db.String(50), nullable=False)  # GK, DEF, MID, ATT
+    rating = db.Column(db.Integer, nullable=False)
+    image_url = db.Column(db.String(255))
+    club = db.Column(db.String(100))
+    nationality = db.Column(db.String(100))
+    price = db.Column(db.Integer, nullable=False)
+    is_available = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Admin who added the player
+
+    # Relationships
+    team_positions = db.relationship('UnlimitedTeamPlayer', backref='player', lazy=True)
+    match_events = db.relationship('UnlimitedMatchEvent', backref='player', lazy=True)
+
+    def __repr__(self):
+        return f"UnlimitedPlayer('{self.name}', '{self.position}', '{self.rating}')"
+
+class UnlimitedTeam(db.Model):
+    __tablename__ = 'unlimited_teams'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    formation = db.Column(db.String(10), default='4-3-3')  # e.g., 4-3-3, 4-4-2, etc.
+    points = db.Column(db.Integer, default=0)  # Total points from match events
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships
+    players = db.relationship('UnlimitedTeamPlayer', backref='team', lazy=True)
+    user = db.relationship('User', backref='unlimited_team', lazy=True)
+
+    def __repr__(self):
+        return f"UnlimitedTeam('{self.name}', '{self.formation}', Points: {self.points})"
+
+class UnlimitedTeamPlayer(db.Model):
+    __tablename__ = 'unlimited_team_players'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    team_id = db.Column(db.Integer, db.ForeignKey('unlimited_teams.id'), nullable=False)
+    player_id = db.Column(db.Integer, db.ForeignKey('unlimited_players.id'), nullable=False)
+    position = db.Column(db.String(50), nullable=False)  # Specific position on field
+    position_order = db.Column(db.Integer, nullable=False)  # Order in formation (1-11 for starters, 12-23 for subs)
+    is_substitute = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"UnlimitedTeamPlayer(Team: {self.team_id}, Player: {self.player_id}, Position: {self.position})"
+
+class UnlimitedMatchEvent(db.Model):
+    __tablename__ = 'unlimited_match_events'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    player_id = db.Column(db.Integer, db.ForeignKey('unlimited_players.id'), nullable=False)
+    event_type = db.Column(db.String(50), nullable=False)  # goal, assist, yellow_card, red_card, etc.
+    points = db.Column(db.Integer, nullable=False , default=0)  # Points to add/subtract
+    match_info = db.Column(db.String(255))  # Information about the match
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Admin who added the event
+    
+    def __repr__(self):
+        return f"UnlimitedMatchEvent(Player: {self.player_id}, Event: {self.event_type}, Points: {self.points})"
+
+# Add indexes for better query performance
+db.Index('idx_unlimited_team_user', UnlimitedTeam.user_id)
+db.Index('idx_unlimited_team_player_team', UnlimitedTeamPlayer.team_id)
+db.Index('idx_unlimited_team_player_player', UnlimitedTeamPlayer.player_id)
+db.Index('idx_unlimited_match_event_player', UnlimitedMatchEvent.player_id)

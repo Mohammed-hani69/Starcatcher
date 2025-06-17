@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>إدارة اللاعبين</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 0, 0, 0.8) rgba(255, 0, 0, 0.1);
+        }
+
+        /* تصميم شريط التمرير */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 0, 0, 0.1);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 0, 0, 0.8);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 0, 0, 1);
+        }
+
+        body {
+            background-color: #1a1a1a;
+            min-height: 100vh;
+            display: grid;
+            grid-template-areas: 
+                "sidebar main main";
+            grid-template-columns: 300px 1fr;
+            grid-template-rows: 80px 1fr;
+        }
+
+        .header {
+            grid-area: header;
+            background: rgba(0,0,0,0.95);
+            padding: 0 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            height: 80px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 40px 10px 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,0,0,0.2);
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.7;
+        }
+
+        .header-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header-icon {
+            position: relative;
+            padding: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .header-icon:hover {
+            background: rgba(255,0,0,0.2);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff0000;
+            color: white;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 2px solid #1a1a1a;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 8px 15px;
+            border-radius: 30px;
+            background: rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-info:hover {
+            background: rgba(255,0,0,0.2);
+        }
+
+        .user-details {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-role {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(45deg, #ff0000, #ff4444);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .sidebar {
+            grid-area: sidebar;
+            background: linear-gradient(180deg, #000000 0%, #1a1a1a 100%);
+            border-left: 1px solid rgba(255,0,0,0.1);
+            padding: 20px 0;
+            color: #fff;
+            height: 100vh;
+            position: fixed;
+            width: 300px;
+            overflow-y: overlay;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 0 25px;
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+        }
+
+        .logo span {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .nav-section {
+            margin-bottom: 30px;
+        }
+
+        .nav-section-title {
+            padding: 0 25px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.5;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 25px;
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,0,0,0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(255,0,0,0.2);
+            border-right: 3px solid #ff0000;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            opacity: 0.8;
+        }
+
+        .logout-section {
+            padding: 25px;
+            border-top: 1px solid rgba(255,0,0,0.1);
+            margin-top: auto;
+        }
+
+        .logout-btn {
+            color: #ff4444;
+        }
+
+        .main-content {
+            grid-area: main;
+            padding: 100px 50px 30px;
+            margin-right: 300px;
+            background: #121212;
+        }
+
+        .event-card {
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            padding: 30px;
+            color: white;
+            border: 1px solid rgba(255,0,0,0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .event-card:hover {
+            border-color: rgba(255,0,0,0.3);
+            box-shadow: 0 5px 15px rgba(255,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #fff;
+            position: relative;
+            padding-right: 15px;
+        }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 5px;
+            height: 25px;
+            background: linear-gradient(to bottom, #ff0000, transparent);
+            border-radius: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: rgba(255,255,255,0.8);
+            font-weight: 500;
+        }
+
+        .form-group input, 
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.2);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, 
+        .form-group select:focus {
+            border-color: rgba(255,0,0,0.5);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255,0,0,0.2);
+        }
+
+        .action-button {
+            background: linear-gradient(45deg, #ff0000, #ff4444);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            margin-top: 10px;
+            font-size: 1rem;
+        }
+
+        .action-button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,0,0,0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: right;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        th {
+            background: rgba(255,0,0,0.1);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: rgba(255,0,0,0.05);
+        }
+
+        .player-thumbnail {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .no-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .edit-button, .delete-button {
+            background: rgba(255,0,0,0.2);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 5px;
+        }
+
+        .edit-button:hover, .delete-button:hover {
+            background: rgba(255,0,0,0.4);
+        }
+
+        @media (max-width: 1024px) {
+            body {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-right: 0;
+                padding: 100px 20px 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .event-card {
+                padding: 20px;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h2 class="header-title">Catcher<span style="color:red">Star</span></h2>
+        
+        <div class="header-actions">
+            <div class="search-box">
+                <input type="text" placeholder="بحث...">
+                <i>🔍</i>
+            </div>
+            
+            <div class="header-links">
+                <div class="header-icon">
+                    <i>🔔</i>
+                    <span class="notification-badge">3</span>
+                </div>
+                <div class="header-icon">
+                    <i>✉️</i>
+                    <span class="notification-badge">5</span>
+                </div>
+            </div>
+
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name">{{username}}</div>
+                    <div class="user-role">مدير النظام</div>
+                </div>
+                <div class="user-avatar">{{username[:1]}}</div>
+            </div>
+        </div>
+    </header>
+
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}" alt="Logo">
+            <span>لوحة التحكم</span>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-title">القائمة الرئيسية</div>
+            <nav>
+                <a href="/dashboard" class="nav-item">
+                    <i>🏠</i>
+                    <span>الرئيسية</span>
+                </a>
+                {% if current_user.can_manage_players == True %}
+                <a href="/add_player" class="nav-item ">
+                    <i>👥</i>
+                    <span>اللاعبين</span>
+                </a>
+                {% endif %}
+                {% if current_user.can_manage_clubs == True %}
+                <a href="/add_club" class="nav-item">
+                    <i>⚽</i>
+                    <span>الأنديه</span>
+                </a>
+                {% endif %}
+                {% if current_user.can_manage_subscriptions == True %}
+                <a href="/add_subscription" class="nav-item">
+                    <i>🏆</i>
+                    <span>الباقات</span>
+                </a>
+                {% endif %}
+                {% if current_user.can_manage_dashboard == True %}
+                <a href="/admin/recharge-requests" class="nav-item">
+                    <i>💰</i>
+                    <span>طلبات الشحن</span>
+                </a>
+                <a href="/admin/wallet-options" class="nav-item">
+                    <i>💎</i>
+                    <span>خيارات المحفظة</span>
+                </a>
+                <a href="/beneficiaries" class="nav-item">
+                    <i>🎭</i>
+                    <span>المستفيدين</span>
+                </a>
+                <a href="/unlimited/admin/events" class="nav-item">
+                    <i>🥅</i>
+                    <span>احداث المباريات</span>
+                </a>
+                <a href="/unlimited/admin/players" class="nav-item active">
+                    <i>⚽</i>
+                    <span>لاعبين النهائي</span>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+
+        <div class="nav-section">
+            {% if current_user.can_manage_users == True %}
+            <div class="nav-section-title">الإدارة</div>
+            <nav>
+                <a href="/users" class="nav-item">
+                    <i>👥</i>
+                    <span>المستخدمين</span>
+                </a>
+                <a href="/subscription_purchases" class="nav-item">
+                    <i>💳</i>
+                    <span>مشتريات الباقات</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i>⚙️</i>
+                    <span>الإعدادات</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i>📝</i>
+                    <span>التقارير</span>
+                </a>
+            </nav>
+            </div>
+            {% endif %}
+
+        <div class="logout-section">
+            <a href="/" class="nav-item logout-btn">
+                <i class="fas fa-globe"></i>
+                <span>الموقع</span>
+            </a>
+            <a href="/logout" class="nav-item logout-btn">
+                <i>🚪</i>
+                <span>تسجيل الخروج</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="event-card">
+            <h2 class="section-title">إدارة اللاعبين</h2>
+
+            <form method="POST" enctype="multipart/form-data" class="add-player-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">        <div class="form-group">
+            <label>اسم اللاعب</label>
+            <input type="text" name="name" placeholder="أدخل اسم اللاعب" required>
+        </div>
+        <div class="form-group">
+            <label>المركز</label>
+            <select name="position" required>
+                <option value="">اختر المركز</option>
+                <option value="GK">حارس مرمى</option>
+                <option value="DEF">مدافع</option>
+                <option value="MID">لاعب وسط</option>
+                <option value="ATT">مهاجم</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>التقييم</label>
+            <input type="number" name="rating" placeholder="التقييم (1-99)" min="1" max="99" required>
+        </div>
+        <div class="form-group">
+            <label>النادي</label>
+            <input type="text" name="club" placeholder="اسم النادي" required>        </div>
+        <div class="form-group">
+            <label>الجنسية</label>
+            <input type="text" name="nationality" placeholder="جنسية اللاعب" required>
+        </div>
+        <div class="form-group">
+            <label>السعر</label>
+            <input type="number" name="price" placeholder="السعر (العملات)" required>
+        </div>
+        <div class="form-group">
+            <label>صورة اللاعب</label>
+            <input type="file" name="image" accept="image/*">
+        </div>
+        <button type="submit" class="action-button">إضافة لاعب</button>
+    </form>
+</div>
+
+<div class="event-card">
+    <h2 class="section-title">قائمة اللاعبين</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>الصورة</th>
+                <th>الاسم</th>
+                <th>المركز</th>
+                <th>التقييم</th>
+                <th>النادي</th>
+                <th>السعر</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+            <tbody>
+                {% for player in players %}
+                <tr>
+                    <td>
+                        {% if player.image_url %}
+                        <img src="{{ player.image_url }}" alt="{{ player.name }}" class="player-thumbnail">
+                        {% else %}                        <div class="no-image">لا توجد صورة</div>
+                        {% endif %}
+                    </td>
+                    <td>{{ player.name }}</td>
+                    <td>
+                        {% if player.position == 'GK' %}
+                        حارس مرمى
+                        {% elif player.position == 'DEF' %}
+                        مدافع
+                        {% elif player.position == 'MID' %}
+                        لاعب وسط
+                        {% elif player.position == 'ATT' %}
+                        مهاجم
+                        {% endif %}
+                    </td>
+                    <td>{{ player.rating }}</td>
+                    <td>{{ player.club }}</td>
+                    <td>{{ player.price }} عملة</td>
+                    <td>
+                        <button class="edit-button" onclick="editPlayer({{ player.id }})">تعديل</button>
+                        <button class="delete-button" onclick="deletePlayer({{ player.id }})">حذف</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+
+    if (menuToggle && sidebar) {
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+    }
+
+    function editPlayer(playerId) {
+        // سيتم إضافة منطق التعديل لاحقاً
+    }
+
+    function deletePlayer(playerId) {
+        if (confirm('هل أنت متأكد من حذف هذا اللاعب؟')) {
+            fetch(`/unlimited/delete_player/${playerId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('حدث خطأ أثناء حذف اللاعب');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء حذف اللاعب');
+            });
+        }
+    }
+
+    window.editPlayer = editPlayer;    window.deletePlayer = deletePlayer;
+
+    // منع إعادة إرسال النموذج عند تحديث الصفحة
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
+    
+    // معاينة الصورة قبل الرفع
+    const imageInput = document.querySelector('input[type="file"]');
+    const previewContainer = document.createElement('div');
+    previewContainer.className = 'image-preview';
+    previewContainer.style.marginTop = '10px';
+    imageInput.parentNode.appendChild(previewContainer);
+
+    imageInput.addEventListener('change', function(e) {
+        previewContainer.innerHTML = '';
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = '200px';
+                img.style.borderRadius = '8px';
+                previewContainer.appendChild(img);
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+});
+</script>
+</body>
+</html>

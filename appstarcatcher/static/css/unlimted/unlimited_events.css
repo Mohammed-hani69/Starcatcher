@@ -1,0 +1,159 @@
+/* Event management styling */
+.event-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.event-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Event type badges */
+.event-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.event-badge.goal {
+    background: #28a745;
+    color: white;
+}
+
+.event-badge.assist {
+    background: #17a2b8;
+    color: white;
+}
+
+.event-badge.yellow-card {
+    background: #ffc107;
+    color: black;
+}
+
+.event-badge.red-card {
+    background: #dc3545;
+    color: white;
+}
+
+.event-badge.own-goal {
+    background: #6c757d;
+    color: white;
+}
+
+/* Points display */
+.points-display {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.points-display.positive {
+    color: #28a745;
+}
+
+.points-display.negative {
+    color: #dc3545;
+}
+
+/* Player search section */
+.player-search {
+    position: relative;
+}
+
+.suggestions-container {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 0 0 4px 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.suggestion-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover {
+    background: #f8f9fa;
+}
+
+/* Event table customization */
+.events-table {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.events-table th {
+    background: #343a40;
+    color: white;
+    border: none;
+}
+
+.events-table td {
+    vertical-align: middle;
+}
+
+/* Action buttons */
+.btn-action {
+    padding: 5px 10px;
+    font-size: 0.9em;
+    border-radius: 15px;
+}
+
+.btn-action i {
+    margin-right: 5px;
+}
+
+/* Loading state */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .event-card {
+        margin-bottom: 15px;
+    }
+    
+    .events-table {
+        font-size: 0.9em;
+    }
+    
+    .btn-action {
+        padding: 3px 8px;
+        font-size: 0.8em;
+    }
+}

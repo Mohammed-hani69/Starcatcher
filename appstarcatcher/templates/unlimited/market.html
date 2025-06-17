@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المتجر | Star Catcher</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sigmar+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        :root {
+            --primary-red: #e50914;
+            --dark-red: #b30710;
+            --accent-gold: #ffc107;
+            --black: #121212;
+            --dark-gray: #1a1a1a;
+            --light-gray: #2d2d2d;
+            --text-light: #f8f9fa;
+        }
+
+        body {
+            background-color: var(--black);
+            color: var(--text-light);
+            font-family: 'Cairo', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            background: linear-gradient(to right, #000000, #440000);
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.2);
+            padding: 15px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-red) !important;
+            text-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
+            transition: all 0.3s ease;
+            padding-left: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand img {
+            height: 70px;
+            width: auto;
+            margin-left: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-brand img:hover {
+            transform: scale(1.1);
+        }
+
+        .navbar-nav .nav-link {
+            color: var(--text-light) !important;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: var(--primary-red) !important;
+            transform: translateY(-2px);
+        }
+
+        /* Market Container */
+        .market-container {
+            padding: 8rem 2rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Market Header */
+        .market-header {
+            background: linear-gradient(145deg, var(--dark-red), var(--black));
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 25px rgba(229, 9, 20, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .market-info h1 {
+            color: var(--primary-red);
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(229, 9, 20, 0.5);
+        }
+
+        .market-stats {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .wallet-info {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .wallet-icon {
+            color: var(--accent-gold);
+            font-size: 2rem;
+        }
+
+        .wallet-balance {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        /* Market Filters */
+        .market-filters {
+            background: linear-gradient(145deg, var(--dark-gray), var(--black));
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .filter-label {
+            color: var(--text-light);
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .filter-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            min-width: 150px;
+        }
+
+        .filter-select option {
+            background: var(--dark-gray);
+            color: var(--text-light);
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            padding: 0.5rem 1rem;
+            padding-left: 2.5rem;
+            border-radius: 8px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            opacity: 0.7;
+        }
+
+        /* Players Grid */
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
+        }
+
+        /* Player Card */
+        .player-card {
+            background: linear-gradient(145deg, var(--dark-gray), var(--black));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .player-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(229, 9, 20, 0.3);
+            border-color: var(--accent-gold);
+        }
+
+        .player-rating {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--primary-red);
+            color: var(--text-light);
+            font-weight: bold;
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            font-size: 1.2rem;
+        }
+
+        .player-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            border: 3px solid var(--primary-red);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .player-card:hover .player-image {
+            border-color: var(--accent-gold);
+            transform: scale(1.05);
+        }
+
+        .player-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .player-info {
+            text-align: center;
+        }
+
+        .player-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .player-position {
+            color: var(--accent-gold);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .player-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-red);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            opacity: 0.8;
+        }
+
+        .player-price {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .price-icon {
+            font-size: 1.5rem;
+        }
+
+        .buy-button {
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary-red);
+            color: var(--text-light);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .buy-button:hover:not(:disabled) {
+            background: var(--dark-red);
+            transform: translateY(-2px);
+        }
+
+        .buy-button:disabled {
+            background: var(--dark-gray);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .market-container {
+                padding: 6rem 1rem 1rem;
+            }
+
+            .market-header {
+                padding: 1.5rem;
+                text-align: center;
+            }
+
+            .market-header h1 {
+                font-size: 2rem;
+            }
+
+            .market-stats {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .market-filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1500;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('unlimited.index') }}">
+                <img src="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}" alt="Star Catcher">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('unlimited.index') }}">الرئيسية</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('unlimited.team') }}">فريقي</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('unlimited.market') }}">المتجر</a>
+                    </li>                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('unlimited.get_events') }}">الأحداث</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    {% if current_user.is_authenticated %}
+                    <div class="dropdown">
+                        <button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <img src="{{ current_user.profile_image or url_for('static', filename='image/default-avatar.png') }}" 
+                                 alt="Profile" class="rounded-circle me-2" style="width: 30px; height: 30px; object-fit: cover;">
+                            {{ current_user.username }}
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('dashboard') }}">لوحة التحكم</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">تسجيل الخروج</a></li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-light me-2">تسجيل الدخول</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary">إنشاء حساب</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="market-container">
+        <!-- Market Header -->
+        <div class="market-header">
+            <div class="market-info">
+                <h1>متجر النجوم</h1>
+                <p class="text-light">اكتشف واشترِ أفضل اللاعبين لفريقك</p>
+            </div>
+            <div class="market-stats">
+                <div class="wallet-info">
+                    <i class="fas fa-coins wallet-icon"></i>
+                    <div>
+                        <div class="wallet-balance">{{ current_user.coins }}</div>
+                        <div class="text-light">رصيدك</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Market Filters -->
+        <div class="market-filters">
+            <div class="filter-group">
+                <label class="filter-label">التصنيف</label>
+                <select class="filter-select" id="positionFilter">
+                    <option value="all">الكل</option>
+                    <option value="GK">حارس مرمى</option>
+                    <option value="DEF">مدافع</option>
+                    <option value="MID">وسط</option>
+                    <option value="FW">مهاجم</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">السعر</label>
+                <select class="filter-select" id="priceFilter">
+                    <option value="all">الكل</option>
+                    <option value="low">الأقل سعراً</option>
+                    <option value="high">الأعلى سعراً</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">التقييم</label>
+                <select class="filter-select" id="ratingFilter">
+                    <option value="all">الكل</option>
+                    <option value="90+">90+</option>
+                    <option value="80-89">80-89</option>
+                    <option value="70-79">70-79</option>
+                    <option value="<70">أقل من 70</option>
+                </select>
+            </div>
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="ابحث عن لاعب...">
+            </div>
+        </div>
+
+        <!-- Players Grid -->
+        <div class="players-grid">
+            {% for player in players %}
+            <div class="player-card" 
+                 data-position="{{ player.position }}"
+                 data-price="{{ player.price }}"
+                 data-rating="{{ player.rating }}">
+                <span class="player-rating">{{ player.rating }}</span>
+                <div class="player-image">
+                    <img src="{{ url_for('static', filename=player.image_url) if player.image_url else url_for('static', filename='image/default-player.png') }}" 
+                         alt="{{ player.name }}">
+                </div>
+                <div class="player-info">
+                    <div class="player-name">{{ player.name }}</div>
+                    <div class="player-position">{{ player.position }}</div>
+                    <div class="player-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">{{ player.pace }}</div>
+                            <div class="stat-label">السرعة</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ player.shooting }}</div>
+                            <div class="stat-label">التسديد</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ player.passing }}</div>
+                            <div class="stat-label">التمرير</div>
+                        </div>
+                    </div>
+                    <div class="player-price">
+                        <i class="fas fa-coins price-icon"></i>
+                        {{ player.price }}
+                    </div>
+                    <button class="buy-button" 
+                            onclick="buyPlayer('{{ player.id }}')"
+                            {% if current_user.coins < player.price %}disabled{% endif %}>
+                        شراء اللاعب
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1500">
+        <div id="successToast" class="toast align-items-center text-white bg-success" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        <div id="errorToast" class="toast align-items-center text-white bg-danger" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Show toast notification
+        function showToast(type, message) {
+            const toast = document.getElementById(`${type}Toast`);
+            toast.querySelector('.toast-body').textContent = message;
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        }
+
+        // Filter players
+        function filterPlayers() {
+            const position = document.getElementById('positionFilter').value;
+            const price = document.getElementById('priceFilter').value;
+            const rating = document.getElementById('ratingFilter').value;
+            const search = document.querySelector('.search-input').value.toLowerCase();
+
+            document.querySelectorAll('.player-card').forEach(card => {
+                const playerPosition = card.dataset.position;
+                const playerPrice = parseInt(card.dataset.price);
+                const playerRating = parseInt(card.dataset.rating);
+                const playerName = card.querySelector('.player-name').textContent.toLowerCase();
+
+                let show = true;
+
+                // Position filter
+                if (position !== 'all' && playerPosition !== position) show = false;
+
+                // Price filter
+                if (price === 'low' && playerPrice > 1000000) show = false;
+                if (price === 'high' && playerPrice <= 1000000) show = false;
+
+                // Rating filter
+                if (rating === '90+' && playerRating < 90) show = false;
+                if (rating === '80-89' && (playerRating < 80 || playerRating >= 90)) show = false;
+                if (rating === '70-79' && (playerRating < 70 || playerRating >= 80)) show = false;
+                if (rating === '<70' && playerRating >= 70) show = false;
+
+                // Search filter
+                if (search && !playerName.includes(search)) show = false;
+
+                card.style.display = show ? 'block' : 'none';
+            });
+        }
+
+        // Add event listeners to filters
+        document.getElementById('positionFilter').addEventListener('change', filterPlayers);
+        document.getElementById('priceFilter').addEventListener('change', filterPlayers);
+        document.getElementById('ratingFilter').addEventListener('change', filterPlayers);
+        document.querySelector('.search-input').addEventListener('input', filterPlayers);
+
+        // Buy player function
+        async function buyPlayer(playerId) {
+            try {
+                const response = await fetch('{{ url_for("unlimited.buy_player") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ player_id: playerId })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast('success', 'تم شراء اللاعب بنجاح!');
+                    // Update wallet balance
+                    const walletBalance = document.querySelector('.wallet-balance');
+                    walletBalance.textContent = result.new_balance;
+                    // Disable buy button if not enough coins
+                    const buttons = document.querySelectorAll('.buy-button');
+                    buttons.forEach(button => {
+                        const price = parseInt(button.closest('.player-card').dataset.price);
+                        button.disabled = price > result.new_balance;
+                    });
+                } else {
+                    throw new Error(result.message || 'فشل في شراء اللاعب');
+                }
+            } catch (error) {
+                showToast('error', error.message);
+            }
+        }
+
+        // Animate cards on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.player-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>

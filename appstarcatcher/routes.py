@@ -1,10 +1,10 @@
 from datetime import time, timedelta
-import random
 import json
+import os
+import random
 from flask_jwt_extended import create_access_token, create_refresh_token, decode_token, get_jwt_identity, jwt_required
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 from numpy import identity
-import requests
 from sqlalchemy import desc, func, text
 
 # Define base URLs for images
@@ -12,18 +12,17 @@ BASE_URL_LOGO = 'http://127.0.0.1:5000/static/uploads/clubs/'
 BASE_URL_BANNER = 'http://127.0.0.1:5000/static/uploads/clubs/bannerclub/'
 BASE_URL_PLAYERS = 'http://127.0.0.1:5000/static/uploads/image_player/'
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
-from appstarcatcher import db , app ,limiter,csrf
-from flask import jsonify, logging, render_template, request, redirect, session, url_for, flash
+from flask import Blueprint, jsonify, logging, render_template, request, redirect, session, url_for, flash, current_app
+from appstarcatcher import db, limiter, csrf, login_manager
+from flask import current_app as app
 from werkzeug.utils import secure_filename
-import os
 from flask_wtf.csrf import generate_csrf
-from werkzeug.security import generate_password_hash ,check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf.csrf import CSRFProtect
 from functools import wraps
 from werkzeug.exceptions import NotFound
-from rembg import remove  # ✅ مكتبة إزالة الخلفية
-import time
-from datetime import datetime, timedelta
+from rembg import remove
+from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from appstarcatcher.forms import AdminMarketListingForm, ClubForm, LoginForm, PackForm, PlayerForm, PromotionForm, RegistrationForm, SubscriptionForm
 from appstarcatcher.models import AdminMarketListing, Beneficiary, ClubDetail, GeneratedPlayer, Pack, PackPurchase, Player, Promotion, Subscription, Transaction, User, UserClub, UserPlayer, UserSubscriptionPurchase, PaymentMethod, WalletRechargeOption, generate_random_code
@@ -38,21 +37,15 @@ def verify_password(password_hash, password):
 # إعدادات رفع الصور
 UPLOAD_FOLDER = 'appstarcatcher/static/uploads/image_player'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-app.config['UPLOAD_FOLDER_IMAGE_PLAYER'] = UPLOAD_FOLDER
-login_manager = LoginManager(app)
 
 
 #======================packs
 
-# إعداد المجلد لتحميل الصور
-app.config['UPLOAD_FOLDER_PACKS'] = 'appstarcatcher/static/uploads/packs'
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # الحد الأقصى لحجم الملف 5MB
-
-app.config['UPLOAD_FOLDER_CLUB'] = 'appstarcatcher/static/uploads/clubs'
-app.config['UPLOAD_FOLDER_BANNERCLUBS'] = 'appstarcatcher/static/uploads/clubs/bannerclub'
-
-# إضافة ثابت لمجلد صور وسائل الدفع
-app.config['UPLOAD_FOLDER_PAYMENT_METHODS'] = 'appstarcatcher/static/uploads/payment_methods'
+# Folder path constants
+UPLOAD_FOLDER_PACKS = 'appstarcatcher/static/uploads/packs'
+UPLOAD_FOLDER_CLUB = 'appstarcatcher/static/uploads/clubs'
+UPLOAD_FOLDER_BANNERCLUBS = 'appstarcatcher/static/uploads/clubs/bannerclub'
+UPLOAD_FOLDER_PAYMENT_METHODS = 'appstarcatcher/static/uploads/payment_methods'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 def allowed_file(filename):
@@ -993,9 +986,15 @@ def add_player():
         # إنشاء لاعب جديد
         player = Player(name=form.name.data, rating=form.rating.data, position=form.position.data, image_url=image_path, rarity=form.rarity.data, nationality=form.nationality.data, club_id=club.club_id)  # تعيين club_id بدلاً من club
         db.session.add(player)
-        db.session.commit()
-        flash('تم إضافة اللاعب بنجاح بعد إزالة الخلفية!', 'success')
-        return redirect(url_for('add_player'))
+        try:
+            db.session.commit()
+            flash('تم إضافة اللاعب بنجاح بعد إزالة الخلفية!', 'success')
+            # Use 303 See Other to force GET request after POST
+            return redirect(url_for('add_player'), code=303)
+        except Exception as e:
+            db.session.rollback()
+            flash(f'حدث خطأ أثناء إضافة اللاعب: {str(e)}', 'error')
+            return redirect(url_for('add_player'))
     players = Player.query.order_by(Player.rating.desc()).all()
     username = current_user.username
     return render_template('add_player.html', form=form, players=players, username=username)
@@ -1005,15 +1004,31 @@ def add_player():
 def delete_player():
     try:
         data = request.get_json()
-        if (not data or ('player_id' not in data)):
+        if not data or 'player_id' not in data:
             return jsonify({'error': 'معرّف اللاعب مطلوب'}), 400
+            
         player_id = data['player_id']
         player = Player.query.get_or_404(player_id)
+
+        # Delete player image if it exists
+        if player.image_url:
+            image_path = os.path.join(app.config['UPLOAD_FOLDER_IMAGE_PLAYER'], player.image_url)
+            try:
+                if os.path.exists(image_path):
+                    os.remove(image_path)
+            except Exception as e:
+                # Log error but continue with player deletion
+                app.logger.error(f"Error deleting player image: {str(e)}")
+
+        # Delete player from database
         db.session.delete(player)
         db.session.commit()
+        
         return jsonify({'message': 'تم حذف اللاعب بنجاح'}), 200
+        
     except Exception as e:
         db.session.rollback()
+        app.logger.error(f"Error in delete_player: {str(e)}")
         return jsonify({'error': 'حدث خطأ أثناء حذف اللاعب'}), 500
 
 
@@ -1694,7 +1709,7 @@ def open_pack(pack_id):
             if ((count > 0) and (not players_by_rarity.get(rarity, []))):
                 missing_rarities.append(rarity)
         if missing_rarities:
-            db.session.rollback()  # إلغاء خصم العملات
+            db.session.rollback()
             return jsonify({'status': 'error', 'message': f'لا يوجد لاعبين من الفئات التالية: {", ".join(missing_rarities)}. يرجى المحاولة لاحقاً.'}), 404
         # قائمة لتتبع اللاعبين المضافين ومنع التكرار
         selected_players = set()
@@ -1710,6 +1725,11 @@ def open_pack(pack_id):
             possible_players = [p for p in players_by_rarity[rarity] if (p.id not in selected_players)]
             if (not possible_players):
                 continue  # إذا لم يتبق لاعب غير مكرر، نعيد المحاولة
+            player = random.choice(possible_players)
+            selected_players.add(player.id)  # إضافة اللاعب إلى القائمة لمنع التكرار
+            # جلب معلومات النادي
+            club_detail = (ClubDetail.query.get(player.club_id) or ClubDetail.query.first())
+            club_name
             player = random.choice(possible_players)
             selected_players.add(player.id)  # إضافة اللاعب إلى القائمة لمنع التكرار
             # جلب معلومات النادي

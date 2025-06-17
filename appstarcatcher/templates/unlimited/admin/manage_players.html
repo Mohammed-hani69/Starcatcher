@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة اللاعبين | Star Catcher</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        :root {
+            --primary: #e50914;
+            --secondary: #b30710;
+            --background: #1a1a1a;
+            --surface: #2a2a2a;
+            --text: #ffffff;
+            --text-secondary: #cccccc;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            font-family: 'Cairo', sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 2rem;
+        }
+
+        /* Header & Navigation */
+        .header {
+            background: linear-gradient(to bottom, #000000, var(--background));
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-link {
+            color: var(--text) !important;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: var(--primary) !important;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Player Form */
+        .player-form-container {
+            background: var(--surface);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-label {
+            color: var(--text);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(229, 9, 20, 0.25);
+            color: var(--text);
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        /* Players Grid */
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
+        }
+
+        .player-card {
+            background: var(--surface);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .player-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .player-image-container {
+            height: 220px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .player-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .player-card:hover .player-image {
+            transform: scale(1.1);
+        }
+
+        .player-info {
+            padding: 1.5rem;
+        }
+
+        .player-rating {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-action {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .btn-delete {
+            top: 1rem;
+            left: 1rem;
+            background-color: rgba(220, 53, 69, 0.8);
+        }
+
+        .btn-edit {
+            top: 1rem;
+            left: 4rem;
+            background-color: rgba(255, 193, 7, 0.8);
+        }
+
+        .btn-action:hover {
+            transform: scale(1.1);
+        }
+
+        /* Custom Buttons */
+        .btn-custom {
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-custom {
+            background: var(--primary);
+            border: none;
+            color: white;
+        }
+
+        .btn-primary-custom:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            color: white;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .notification.success {
+            background-color: rgba(40, 167, 69, 0.9);
+        }
+
+        .notification.error {
+            background-color: rgba(220, 53, 69, 0.9);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .players-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+
+            .player-form-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="#">
+                        <img src="{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}" 
+                             alt="Star Catcher" height="40">
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('dashboard') }}">
+                                    <i class="fas fa-home"></i> الرئيسية
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="user-info">
+                            <span class="text-light">مرحباً، {{ current_user.username }}</span>
+                            <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">
+                                <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Add Player Form -->
+        <div class="player-form-container">
+            <h3 class="mb-4">
+                <i class="fas fa-user-plus"></i> إضافة لاعب جديد
+            </h3>
+            <form id="addPlayerForm" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">اسم اللاعب</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">المركز</label>
+                        <select name="position" class="form-control" required>
+                            <option value="">اختر المركز</option>
+                            <option value="GK">حارس مرمى</option>
+                            <option value="RB">مدافع أيمن</option>
+                            <option value="CB">مدافع وسط</option>
+                            <option value="LB">مدافع أيسر</option>
+                            <option value="CDM">وسط مدافع</option>
+                            <option value="CM">وسط ميدان</option>
+                            <option value="CAM">وسط مهاجم</option>
+                            <option value="RW">جناح أيمن</option>
+                            <option value="LW">جناح أيسر</option>
+                            <option value="ST">مهاجم</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">التقييم</label>
+                        <input type="number" name="rating" class="form-control" min="1" max="99" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">النادي</label>
+                        <input type="text" name="club" class="form-control" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">الجنسية</label>
+                        <input type="text" name="nationality" class="form-control" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">صورة اللاعب</label>
+                    <input type="file" name="image" class="form-control" accept="image/*" required>
+                    <div class="text-center">
+                        <img id="imagePreview" class="image-preview">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary-custom">
+                    <i class="fas fa-plus-circle"></i> إضافة اللاعب
+                </button>
+            </form>
+        </div>
+
+        <!-- Players List -->
+        <div class="mb-4">
+            <h3>
+                <i class="fas fa-users"></i> قائمة اللاعبين
+                <span class="badge bg-primary">{{ players|length }}</span>
+            </h3>
+        </div>
+
+        <!-- Players Grid -->
+        <div class="players-grid">
+            {% for player in players %}
+            <div class="player-card" data-player-id="{{ player.id }}">
+                <div class="player-image-container">
+                    <img src="{{ url_for('static', filename=player.image_url.lstrip('/')) if player.image_url else url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}"
+                         class="player-image" 
+                         alt="{{ player.name }}"
+                         onerror="this.src='{{ url_for('static', filename='image/STAR CATCHER FINAL LOGO-11.png') }}'">
+                    <div class="player-rating">{{ player.rating }}</div>
+                    <button class="btn-action btn-delete" onclick="deletePlayer({{ player.id }})">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    <button class="btn-action btn-edit" onclick="editPlayer({{ player.id }})">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                </div>
+                <div class="player-info">
+                    <h5>{{ player.name }}</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span><i class="fas fa-running me-2"></i>{{ player.position }}</span>
+                        <span><i class="fas fa-shield-alt me-2"></i>{{ player.club }}</span>
+                    </div>
+                    <div>
+                        <span><i class="fas fa-flag me-2"></i>{{ player.nationality }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Notifications
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Image Preview
+        document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+            const preview = document.getElementById('imagePreview');
+            const file = e.target.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Add Player
+        document.getElementById('addPlayerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('{{ url_for("unlimited.admin_players") }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showNotification('تم إضافة اللاعب بنجاح');
+                    this.reset();
+                    document.getElementById('imagePreview').style.display = 'none';
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showNotification(data.message || 'حدث خطأ أثناء إضافة اللاعب', 'error');
+                }
+            } catch (error) {
+                showNotification('حدث خطأ في النظام', 'error');
+            }
+        });
+
+        // Delete Player
+        async function deletePlayer(playerId) {
+            if (!confirm('هل أنت متأكد من حذف هذا اللاعب؟')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`{{ url_for("unlimited.delete_player", player_id=0) }}`.replace('0', playerId), {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    const playerCard = document.querySelector(`.player-card[data-player-id="${playerId}"]`);
+                    playerCard.style.transform = 'scale(0.8)';
+                    playerCard.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        playerCard.remove();
+                        showNotification('تم حذف اللاعب بنجاح');
+                    }, 300);
+                } else {
+                    showNotification(data.message || 'حدث خطأ أثناء حذف اللاعب', 'error');
+                }
+            } catch (error) {
+                showNotification('حدث خطأ في النظام', 'error');
+            }
+        }
+
+        // Prevent form resubmission
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+    </script>
+</body>
+</html>
