@@ -23,7 +23,7 @@ def create_app():
     app = Flask(__name__)
 
     # App configuration
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/starcatcher'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:zxc65432@localhost/starcatcher'
     app.config['SECRET_KEY'] = '23e54cc55abaab30e316908c8fe67406ee2eda447badb2eb'
     app.config["JWT_SECRET_KEY"] = "b4b38504c6b61a7529e353a1c5b3d42b142739b23ce8ca8ac2c7770c24259bf7"
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
